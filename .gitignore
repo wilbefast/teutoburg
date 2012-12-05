@@ -1,0 +1,57 @@
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.lo
+*.Plo
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+#*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log*
+*.sql
+*.sqlite
+log.*
+
+# OS generated files #
+######################
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# TMP files #
+#############
+*.swp
+*.swo
+*.swn
+*.*~
+
+# NETBEANS #
+############
+manifest.mf
+nbbuild.xml
+build.xml
+/nbproject/**
+/build/
+
+# AGENT LOGS #
+##############
+agent*.res
+/dist/
