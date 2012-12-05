@@ -99,8 +99,8 @@ public class Agent implements IVisible, IDynamic
   @Override
   public EUpdateResult update(int t_delta)
   {
-    //advance(0.1f*t_delta);
-    //turn(0.001f*t_delta);
+    advance(0.1f*t_delta);
+    turn(0.001f*t_delta);
     
     
     // override if needed

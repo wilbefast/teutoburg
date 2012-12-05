@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg;
 
+import wjd.teutoburg.agent.BarbarianRegiment;
 import java.util.LinkedList;
 import java.util.List;
 import wjd.amb.AScene;
@@ -50,8 +51,11 @@ public class SimulationScene extends AScene
     camera = new StrategyCamera(null); // FIXME add boundary
     agents = new LinkedList<Agent>();
     
-    for(int i = 0; i < 5; i++)
-      agents.add(new RomanRegiment(new V2((float)Math.random()*400, (float)Math.random()*400)));
+    for(int i = 0; i < 3; i++)
+      agents.add(new RomanRegiment(new V2((float)Math.random()*1400, (float)Math.random()*1400)));
+    
+    for(int i = 0; i < 3; i++)
+      agents.add(new BarbarianRegiment(new V2((float)Math.random()*1400, (float)Math.random()*1400)));
       
   }
 
@@ -104,11 +108,11 @@ public class SimulationScene extends AScene
     if(result != EUpdateResult.CONTINUE)
       return result;
     
-    if(input.isKeyHeld(IInput.EKeyCode.L_CTRL))
+    /*if(input.isKeyHeld(IInput.EKeyCode.L_CTRL))
       agents.get(0).turn(-0.1f);
     
     if(input.isKeyHeld(IInput.EKeyCode.L_ALT))
-      agents.get(0).turn(0.1f);
+      agents.get(0).turn(0.1f);*/
     
     // control camera
     camera.processInput(input);

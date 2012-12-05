@@ -71,15 +71,21 @@ public abstract class Soldier implements IVisible
   /* NESTING */
   public static class Roman extends Soldier
   {
-    /* CONSTANTS */
     private static final Colour C_BODY = Colour.RED;
     private static final Colour C_HEAD = Colour.YELLOW;
     private static final Colour C_SHIELD = Colour.VIOLET;
-
-    /* METHODS */
-    
-    // constructor
     public Roman(V2 _position, V2 _direction)
+    {
+      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
+    }
+  }
+  
+  public static class Barbarian extends Soldier
+  {
+    private static final Colour C_BODY = Colour.TEAL;
+    private static final Colour C_HEAD = Colour.BLUE;
+    private static final Colour C_SHIELD = Colour.GREEN;
+    public Barbarian(V2 _position, V2 _direction)
     {
       super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
     }
