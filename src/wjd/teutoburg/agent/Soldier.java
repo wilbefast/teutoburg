@@ -31,26 +31,61 @@ public abstract class Soldier implements IVisible
 {
   /* CONSTANTS */
   private static final float SHADOW_RADIUS =  6.0f;
-  private static final Colour SHADOW_COLOUR = Colour.BLACK;
+  private static final Colour C_SHADOW = Colour.BLACK;
+  private static final V2 SHIELD_SIZE = new V2(8.0f, 10.0f);
+  private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
+                                                -SHIELD_SIZE.y * 0.5f);
+  private static final V2 BODY_SIZE = new V2(6.0f, 12.0f);
+  private static final float HEAD_RADIUS = 2.0f;
+  private static final float HEAD_OFFSET = -BODY_SIZE.y -(HEAD_RADIUS * 0.5f);
   
   /* ATTRIBUTES */
-  protected V2 position = new V2(), direction = new V2();
+  private V2 position = new V2(), direction = new V2(), head = new V2();
+  private Rect body = new Rect(V2.ORIGIN, BODY_SIZE),
+               shield = new Rect(V2.ORIGIN, SHIELD_SIZE);
+  private final Colour c_shield, c_body, c_head;
   
   /* METHODS */
-  
   // constructors
-  protected Soldier()
+  protected Soldier(V2 _position, V2 _direction, Colour _c_shield, Colour _c_body, Colour _c_head)
   {
+    c_shield = _c_shield;
+    c_body = _c_body;
+    c_head = _c_head;
+    reposition(_position, _direction);
   }
   
-  /* INTERFACE */
-  public abstract void renderHead(ICanvas canvas);
-  public abstract void renderShield(ICanvas canvas);
-  public abstract void renderBody(ICanvas canvas);
-  public abstract void reposition(V2 position, V2 direction);
+  public final void reposition(V2 _position, V2 _direction)
+  {
+    // save position and direction
+    position.reset(_position);
+    direction.reset(_direction);
+
+    // position body parts
+    head.xy(position.x, position.y + HEAD_OFFSET);
+    body.xy(position.x - (BODY_SIZE.x * 0.5f), position.y - BODY_SIZE.y);
+    shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
+    shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, SHIELD_OFFSET.y);
+  }
+  
+  /* NESTING */
+  public static class Roman extends Soldier
+  {
+    /* CONSTANTS */
+    private static final Colour C_BODY = Colour.RED;
+    private static final Colour C_HEAD = Colour.YELLOW;
+    private static final Colour C_SHIELD = Colour.VIOLET;
+
+    /* METHODS */
+    
+    // constructor
+    public Roman(V2 _position, V2 _direction)
+    {
+      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
+    }
+  }
   
   /* IMPLEMENTS -- IVISIBLE */
-  
   @Override
   public void render(ICanvas canvas)
   {
@@ -74,67 +109,22 @@ public abstract class Soldier implements IVisible
     }
   }
   
-  /* IMPLEMENTATIONS */
-  public static class Roman extends Soldier
+  /* SUBROUTINES */
+  public void renderHead(ICanvas canvas)
   {
-    /* CONSTANTS */
-    private static final Colour C_BODY = Colour.RED;
-    private static final Colour C_HEAD = Colour.YELLOW;
-    private static final Colour C_SHIELD = Colour.VIOLET;
-    private static final V2 SHIELD_SIZE = new V2(8.0f, 10.0f);
-    private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
-                                                  -SHIELD_SIZE.y * 0.5f);
-    private static final V2 BODY_SIZE = new V2(6.0f, 12.0f);
-    private static final float HEAD_RADIUS = 2.0f;
-    private static final float HEAD_OFFSET = -BODY_SIZE.y -(HEAD_RADIUS * 0.5f);
-    
-    /* ATTRIBUTES */
-    private Rect body = new Rect(V2.ORIGIN, BODY_SIZE);
-    private Rect shield = new Rect(V2.ORIGIN, SHIELD_SIZE);
-    private V2 head = new V2();
-    
-    /* METHODS */
-    public Roman(V2 _position, V2 _direction)
-    {
-      super();
-      reposition(_position, _direction);
-    }
-    
-    /* IMPLEMENTS -- SOLDIER */
-
-    @Override
-    public final void reposition(V2 _position, V2 _direction)
-    {
-      // save position and direction
-      position.reset(_position);
-      direction.reset(_direction);
-      
-      // position body parts
-      head.xy(position.x, position.y + HEAD_OFFSET);
-      body.xy(position.x - (BODY_SIZE.x * 0.5f), position.y - BODY_SIZE.y);
-      shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
-      shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, SHIELD_OFFSET.y);
-    }
-
-    @Override
-    public void renderHead(ICanvas canvas)
-    {
-      canvas.setColour(C_HEAD);
-      canvas.circle(head, HEAD_RADIUS, true);
-    }
-
-    @Override
-    public void renderShield(ICanvas canvas)
-    {
-      canvas.setColour(C_SHIELD);
-      canvas.box(shield, true);
-    }
-
-    @Override
-    public void renderBody(ICanvas canvas)
-    {
-      canvas.setColour(C_BODY);
-      canvas.box(body, true);
-    }
+    canvas.setColour(c_head);
+    canvas.circle(head, HEAD_RADIUS, true);
+  }
+  
+  public void renderShield(ICanvas canvas)
+  {
+    canvas.setColour(c_shield);
+    canvas.box(shield, true);
+  }
+  
+  public void renderBody(ICanvas canvas)
+  {
+    canvas.setColour(c_body);
+    canvas.box(body, true);
   }
 }
