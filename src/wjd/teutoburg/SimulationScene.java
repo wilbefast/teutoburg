@@ -36,7 +36,6 @@ import wjd.teutoburg.agent.RomanRegiment;
 public class SimulationScene extends AScene
 {
   /* CONSTANTS */
-  private static final V2 GRIDSIZE = new V2(64, 64);
   private static final Colour C_GRASS = new Colour(120, 255, 33);
   
   /* ATTRIBUTES */
@@ -52,10 +51,12 @@ public class SimulationScene extends AScene
     camera = new StrategyCamera(null); // FIXME add boundary
     agents = new LinkedList<Agent>();
 
-    for(int i = 0; i < 500; i++)
+    agents.add(new RomanRegiment(new V2(100, 100)));
+    
+    for(int i = 0; i < 1500; i++)
       agents.add(new RomanRegiment(new V2((float)Math.random()*14000, (float)Math.random()*14000)));
     
-    for(int i = 0; i < 500; i++)
+    for(int i = 0; i < 1500; i++)
       agents.add(new BarbarianRegiment(new V2((float)Math.random()*10000, (float)Math.random()*10000)));
   }
 

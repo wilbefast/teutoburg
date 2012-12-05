@@ -29,9 +29,7 @@ import wjd.math.V2;
 public abstract class RegimentAgent extends Agent
 {
   /* CONSTANTS */
-  private static final float RADIUS_PER_SOLDER = 4.0f;
   private static final float SOLDIER_SPACING = 22.0f;
-  private static final float SOLDIER_RADIUS = 3.0f;
   // distance at which simplified "imposter" shapes replace regiments
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.15f;
   
@@ -50,6 +48,7 @@ public abstract class RegimentAgent extends Agent
   private int incomplete_rank;
   private Soldier[] soldiers;
   private boolean visible_previous = false;
+  private boolean nearby = false, nearby_previous = false;
   private final Colour c_imposter;
 
   /* METHODS */
@@ -83,9 +82,10 @@ public abstract class RegimentAgent extends Agent
     if (result != EUpdateResult.CONTINUE)
       return result;
 
-    // extension
-    if(visible)
-      repositionSoldiers(!visible_previous); // regenerate if moved into view
+    // we need to recache the soldiers' positions if in view close to us
+    if(visible && nearby)
+      // regenerate if the regiment has just moved into view
+      repositionSoldiers(!visible_previous || !nearby_previous);
     else
       soldiers = null;
     visible_previous = visible; // Agent doesn't have this attribute
@@ -98,18 +98,22 @@ public abstract class RegimentAgent extends Agent
   public void render(ICanvas canvas)
   {
     super.render(canvas);
-    if(visible && visible_previous) // 2 steps are required for re-caching
+    if(visible && visible_previous) 
     {
-      // draw far away
-      if(canvas.getCamera().getZoom() < ZOOM_IMPOSTER_THRESHOLD)
+      nearby_previous = nearby;
+      nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
+      
+      // draw close-up regiments
+      if(nearby && nearby_previous) 
+        for(Soldier s : soldiers)
+          s.render(canvas);
+      
+      // draw far away regiments
+      else
       {
         canvas.setColour(c_imposter);
         canvas.angleBox(position, direction, radius, true);
       }
-      
-      // draw close-up
-      else for(Soldier s : soldiers)
-        s.render(canvas);
     }
   }
 

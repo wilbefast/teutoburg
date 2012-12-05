@@ -45,8 +45,8 @@ public abstract class Soldier implements IVisible
   // distance at which simplified "imposter" shapes replace soldiers
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.5f;
   // amount that soldiers "wiggle" within formation
-  private static final float WIGGLE_AMOUNT = 0.5f;
-  private static final float WIGGLE_AMOUNT2 = 2*WIGGLE_AMOUNT;
+  private static final float WIGGLE = 0.5f;
+  private static final float WIGGLE2 = 2*WIGGLE;
   
   /* ATTRIBUTES */
   private V2 position = new V2(), direction = new V2(), head = new V2();
@@ -67,9 +67,8 @@ public abstract class Soldier implements IVisible
   public final void reposition(V2 _position, V2 _direction)
   {
     // save position and direction
-    position.reset(_position).add(
-      (float)(Math.random()*WIGGLE_AMOUNT2-WIGGLE_AMOUNT), 
-      (float)(Math.random()*WIGGLE_AMOUNT2-WIGGLE_AMOUNT));
+    position.reset(_position).add((float)((Math.random() * WIGGLE2) - WIGGLE), 
+                                  (float)((Math.random() * WIGGLE2) - WIGGLE));
     direction.reset(_direction);
 
     // position body parts
