@@ -26,7 +26,7 @@ import wjd.math.V2;
 public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
-  private static final int STRENGTH_START = 40;
+  private static final int STRENGTH_START = 50;
   
   /* ATTRIBUTES */
   

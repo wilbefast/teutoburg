@@ -51,12 +51,15 @@ public class SimulationScene extends AScene
     camera = new StrategyCamera(null); // FIXME add boundary
     agents = new LinkedList<Agent>();
     
+    agents.add(new BarbarianRegiment(new V2(900, 200)));
+    
+    /*
     for(int i = 0; i < 3; i++)
       agents.add(new RomanRegiment(new V2((float)Math.random()*1400, (float)Math.random()*1400)));
     
     for(int i = 0; i < 3; i++)
       agents.add(new BarbarianRegiment(new V2((float)Math.random()*1400, (float)Math.random()*1400)));
-      
+      */
   }
 
   // mutators

@@ -52,20 +52,9 @@ public abstract class RegimentAgent extends Agent
   // constructors
   public RegimentAgent(V2 start_position, int strength)
   {
-    super(start_position, (float) (Math.sqrt(strength) * SOLDIER_SPACING * 0.5f));
-
+    super(start_position, 0);
     strength_max = strength_current = strength;
-    soldiers = new Soldier[strength];
-
-    // calculate number of ranks and files, plus size of incomplete final rank
-    n_files = (int) Math.sqrt(strength);
-    files_middle = (n_files - 1) * SOLDIER_SPACING * 0.5f;
-    n_ranks = strength / n_files;
-    ranks_middle = (n_ranks - 1) * SOLDIER_SPACING * 0.5f;
-    incomplete_rank = strength - (n_files * n_ranks);
-    
-    // generate and position the soldiers to begin with
-    repositionSoldiers(true);
+    recalculateFormation();
   }
 
   // accessors
@@ -88,7 +77,17 @@ public abstract class RegimentAgent extends Agent
 
     // extension
     if(visible)
+    {
       repositionSoldiers(!visible_previous); // regenerate if moved into view
+      if(!visible_previous)
+        System.out.println("became visible");
+    }
+    else
+    {
+      soldiers = null;
+      if(visible_previous)
+        System.out.println("became invisible");
+    }
     visible_previous = visible;
 
     // all clear!
@@ -99,21 +98,46 @@ public abstract class RegimentAgent extends Agent
   public void render(ICanvas canvas)
   {
     super.render(canvas);
-    if(visible) for (int i = 0; i < /* FIXME */ n_ranks * n_files; i++)
-      soldiers[i].render(canvas);
+    if(visible && visible_previous) 
+      for(Soldier s : soldiers)
+        s.render(canvas);
   }
 
   /* SUBROUTINES */
+  
+  private void recalculateFormation()
+  {
+    double sqrt_strength = Math.sqrt(strength_current);
+    
+    // calculate number of ranks and files, plus size of incomplete final rank
+    n_files = (int)sqrt_strength + 1;
+    files_middle = (n_files - 1) * SOLDIER_SPACING * 0.5f;
+    n_ranks = strength_current / n_files;
+    ranks_middle = (n_ranks - 1) * SOLDIER_SPACING * 0.5f;
+    incomplete_rank = strength_current - (n_files * n_ranks);
+    
+    // change the overall radius of the unit
+    setRadius((float)sqrt_strength * SOLDIER_SPACING * 0.5f);
+    
+    // we must now reposition the soldiers in their new formation
+    repositionSoldiers(true);
+  }
+  
   private void repositionSoldiers(boolean regenerate)
   {
+    // reallocate vector if need be
+    if(regenerate)
+      soldiers = new Soldier[strength_current];
+    
+    // reset position by rank and file
     for (int r = 0; r < (n_ranks + 1); r++)
     {
       // row offset
-      r_offset.reset(direction).scale(r * SOLDIER_SPACING - ranks_middle);
+      r_offset.reset(direction).scale(ranks_middle -(r * SOLDIER_SPACING));
       for (int f = 0; f < ((r < n_ranks) ? n_files : incomplete_rank); f++)
       {
         // file offset
-        f_offset.reset(left).scale(f * SOLDIER_SPACING - files_middle);
+        f_offset.reset(left).scale((f * SOLDIER_SPACING) - files_middle);
         
         // calculate absolute position and move there
         soldier_position.reset(position).add(r_offset).add(f_offset);

@@ -52,7 +52,7 @@ public class Agent implements IVisible, IDynamic
   {
     position = start_position;
       front_position = direction.clone().scale(radius).add(position);
-    radius = start_radius;
+    setRadius(start_radius);
     visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
   }
 
@@ -74,6 +74,12 @@ public class Agent implements IVisible, IDynamic
       front_position.add(direction);
     direction.scale(1/distance);
     visibility_box.centrePos(position);
+  }
+  
+  public final void setRadius(float new_radius)
+  {
+    radius = new_radius;
+    visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
   }
   
   
