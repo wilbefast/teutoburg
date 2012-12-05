@@ -26,10 +26,8 @@ import wjd.math.V2;
 public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
-  private static final int STRENGTH_START = 25;
-  
-  /* ATTRIBUTES */
-  
+  private static final int STRENGTH_START = 25; // 5*5
+
   /* METHODS */
   
   // constructors
@@ -37,10 +35,6 @@ public class RomanRegiment extends RegimentAgent
   {
     super(start_position, STRENGTH_START);
   }
-
-  // accessors
-
-  // mutators
   
   /* IMPLEMENTS -- SOLDIER */
   

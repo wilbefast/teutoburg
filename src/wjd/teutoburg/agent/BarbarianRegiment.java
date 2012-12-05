@@ -26,9 +26,7 @@ import wjd.math.V2;
 public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
-  private static final int STRENGTH_START = 50;
-  
-  /* ATTRIBUTES */
+  private static final int STRENGTH_START = 49; // 7*7
   
   /* METHODS */
   
@@ -38,10 +36,6 @@ public class BarbarianRegiment extends RegimentAgent
     super(start_position, STRENGTH_START);
   }
 
-  // accessors
-
-  // mutators
-  
   /* IMPLEMENTS -- SOLDIER */
   
   @Override

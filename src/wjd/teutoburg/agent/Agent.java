@@ -89,13 +89,7 @@ public class Agent implements IVisible, IDynamic
   public void render(ICanvas canvas)
   {
     if(canvas.getCamera().canSee(visibility_box))
-    {
       visible = true;
-      canvas.setColour(Colour.BLACK);
-      canvas.box(visibility_box, false);
-      canvas.circle(position, radius, false); // no fill
-      canvas.line(position, front_position);
-    }
     else
       visible = false;
   }

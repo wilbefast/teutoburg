@@ -16,7 +16,6 @@
  */
 package wjd.teutoburg;
 
-import wjd.teutoburg.agent.BarbarianRegiment;
 import java.util.LinkedList;
 import java.util.List;
 import wjd.amb.AScene;
@@ -27,6 +26,7 @@ import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
 import wjd.teutoburg.agent.Agent;
+import wjd.teutoburg.agent.BarbarianRegiment;
 import wjd.teutoburg.agent.RomanRegiment;
 
 /**
@@ -36,7 +36,8 @@ import wjd.teutoburg.agent.RomanRegiment;
 public class SimulationScene extends AScene
 {
   /* CONSTANTS */
-  public static final V2 GRIDSIZE = new V2(64, 64);
+  private static final V2 GRIDSIZE = new V2(64, 64);
+  private static final Colour C_GRASS = new Colour(120, 255, 33);
   
   /* ATTRIBUTES */
   private StrategyCamera camera;
@@ -50,16 +51,12 @@ public class SimulationScene extends AScene
     // view
     camera = new StrategyCamera(null); // FIXME add boundary
     agents = new LinkedList<Agent>();
+
+    //for(int i = 0; i < 1000; i++)
+      //agents.add(new RomanRegiment(new V2((float)Math.random()*14000, (float)Math.random()*14000)));
     
-    agents.add(new BarbarianRegiment(new V2(900, 200)));
-    
-    /*
-    for(int i = 0; i < 3; i++)
-      agents.add(new RomanRegiment(new V2((float)Math.random()*1400, (float)Math.random()*1400)));
-    
-    for(int i = 0; i < 3; i++)
-      agents.add(new BarbarianRegiment(new V2((float)Math.random()*1400, (float)Math.random()*1400)));
-      */
+    for(int i = 0; i < 500; i++)
+      agents.add(new BarbarianRegiment(new V2((float)Math.random()*10000, (float)Math.random()*10000)));
   }
 
   // mutators
@@ -90,9 +87,12 @@ public class SimulationScene extends AScene
     // clear the screen
     canvas.clear();
     
+    // draw the grass
+    canvas.setColour(C_GRASS);
+    canvas.fill();
+    
     // draw all the agents
     canvas.setCamera(camera);
-    canvas.setColour(Colour.VIOLET);
     for(Agent a : agents)
       a.render(canvas);
       

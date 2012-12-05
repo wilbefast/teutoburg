@@ -30,14 +30,20 @@ import wjd.math.V2;
 public abstract class Soldier implements IVisible
 {
   /* CONSTANTS */
+  // shadow
   private static final float SHADOW_RADIUS =  6.0f;
-  private static final Colour C_SHADOW = Colour.BLACK;
+  private static final Colour C_SHADOW = new Colour(12, 26, 3);
+  // shield
   private static final V2 SHIELD_SIZE = new V2(8.0f, 10.0f);
   private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
                                                 -SHIELD_SIZE.y * 0.5f);
+  // body
   private static final V2 BODY_SIZE = new V2(6.0f, 12.0f);
+  // head
   private static final float HEAD_RADIUS = 2.0f;
   private static final float HEAD_OFFSET = -BODY_SIZE.y -(HEAD_RADIUS * 0.5f);
+  // distance at which simplified "imposter" shapes replace soldiers
+  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.5f;
   
   /* ATTRIBUTES */
   private V2 position = new V2(), direction = new V2(), head = new V2();
@@ -58,7 +64,7 @@ public abstract class Soldier implements IVisible
   public final void reposition(V2 _position, V2 _direction)
   {
     // save position and direction
-    position.reset(_position);
+    position.reset(_position).add((float)(Math.random()*2-1), (float)(Math.random()*2-1));
     direction.reset(_direction);
 
     // position body parts
@@ -95,10 +101,21 @@ public abstract class Soldier implements IVisible
   @Override
   public void render(ICanvas canvas)
   {
-    // shadow
-    canvas.setColour(Colour.BLACK);
+    // always draw the shadow
+    canvas.setColour(C_SHADOW);
     canvas.circle(position, SHADOW_RADIUS, true);
     
+    // draw a simplified body if far away
+    if(canvas.getCamera().getZoom() > ZOOM_IMPOSTER_THRESHOLD)
+      renderNearby(canvas);
+    else
+      renderDistant(canvas);
+  }
+  
+  /* SUBROUTINES */
+  
+  private void renderNearby(ICanvas canvas)
+  { 
     // up => shield is further than body
     if(direction.y < 0)
     {
@@ -115,20 +132,24 @@ public abstract class Soldier implements IVisible
     }
   }
   
-  /* SUBROUTINES */
-  public void renderHead(ICanvas canvas)
+  private void renderDistant(ICanvas canvas)
+  {
+    renderBody(canvas);
+  }
+  
+  private void renderHead(ICanvas canvas)
   {
     canvas.setColour(c_head);
     canvas.circle(head, HEAD_RADIUS, true);
   }
   
-  public void renderShield(ICanvas canvas)
+  private void renderShield(ICanvas canvas)
   {
     canvas.setColour(c_shield);
     canvas.box(shield, true);
   }
   
-  public void renderBody(ICanvas canvas)
+  private void renderBody(ICanvas canvas)
   {
     canvas.setColour(c_body);
     canvas.box(body, true);

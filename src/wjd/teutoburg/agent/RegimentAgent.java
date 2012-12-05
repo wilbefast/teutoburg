@@ -17,6 +17,7 @@
 package wjd.teutoburg.agent;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
 
@@ -31,6 +32,8 @@ public abstract class RegimentAgent extends Agent
   private static final float RADIUS_PER_SOLDER = 4.0f;
   private static final float SOLDIER_SPACING = 22.0f;
   private static final float SOLDIER_RADIUS = 3.0f;
+  // distance at which simplified "imposter" shapes replace regiments
+  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.15f;
   
   /* LOCAL VARIABLES */
   private V2 r_offset = new V2(), f_offset = new V2(), soldier_position = new V2();
@@ -77,18 +80,10 @@ public abstract class RegimentAgent extends Agent
 
     // extension
     if(visible)
-    {
       repositionSoldiers(!visible_previous); // regenerate if moved into view
-      if(!visible_previous)
-        System.out.println("became visible");
-    }
     else
-    {
       soldiers = null;
-      if(visible_previous)
-        System.out.println("became invisible");
-    }
-    visible_previous = visible;
+    visible_previous = visible; // Agent doesn't have this attribute
 
     // all clear!
     return EUpdateResult.CONTINUE;
@@ -98,9 +93,19 @@ public abstract class RegimentAgent extends Agent
   public void render(ICanvas canvas)
   {
     super.render(canvas);
-    if(visible && visible_previous) 
-      for(Soldier s : soldiers)
+    if(visible && visible_previous) // 2 steps are required for re-caching
+    {
+      // draw far away
+      if(canvas.getCamera().getZoom() < ZOOM_IMPOSTER_THRESHOLD)
+      {
+        canvas.setColour(Colour.BLUE);
+        canvas.circle(position, radius, true);
+      }
+      
+      // draw close-up
+      else for(Soldier s : soldiers)
         s.render(canvas);
+    }
   }
 
   /* SUBROUTINES */
@@ -110,7 +115,7 @@ public abstract class RegimentAgent extends Agent
     double sqrt_strength = Math.sqrt(strength_current);
     
     // calculate number of ranks and files, plus size of incomplete final rank
-    n_files = (int)sqrt_strength + 1;
+    n_files = (int)Math.ceil(sqrt_strength);
     files_middle = (n_files - 1) * SOLDIER_SPACING * 0.5f;
     n_ranks = strength_current / n_files;
     ranks_middle = (n_ranks - 1) * SOLDIER_SPACING * 0.5f;
