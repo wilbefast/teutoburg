@@ -47,8 +47,8 @@ public abstract class RegimentAgent extends Agent
   private float files_middle;
   private int incomplete_rank;
   private Soldier[] soldiers;
-  private boolean visible_previous = false;
-  private boolean nearby = false, nearby_previous = false;
+  private boolean visible_previous = true;
+  private boolean nearby = true, nearby_previous = true;
   private final Colour c_imposter;
 
   /* METHODS */

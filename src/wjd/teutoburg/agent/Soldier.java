@@ -53,6 +53,7 @@ public abstract class Soldier implements IVisible
   private Rect body = new Rect(V2.ORIGIN, BODY_SIZE),
                shield = new Rect(V2.ORIGIN, SHIELD_SIZE);
   private final Colour c_shield, c_body, c_head;
+  private boolean nearby = true, nearby_previous = true;
   
   /* METHODS */
   // constructors
@@ -66,14 +67,21 @@ public abstract class Soldier implements IVisible
   
   public final void reposition(V2 _position, V2 _direction)
   {
-    // save position and direction
-    position.reset(_position).add((float)((Math.random() * WIGGLE2) - WIGGLE), 
-                                  (float)((Math.random() * WIGGLE2) - WIGGLE));
+    // always save the position and move the body 
+    position.reset(_position);
+    body.xy(position.x - (BODY_SIZE.x * 0.5f), position.y - BODY_SIZE.y);
+      
+    // don't bother with the rest if we're drawing the simplified version
+    if(!nearby)
+      return;
+    
+    // apply wiggle and reset direction
+    position.add((float)((Math.random() * WIGGLE2) - WIGGLE), 
+                        (float)((Math.random() * WIGGLE2) - WIGGLE));
     direction.reset(_direction);
 
-    // position body parts
+    // position auxilliary body parts
     head.xy(position.x, position.y + HEAD_OFFSET);
-    body.xy(position.x - (BODY_SIZE.x * 0.5f), position.y - BODY_SIZE.y);
     shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
     shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, SHIELD_OFFSET.y);
   }
@@ -87,7 +95,9 @@ public abstract class Soldier implements IVisible
     canvas.circle(position, SHADOW_RADIUS, true);
     
     // draw a simplified body if far away
-    if(canvas.getCamera().getZoom() > ZOOM_IMPOSTER_THRESHOLD)
+    nearby_previous = nearby;
+    nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
+    if(nearby && nearby_previous)
       renderNearby(canvas);
     else
       renderDistant(canvas);
