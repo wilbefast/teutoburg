@@ -50,12 +50,17 @@ public abstract class RegimentAgent extends Agent
   private int incomplete_rank;
   private Soldier[] soldiers;
   private boolean visible_previous = false;
+  private final Colour c_imposter;
 
   /* METHODS */
   // constructors
-  public RegimentAgent(V2 start_position, int strength)
+  public RegimentAgent(V2 start_position, int strength, Colour c_imposter)
   {
     super(start_position, 0);
+    
+    this.c_imposter = c_imposter;
+    
+    // calculate unit positions based on the strength of the unit
     strength_max = strength_current = strength;
     recalculateFormation();
   }
@@ -98,8 +103,8 @@ public abstract class RegimentAgent extends Agent
       // draw far away
       if(canvas.getCamera().getZoom() < ZOOM_IMPOSTER_THRESHOLD)
       {
-        canvas.setColour(Colour.BLUE);
-        canvas.circle(position, radius, true);
+        canvas.setColour(c_imposter);
+        canvas.angleBox(position, direction, radius, true);
       }
       
       // draw close-up

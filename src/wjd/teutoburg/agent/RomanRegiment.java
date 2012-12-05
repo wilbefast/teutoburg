@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.agent;
 
+import wjd.amb.view.Colour;
 import wjd.math.V2;
 
 /**
@@ -26,14 +27,27 @@ import wjd.math.V2;
 public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
-  private static final int STRENGTH_START = 25; // 5*5
+  private static final int STRENGTH_START = 5*5;
+  private static final Colour C_IMPOSTER = new Colour(196, 0, 0);
+  
+  /* NESTING */
+  private static class Roman extends Soldier
+  {
+    private static final Colour C_BODY = Colour.RED;
+    private static final Colour C_HEAD = Colour.YELLOW;
+    private static final Colour C_SHIELD = Colour.VIOLET;
+    public Roman(V2 _position, V2 _direction)
+    {
+      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
+    }
+  }
 
   /* METHODS */
   
   // constructors
   public RomanRegiment(V2 start_position)
   {
-    super(start_position, STRENGTH_START);
+    super(start_position, STRENGTH_START, C_IMPOSTER);
   }
   
   /* IMPLEMENTS -- SOLDIER */
@@ -41,6 +55,6 @@ public class RomanRegiment extends RegimentAgent
   @Override
   public Soldier createSoldier(V2 position, V2 direction)
   {
-    return new Soldier.Roman(position, direction);
+    return new Roman(position, direction);
   }
 }

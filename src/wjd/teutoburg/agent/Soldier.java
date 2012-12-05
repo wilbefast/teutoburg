@@ -44,6 +44,9 @@ public abstract class Soldier implements IVisible
   private static final float HEAD_OFFSET = -BODY_SIZE.y -(HEAD_RADIUS * 0.5f);
   // distance at which simplified "imposter" shapes replace soldiers
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.5f;
+  // amount that soldiers "wiggle" within formation
+  private static final float WIGGLE_AMOUNT = 0.5f;
+  private static final float WIGGLE_AMOUNT2 = 2*WIGGLE_AMOUNT;
   
   /* ATTRIBUTES */
   private V2 position = new V2(), direction = new V2(), head = new V2();
@@ -64,7 +67,9 @@ public abstract class Soldier implements IVisible
   public final void reposition(V2 _position, V2 _direction)
   {
     // save position and direction
-    position.reset(_position).add((float)(Math.random()*2-1), (float)(Math.random()*2-1));
+    position.reset(_position).add(
+      (float)(Math.random()*WIGGLE_AMOUNT2-WIGGLE_AMOUNT), 
+      (float)(Math.random()*WIGGLE_AMOUNT2-WIGGLE_AMOUNT));
     direction.reset(_direction);
 
     // position body parts
@@ -72,29 +77,6 @@ public abstract class Soldier implements IVisible
     body.xy(position.x - (BODY_SIZE.x * 0.5f), position.y - BODY_SIZE.y);
     shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
     shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, SHIELD_OFFSET.y);
-  }
-  
-  /* NESTING */
-  public static class Roman extends Soldier
-  {
-    private static final Colour C_BODY = Colour.RED;
-    private static final Colour C_HEAD = Colour.YELLOW;
-    private static final Colour C_SHIELD = Colour.VIOLET;
-    public Roman(V2 _position, V2 _direction)
-    {
-      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
-    }
-  }
-  
-  public static class Barbarian extends Soldier
-  {
-    private static final Colour C_BODY = Colour.TEAL;
-    private static final Colour C_HEAD = Colour.BLUE;
-    private static final Colour C_SHIELD = Colour.GREEN;
-    public Barbarian(V2 _position, V2 _direction)
-    {
-      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
-    }
   }
   
   /* IMPLEMENTS -- IVISIBLE */
