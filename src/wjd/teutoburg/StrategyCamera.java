@@ -60,19 +60,6 @@ public class StrategyCamera implements ICamera
     this.boundary = boundary;
   }
   
-
-  /*public void getVisibleGridCells(V2 min, V2 max, V2 grid_size, 
-                                  float cell_inv_size)
-  {
-    // top-left cell
-    min.xy((int)Math.max(0, view.x*cell_inv_size)-1, 
-          (int)Math.max(0, view.y*cell_inv_size)-1);
-    
-    // bottom-right cell
-    max.xy((int)Math.min(grid_size.x, view.endx()*cell_inv_size)+1,
-          (int)Math.min(grid_size.y, view.endy()*cell_inv_size)+1);
-  }*/
-  
   /* IMPLEMENTATIONS -- ICAMERA */
   
   public Rect getView()
@@ -115,6 +102,12 @@ public class StrategyCamera implements ICamera
   public boolean canSee(V2 position)
   {
     return view.contains(position);
+  }
+  
+  @Override
+  public boolean canSee(Rect area)
+  {
+    return area.collides(view);
   }
 
   // modification

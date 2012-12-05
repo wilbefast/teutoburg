@@ -35,12 +35,15 @@ public class Agent implements IVisible, IDynamic
   private static final double INV_2PI = 1/(2*Math.PI);
   
   /* ATTRIBUTES */
-  private V2 direction = new V2(1.0f, 0.0f);
-  private V2 left = new V2(0.0f, 1.0f);
-  private float radius;
-  private Rect bounding_box;
-  private V2 position;
-  private V2 front_position;
+  // model
+  protected V2 direction = new V2(1.0f, 0.0f);
+  protected V2 left = new V2(0.0f, 1.0f);
+  protected float radius;
+  protected V2 position;
+  protected V2 front_position;
+  // view
+  protected Rect visibility_box;
+  protected boolean visible = false;
 
   /* METHODS */
   
@@ -50,25 +53,10 @@ public class Agent implements IVisible, IDynamic
     position = start_position;
       front_position = direction.clone().scale(radius).add(position);
     radius = start_radius;
-    bounding_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
+    visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
   }
-  
-  // accessors
 
-  public void writePositionTo(V2 receiver)
-  {
-    receiver.reset(position);
-  }
-  
-  public void writeLeftTo(V2 receiver)
-  {
-    receiver.reset(left);
-  }
-  
-  public void writeDirection(V2 receiver)
-  {
-    receiver.reset(direction);
-  }
+  // accessors
   
   // mutators
   
@@ -85,7 +73,7 @@ public class Agent implements IVisible, IDynamic
       position.add(direction);
       front_position.add(direction);
     direction.scale(1/distance);
-    bounding_box.centrePos(position);
+    visibility_box.centrePos(position);
   }
   
   
@@ -94,10 +82,16 @@ public class Agent implements IVisible, IDynamic
   @Override
   public void render(ICanvas canvas)
   {
-    canvas.setColour(Colour.BLACK);
-    canvas.box(bounding_box, false);
-    canvas.circle(position, radius, false); // no fill
-    canvas.line(position, front_position);
+    if(canvas.getCamera().canSee(visibility_box))
+    {
+      visible = true;
+      canvas.setColour(Colour.BLACK);
+      canvas.box(visibility_box, false);
+      canvas.circle(position, radius, false); // no fill
+      canvas.line(position, front_position);
+    }
+    else
+      visible = false;
   }
 
   /* IMPLEMENTS -- IDYNAMIC */
@@ -106,10 +100,11 @@ public class Agent implements IVisible, IDynamic
   public EUpdateResult update(int t_delta)
   {
     //advance(0.1f*t_delta);
-    turn(0.001f*t_delta);
+    //turn(0.001f*t_delta);
     
     
     // override if needed
     return EUpdateResult.CONTINUE;
   }
+ 
 }

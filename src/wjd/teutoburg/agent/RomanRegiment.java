@@ -38,15 +38,15 @@ public class RomanRegiment extends RegimentAgent
     super(start_position, STRENGTH_START);
   }
 
-  
-
   // accessors
 
   // mutators
-
+  
+  /* IMPLEMENTS -- SOLDIER */
+  
   @Override
-  public Soldier getSoldier()
+  public Soldier createSoldier(V2 position, V2 direction)
   {
-    return Soldier.ROMAN;
+    return new Soldier.Roman(position, direction);
   }
 }

@@ -18,6 +18,7 @@ package wjd.teutoburg.agent;
 
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
+import wjd.amb.view.IVisible;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -26,57 +27,114 @@ import wjd.math.V2;
  * @author wdyce
  * @since Dec 4, 2012
  */
-public abstract class Soldier
+public abstract class Soldier implements IVisible
 {
-  /* INTERFACE */
+  /* CONSTANTS */
+  private static final float SHADOW_RADIUS =  6.0f;
+  private static final Colour SHADOW_COLOUR = Colour.BLACK;
   
-  public abstract void render(ICanvas canvas, V2 position, V2 direction);
+  /* ATTRIBUTES */
+  protected V2 position = new V2(), direction = new V2();
+  
+  /* METHODS */
+  
+  // constructors
+  protected Soldier()
+  {
+  }
+  
+  /* INTERFACE */
+  public abstract void renderHead(ICanvas canvas);
+  public abstract void renderShield(ICanvas canvas);
+  public abstract void renderBody(ICanvas canvas);
+  public abstract void reposition(V2 position, V2 direction);
+  
+  /* IMPLEMENTS -- IVISIBLE */
+  
+  @Override
+  public void render(ICanvas canvas)
+  {
+    // shadow
+    canvas.setColour(Colour.BLACK);
+    canvas.circle(position, SHADOW_RADIUS, true);
+    
+    // up => shield is further than body
+    if(direction.y < 0)
+    {
+      renderShield(canvas);
+      renderHead(canvas);
+      renderBody(canvas);
+    }
+    // down => body is further than shield
+    else
+    {
+      renderBody(canvas);
+      renderHead(canvas);
+      renderShield(canvas);
+    }
+  }
   
   /* IMPLEMENTATIONS */
-  public static final Soldier ROMAN = new Soldier()
+  public static class Roman extends Soldier
   {
-    // attributes
-    //private Rect body = new Rect(0.0f, 0.0f, 3.0f, 6.0f);
-    //private Rect shield = new Rect(0.0f, 0.0f, 4.0f, 5.0f);
-    private Rect body = new Rect(0.0f, 0.0f, 6.0f, 12.0f);
-    private Rect shield = new Rect(0.0f, 0.0f, 8.0f, 10.0f);
+    /* CONSTANTS */
+    private static final Colour C_BODY = Colour.RED;
+    private static final Colour C_HEAD = Colour.YELLOW;
+    private static final Colour C_SHIELD = Colour.VIOLET;
+    private static final V2 SHIELD_SIZE = new V2(8.0f, 10.0f);
+    private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
+                                                  -SHIELD_SIZE.y * 0.5f);
+    private static final V2 BODY_SIZE = new V2(6.0f, 12.0f);
+    private static final float HEAD_RADIUS = 2.0f;
+    private static final float HEAD_OFFSET = -BODY_SIZE.y -(HEAD_RADIUS * 0.5f);
     
-    // implements -- soldier
-    @Override
-    public void render(ICanvas canvas, V2 position, V2 direction)
+    /* ATTRIBUTES */
+    private Rect body = new Rect(V2.ORIGIN, BODY_SIZE);
+    private Rect shield = new Rect(V2.ORIGIN, SHIELD_SIZE);
+    private V2 head = new V2();
+    
+    /* METHODS */
+    public Roman(V2 _position, V2 _direction)
     {
-      // position body and shield
-      body.centrePos(position);
-      shield.centrePos(position).shift(direction.left().scale(2));
-      direction.right();
-      
-      shield.w = 1+3*Math.abs(direction.y);
-      
-      canvas.setColour(Colour.BLACK);
-        canvas.circle(position.add(0, 7), 5, true);
-      position.add(0, -14);
-      
-      // up => shield is further than body
-      if(direction.y < 0)
-      {
-        canvas.setColour(Colour.VIOLET);
-          canvas.box(shield, true);
-        canvas.setColour(Colour.YELLOW);
-          canvas.circle(position, 2, true);
-        canvas.setColour(Colour.RED);
-          canvas.box(body, true);
-
-      }
-      // down => body is further than shield
-      else
-      {
-        canvas.setColour(Colour.RED);
-          canvas.box(body, true);
-        canvas.setColour(Colour.YELLOW);
-          canvas.circle(position, 2, true);
-        canvas.setColour(Colour.VIOLET);
-          canvas.box(shield, true);
-      }
+      super();
+      reposition(_position, _direction);
     }
-  };
+    
+    /* IMPLEMENTS -- SOLDIER */
+
+    @Override
+    public final void reposition(V2 _position, V2 _direction)
+    {
+      // save position and direction
+      position.reset(_position);
+      direction.reset(_direction);
+      
+      // position body parts
+      head.xy(position.x, position.y + HEAD_OFFSET);
+      body.xy(position.x - (BODY_SIZE.x * 0.5f), position.y - BODY_SIZE.y);
+      shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
+      shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, SHIELD_OFFSET.y);
+    }
+
+    @Override
+    public void renderHead(ICanvas canvas)
+    {
+      canvas.setColour(C_HEAD);
+      canvas.circle(head, HEAD_RADIUS, true);
+    }
+
+    @Override
+    public void renderShield(ICanvas canvas)
+    {
+      canvas.setColour(C_SHIELD);
+      canvas.box(shield, true);
+    }
+
+    @Override
+    public void renderBody(ICanvas canvas)
+    {
+      canvas.setColour(C_BODY);
+      canvas.box(body, true);
+    }
+  }
 }

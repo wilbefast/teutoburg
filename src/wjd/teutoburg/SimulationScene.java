@@ -26,7 +26,6 @@ import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
 import wjd.teutoburg.agent.Agent;
-import wjd.teutoburg.agent.RegimentAgent;
 import wjd.teutoburg.agent.RomanRegiment;
 
 /**
@@ -104,6 +103,12 @@ public class SimulationScene extends AScene
     EUpdateResult result = super.processInput(input);
     if(result != EUpdateResult.CONTINUE)
       return result;
+    
+    if(input.isKeyHeld(IInput.EKeyCode.L_CTRL))
+      agents.get(0).turn(-0.1f);
+    
+    if(input.isKeyHeld(IInput.EKeyCode.L_ALT))
+      agents.get(0).turn(0.1f);
     
     // control camera
     camera.processInput(input);
