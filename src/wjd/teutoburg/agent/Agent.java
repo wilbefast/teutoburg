@@ -16,9 +16,10 @@
  */
 package wjd.teutoburg.agent;
 
+import java.util.HashMap;
+import java.util.Map;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IDynamic;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
@@ -44,6 +45,8 @@ public class Agent implements IVisible, IDynamic
   // view
   protected Rect visibility_box;
   protected boolean visible = false;
+  // brain
+  protected Map<String, String> belief = new HashMap<String, String>();
 
   /* METHODS */
   
@@ -99,8 +102,8 @@ public class Agent implements IVisible, IDynamic
   @Override
   public EUpdateResult update(int t_delta)
   {
-    advance(0.1f*t_delta);
-    turn(0.001f*t_delta);
+    //advance(0.1f*t_delta);
+    turn(0.005f*t_delta);
     
     
     // override if needed

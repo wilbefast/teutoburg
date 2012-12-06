@@ -37,19 +37,23 @@ public abstract class Soldier implements IVisible
   private static final V2 SHIELD_SIZE = new V2(8.0f, 10.0f);
   private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
                                                 -SHIELD_SIZE.y * 0.5f);
+  // weapon
+  private static final V2 WEAPON_SIZE = new V2(2.0f, 18.0f);
+  private static final V2 WEAPON_OFFSET = new V2(5.0f, 1.0f);
   // body
   private static final V2 BODY_SIZE = new V2(6.0f, 12.0f);
   // head
   private static final float HEAD_RADIUS = 2.0f;
   private static final float HEAD_OFFSET = -BODY_SIZE.y -(HEAD_RADIUS * 0.5f);
   // distance at which simplified "imposter" shapes replace soldiers
-  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.5f;
+  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.6f;
   // amount that soldiers "wiggle" within formation
   private static final float WIGGLE = 0.5f;
   private static final float WIGGLE2 = 2*WIGGLE;
   
   /* ATTRIBUTES */
-  private V2 position = new V2(), direction = new V2(), head = new V2();
+  private V2 position = new V2(), direction = new V2(), head = new V2(), 
+            weapon_bottom = new V2(), weapon_top = new V2();
   private Rect body = new Rect(V2.ORIGIN, BODY_SIZE),
                shield = new Rect(V2.ORIGIN, SHIELD_SIZE);
   private final Colour c_shield, c_body, c_head;
@@ -76,14 +80,19 @@ public abstract class Soldier implements IVisible
       return;
     
     // apply wiggle and reset direction
-    position.add((float)((Math.random() * WIGGLE2) - WIGGLE), 
-                        (float)((Math.random() * WIGGLE2) - WIGGLE));
+    /*position.add((float)((Math.random() * WIGGLE2) - WIGGLE), 
+                        (float)((Math.random() * WIGGLE2) - WIGGLE));*/
     direction.reset(_direction);
 
     // position auxilliary body parts
     head.xy(position.x, position.y + HEAD_OFFSET);
-    shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
-    shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, SHIELD_OFFSET.y);
+    //shield.w = SHIELD_SIZE.x * Math.abs(direction.y);
+    shield.centrePos(position).shift(direction.y * SHIELD_OFFSET.x, 
+                                     SHIELD_OFFSET.y);
+    
+    weapon_bottom.reset(position).add(-direction.y * WEAPON_OFFSET.x, 
+                                      direction.y * WEAPON_OFFSET.y);
+    weapon_top.xy(weapon_bottom.x, weapon_bottom.y - WEAPON_SIZE.y);
   }
   
   /* IMPLEMENTS -- IVISIBLE */
@@ -107,19 +116,46 @@ public abstract class Soldier implements IVisible
   
   private void renderNearby(ICanvas canvas)
   { 
-    // up => shield is further than body
+    // North
     if(direction.y < 0)
     {
-      renderShield(canvas);
-      renderHead(canvas);
-      renderBody(canvas);
+      // North-East
+      if(direction.x > 0)
+      {
+        renderShield(canvas);
+        renderHead(canvas);
+        renderBody(canvas);
+        renderWeapon(canvas);
+      }
+      // North-West
+      else
+      {
+        renderWeapon(canvas);
+        renderHead(canvas);
+        renderBody(canvas);
+        renderShield(canvas);
+      }
+      
     }
-    // down => body is further than shield
+    // South
     else
     {
-      renderBody(canvas);
-      renderHead(canvas);
-      renderShield(canvas);
+      // South-East
+      if(direction.x > 0)
+      {
+        renderShield(canvas);
+        renderBody(canvas);
+        renderHead(canvas);
+        renderWeapon(canvas);
+      }
+      // South-West
+      else
+      {
+        renderWeapon(canvas);
+        renderBody(canvas);
+        renderHead(canvas);
+        renderShield(canvas);
+      }
     }
   }
   
@@ -144,5 +180,12 @@ public abstract class Soldier implements IVisible
   {
     canvas.setColour(c_body);
     canvas.box(body, true);
+  }
+
+  private void renderWeapon(ICanvas canvas)
+  {
+    canvas.setLineWidth(WEAPON_SIZE.x);
+    canvas.setColour(Colour.BLACK);
+    canvas.line(weapon_bottom, weapon_top);
   }
 }

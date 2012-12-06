@@ -31,7 +31,7 @@ public abstract class RegimentAgent extends Agent
   /* CONSTANTS */
   private static final float SOLDIER_SPACING = 22.0f;
   // distance at which simplified "imposter" shapes replace regiments
-  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.15f;
+  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   
   /* LOCAL VARIABLES */
   private V2 r_offset = new V2(), f_offset = new V2(), soldier_position = new V2();
@@ -68,6 +68,15 @@ public abstract class RegimentAgent extends Agent
   
 
   // mutators
+  public EUpdateResult killSoldiers(int n_killed)
+  {
+    strength_current -= n_killed;
+    if(strength_current <= 0)
+      return EUpdateResult.DELETE_ME;
+    
+    recalculateFormation();
+    return EUpdateResult.CONTINUE;
+  }
   
   /* INTERFACE */
   public abstract Soldier createSoldier(V2 position, V2 offset);
