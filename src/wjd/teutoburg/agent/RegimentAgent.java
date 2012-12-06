@@ -19,7 +19,9 @@ package wjd.teutoburg.agent;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
+import wjd.math.M;
 import wjd.math.V2;
+import wjd.teutoburg.agent.Agent;
 
 /**
  *
@@ -133,7 +135,7 @@ public abstract class RegimentAgent extends Agent
     double sqrt_strength = Math.sqrt(strength_current);
     
     // calculate number of ranks and files, plus size of incomplete final rank
-    n_files = (int)Math.ceil(sqrt_strength);
+    n_files = M.isqrt(strength_current);
     files_middle = (n_files - 1) * SOLDIER_SPACING * 0.5f;
     n_ranks = strength_current / n_files;
     ranks_middle = (n_ranks - 1) * SOLDIER_SPACING * 0.5f;

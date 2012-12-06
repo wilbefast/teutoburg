@@ -35,7 +35,7 @@ public class BarbarianRegiment extends RegimentAgent
   {
     private static final Colour C_BODY = Colour.TEAL;
     private static final Colour C_HEAD = Colour.BLUE;
-    private static final Colour C_SHIELD = Colour.GREEN;
+    private static final Colour C_SHIELD = Colour.WHITE;
     public Barbarian(V2 _position, V2 _direction)
     {
       super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);

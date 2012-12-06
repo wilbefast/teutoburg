@@ -80,8 +80,8 @@ public abstract class Soldier implements IVisible
       return;
     
     // apply wiggle and reset direction
-    /*position.add((float)((Math.random() * WIGGLE2) - WIGGLE), 
-                        (float)((Math.random() * WIGGLE2) - WIGGLE));*/
+    position.add((float)((Math.random() * WIGGLE2) - WIGGLE), 
+                        (float)((Math.random() * WIGGLE2) - WIGGLE));
     direction.reset(_direction);
 
     // position auxilliary body parts

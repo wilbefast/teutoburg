@@ -22,6 +22,7 @@ import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IDynamic;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
+import wjd.math.M;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -30,7 +31,7 @@ import wjd.math.V2;
  * @author wdyce
  * @since Dec 4, 2012
  */
-public class Agent implements IVisible, IDynamic
+public class Agent implements IVisible, IDynamic, IPhysical
 {
   /* CONSTANTS */
   private static final double INV_2PI = 1/(2*Math.PI);
@@ -102,12 +103,26 @@ public class Agent implements IVisible, IDynamic
   @Override
   public EUpdateResult update(int t_delta)
   {
-    //advance(0.1f*t_delta);
+    advance(0.1f*t_delta);
     turn(0.005f*t_delta);
     
     
     // override if needed
     return EUpdateResult.CONTINUE;
+  }
+  
+  /* IMPLEMENTS -- IPHYSICAL */
+
+  @Override
+  public boolean isColliding(IPhysical other)
+  {
+    if(other instanceof Agent)
+    {
+      Agent a = (Agent)other;
+      return (a.position.distance2(position) < M.sqr(a.radius+radius));
+    }
+    else
+      return false;
   }
  
 }

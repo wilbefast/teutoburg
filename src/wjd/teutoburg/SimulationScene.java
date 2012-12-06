@@ -24,10 +24,12 @@ import wjd.amb.control.IInput;
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
+import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.agent.Agent;
 import wjd.teutoburg.agent.BarbarianRegiment;
 import wjd.teutoburg.agent.RomanRegiment;
+import wjd.teutoburg.agent.Tree;
 
 /**
  * @author wdyce
@@ -39,25 +41,45 @@ public class SimulationScene extends AScene
   private static final Colour C_GRASS = new Colour(120, 255, 33);
   
   /* ATTRIBUTES */
+  private Rect area;
   private StrategyCamera camera;
   private List<Agent> agents;
+  private List<Tree> trees;
 
   /* METHODS */
   
   // constructors
-  public SimulationScene()
+  public SimulationScene(V2 size)
   {
-    // view
-    camera = new StrategyCamera(null); // FIXME add boundary
+    
+    // model
+    area = new Rect(V2.ORIGIN, size);
+    
     agents = new LinkedList<Agent>();
-
-    agents.add(new RomanRegiment(new V2(100, 100)));
+    V2 p = new V2();
+    for(int i = 0; i < 10; i++)
+    {
+      area.randomPoint(p);
+      agents.add(new RomanRegiment(p.clone()));
+      area.randomPoint(p);
+      agents.add(new BarbarianRegiment(p.clone()));
+    }
     
-    for(int i = 0; i < 1500; i++)
-      agents.add(new RomanRegiment(new V2((float)Math.random()*14000, (float)Math.random()*14000)));
+    trees = new LinkedList<Tree>();
+    Rect copse = new Rect(0, 0, area.w/4, area.h/4);
+    for(int i = 0; i < 20; i++)
+    {
+      copse.xy((float)(Math.random()*(area.w - copse.w)), 
+               (float)(Math.random()*(area.h - copse.h)));
+      for(int j = 0; j < 40; j++)
+      {
+        copse.randomPoint(p);
+        trees.add(new Tree(p.clone()));
+      }
+    }
     
-    for(int i = 0; i < 1500; i++)
-      agents.add(new BarbarianRegiment(new V2((float)Math.random()*10000, (float)Math.random()*10000)));
+    // view
+    camera = new StrategyCamera(area);
   }
 
   // mutators
@@ -65,7 +87,6 @@ public class SimulationScene extends AScene
   // accessors
   
   public ICamera getCamera() { return camera; }
-
   
   /* IMPLEMENTS -- IDYNAMIC */
 
@@ -88,18 +109,20 @@ public class SimulationScene extends AScene
     // clear the screen
     canvas.clear();
     
+    canvas.setCamera(camera);
+    
     // draw the grass
     canvas.setColour(C_GRASS);
-    canvas.fill();
+    canvas.box(area, true);
     
     // draw all the agents
-    canvas.setCamera(camera);
     for(Agent a : agents)
       a.render(canvas);
+    for(Tree t : trees)
+      t.render(canvas);
       
     // render GUI elements
     canvas.setCameraActive(false);
-    //! TODO
   }
   
   /* OVERRIDES -- CONTROLLER */

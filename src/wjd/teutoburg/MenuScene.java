@@ -32,6 +32,7 @@ public class MenuScene extends AScene
 {
   /* CONSTANTS */
   private static final V2 HELLO_POS = new V2(32, 32);
+  private static final V2 MAP_SIZE = new V2(5000, 5000);
   
   /* METHODS */
   
@@ -67,7 +68,7 @@ public class MenuScene extends AScene
       if(event.key != null) switch(event.key)
       {
         case ENTER:
-          setNext(new SimulationScene());
+          setNext(new SimulationScene(MAP_SIZE));
           return EUpdateResult.REPLACE_ME;
           
         case ESC:
