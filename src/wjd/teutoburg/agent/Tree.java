@@ -30,8 +30,10 @@ import wjd.math.V2;
 public class Tree implements IVisible, IPhysical
 {
   /* CONSTANTS */
-  private static final float HEIGHT_BASE = 20.0f;
-  private static final float HEIGHT_VAR = HEIGHT_BASE*0.2f; // 20% random
+  public static final float HEIGHT_BASE = 20.0f;
+  public static final float HEIGHT_VAR = HEIGHT_BASE*0.2f; // 20% random
+
+  public static final float COLLISION_RADIUS = 10.0f;
   
   /* ATTRIBUTES */
   private V2 position, summit, left, right;

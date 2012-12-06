@@ -39,9 +39,21 @@ public class SimulationScene extends AScene
 {
   /* CONSTANTS */
   private static final Colour C_GRASS = new Colour(120, 255, 33);
+  // forest
+  private static final int N_COPSES = 50;
+  private static final int COPSE_N_TREES = 30;
+  private static final float COPSE_SIZE = Tree.COLLISION_RADIUS*COPSE_N_TREES*4;
+  // romans
+  private static final float ROMAN_DEPLOYMENT_FRACTION = 0.3f;
+  private static final int ROMAN_N_REGIMENTS = 15;
+  // barbarians
+  private static final float BARBARIAN_DEPLOYMENT_FRACTION = 0.3f;
+  private static final int BARBARIAN_N_REGIMENTS = 20;
   
   /* ATTRIBUTES */
   private Rect area;
+  private Rect roman_deployment;
+  private Rect barbarian_illegal_deployment;
   private StrategyCamera camera;
   private List<Agent> agents;
   private List<Tree> trees;
@@ -52,31 +64,19 @@ public class SimulationScene extends AScene
   public SimulationScene(V2 size)
   {
     
-    // model
+    // boundaries
     area = new Rect(V2.ORIGIN, size);
+    roman_deployment = area.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
+    barbarian_illegal_deployment = area.clone().scale(1 - BARBARIAN_DEPLOYMENT_FRACTION);
     
-    agents = new LinkedList<Agent>();
-    V2 p = new V2();
-    for(int i = 0; i < 10; i++)
-    {
-      area.randomPoint(p);
-      agents.add(new RomanRegiment(p.clone()));
-      area.randomPoint(p);
-      agents.add(new BarbarianRegiment(p.clone()));
-    }
-    
+    // generate forest
     trees = new LinkedList<Tree>();
-    Rect copse = new Rect(0, 0, area.w/4, area.h/4);
-    for(int i = 0; i < 20; i++)
-    {
-      copse.xy((float)(Math.random()*(area.w - copse.w)), 
-               (float)(Math.random()*(area.h - copse.h)));
-      for(int j = 0; j < 40; j++)
-      {
-        copse.randomPoint(p);
-        trees.add(new Tree(p.clone()));
-      }
-    }
+    generateForest();
+    
+    // deploy soldiers
+    agents = new LinkedList<Agent>();
+    deployRomans();
+    deployBarbarians();
     
     // view
     camera = new StrategyCamera(area);
@@ -87,6 +87,60 @@ public class SimulationScene extends AScene
   // accessors
   
   public ICamera getCamera() { return camera; }
+  
+  /* SUBROUTINES */
+  
+  private void generateForest()
+  {
+    
+    
+    Rect copse = new Rect(0, 0, COPSE_SIZE, COPSE_SIZE);
+    for(int c = 0; c < N_COPSES; c++)
+    {
+      do
+      {
+      copse.xy((float)(Math.random()*(area.w - copse.w)), 
+               (float)(Math.random()*(area.h - copse.h)));
+      }
+      while(copse.collides(roman_deployment));
+      
+      for(int t = 0; t < COPSE_N_TREES; t++)
+      {
+        V2 p = new V2();
+        copse.randomPoint(p);
+        trees.add(new Tree(p));
+      }
+    }
+  }
+  
+  private void deployRomans()
+  {
+    for(int i = 0; i < ROMAN_N_REGIMENTS; i++)
+    {
+      V2 p = new V2();
+      roman_deployment.randomPoint(p);
+      RomanRegiment r = new RomanRegiment(p);
+      r.faceRandom();
+      agents.add(r);
+    }
+  }
+  
+  private void deployBarbarians()
+  {
+    V2 centre = area.getCentre();
+    for(int i = 0; i < BARBARIAN_N_REGIMENTS; i++)
+    {
+      V2 p = new V2();
+      do
+      {
+        area.randomPoint(p);
+      }
+      while(barbarian_illegal_deployment.contains(p));
+      BarbarianRegiment r = new BarbarianRegiment(p);
+      r.faceTowards(centre);
+      agents.add(r);
+    }
+  }
   
   /* IMPLEMENTS -- IDYNAMIC */
 
@@ -112,14 +166,23 @@ public class SimulationScene extends AScene
     canvas.setCamera(camera);
     
     // draw the grass
+    
+
+    
     canvas.setColour(C_GRASS);
     canvas.box(area, true);
+
     
     // draw all the agents
     for(Agent a : agents)
       a.render(canvas);
     for(Tree t : trees)
       t.render(canvas);
+    
+    canvas.setColour(Colour.BLUE);
+    canvas.box(roman_deployment, false);
+    canvas.setColour(Colour.RED);
+    canvas.box(barbarian_illegal_deployment, false);
       
     // render GUI elements
     canvas.setCameraActive(false);
@@ -134,12 +197,6 @@ public class SimulationScene extends AScene
     EUpdateResult result = super.processInput(input);
     if(result != EUpdateResult.CONTINUE)
       return result;
-    
-    /*if(input.isKeyHeld(IInput.EKeyCode.L_CTRL))
-      agents.get(0).turn(-0.1f);
-    
-    if(input.isKeyHeld(IInput.EKeyCode.L_ALT))
-      agents.get(0).turn(0.1f);*/
     
     // control camera
     camera.processInput(input);

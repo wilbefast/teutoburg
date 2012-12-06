@@ -64,9 +64,26 @@ public class Agent implements IVisible, IDynamic, IPhysical
   
   // mutators
   
-  public void turn(float angle)
+  /**
+   * 
+   * @param degrees angle to turn, in degrees.
+   */
+  public void turn(float degrees)
   {
-    direction.addAngle((float)(INV_2PI*angle));
+    direction.addAngle((float)(INV_2PI*degrees));
+    left.reset(direction).left();
+    front_position.reset(direction).scale(radius).add(position);
+  }
+  
+  public void faceRandom()
+  {
+    turn((float)Math.random()*360);
+  }
+  
+  public void faceTowards(V2 target)
+  {
+    direction.reset(target).sub(position);
+    direction.normalise();
     left.reset(direction).left();
     front_position.reset(direction).scale(radius).add(position);
   }
@@ -103,8 +120,8 @@ public class Agent implements IVisible, IDynamic, IPhysical
   @Override
   public EUpdateResult update(int t_delta)
   {
-    advance(0.1f*t_delta);
-    turn(0.005f*t_delta);
+    //advance(0.1f*t_delta);
+    //turn(0.005f*t_delta);
     
     
     // override if needed

@@ -32,7 +32,7 @@ public class MenuScene extends AScene
 {
   /* CONSTANTS */
   private static final V2 HELLO_POS = new V2(32, 32);
-  private static final V2 MAP_SIZE = new V2(5000, 5000);
+  private static final V2 MAP_SIZE = new V2(10000, 10000);
   
   /* METHODS */
   
