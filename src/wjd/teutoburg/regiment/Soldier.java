@@ -14,13 +14,13 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.agent;
+package wjd.teutoburg.regiment;
 
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
 import wjd.math.V2;
-import wjd.teutoburg.Palette;
+import wjd.teutoburg.simulation.Palette;
 
 /**
  *

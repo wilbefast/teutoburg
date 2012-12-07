@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg;
+package wjd.teutoburg.simulation;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,10 +26,12 @@ import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
-import wjd.teutoburg.agent.Agent;
-import wjd.teutoburg.agent.BarbarianRegiment;
-import wjd.teutoburg.agent.RomanRegiment;
-import wjd.teutoburg.agent.Tree;
+import wjd.teutoburg.MenuScene;
+import wjd.teutoburg.MenuScene;
+import wjd.teutoburg.physics.Agent;
+import wjd.teutoburg.regiment.BarbarianRegiment;
+import wjd.teutoburg.regiment.RomanRegiment;
+import wjd.teutoburg.physics.Tree;
 
 /**
  * @author wdyce

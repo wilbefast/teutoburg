@@ -14,13 +14,14 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.agent;
+package wjd.teutoburg.physics;
 
+import wjd.teutoburg.physics.IPhysical;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
 import wjd.math.V2;
-import wjd.teutoburg.Palette;
+import wjd.teutoburg.simulation.Palette;
 
 /**
  *
@@ -44,7 +45,7 @@ public class Tree implements IVisible, IPhysical
   // model
   public static final float COLLISION_RADIUS = 10.0f;
   // visibility 
-  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.7f;
+  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.45f;
   
   /* ATTRIBUTES */
   private V2 position, summit, left, right, imposter_left, imposter_right;
@@ -103,6 +104,7 @@ public class Tree implements IVisible, IPhysical
           loadImposterModel();
           nearby = false;
         }
+        // imposter
         canvas.setColour(Palette.TREE_IMPOSTER);
         canvas.triangle(summit, imposter_left, imposter_right, true);
       }

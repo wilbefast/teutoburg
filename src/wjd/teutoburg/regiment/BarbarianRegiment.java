@@ -14,43 +14,41 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.agent;
+package wjd.teutoburg.regiment;
 
+import wjd.teutoburg.regiment.RegimentAgent;
 import wjd.math.V2;
 
 /**
  *
  * @author wdyce
- * @since Dec 4, 2012
+ * @since Dec 5, 2012
  */
-public class RomanRegiment extends RegimentAgent
+public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
-  private static final int STRENGTH_START = 5*5;
-  public static final Faction faction = Faction.ROMAN;
+  private static final int STRENGTH_START = 7*7;
   
   /* NESTING */
-  private static class Roman extends Soldier
+  public static class Barbarian extends Soldier
   {
-    public Roman(V2 _position, V2 _direction)
+    public Barbarian(V2 _position, V2 _direction)
     {
-      super(_position, _direction, Faction.ROMAN);
+      super(_position, _direction, Faction.BARBARIAN);
     }
   }
-
+  
   /* METHODS */
   
   // constructors
-  public RomanRegiment(V2 start_position)
+  public BarbarianRegiment(V2 start_position)
   {
-    super(start_position, STRENGTH_START, Faction.ROMAN);
+    super(start_position, STRENGTH_START, Faction.BARBARIAN);
   }
-  
-  /* IMPLEMENTS -- SOLDIER */
   
   @Override
   public Soldier createSoldier(V2 position, V2 direction)
   {
-    return new Roman(position, direction);
+    return new Barbarian(position, direction);
   }
 }

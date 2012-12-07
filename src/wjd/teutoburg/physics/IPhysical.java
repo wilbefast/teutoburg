@@ -14,40 +14,15 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.agent;
-
-import wjd.math.V2;
+package wjd.teutoburg.physics;
 
 /**
  *
  * @author wdyce
- * @since Dec 5, 2012
+ * @since Dec 6, 2012
  */
-public class BarbarianRegiment extends RegimentAgent
+public interface IPhysical 
 {
-  /* CONSTANTS */
-  private static final int STRENGTH_START = 7*7;
-  
-  /* NESTING */
-  public static class Barbarian extends Soldier
-  {
-    public Barbarian(V2 _position, V2 _direction)
-    {
-      super(_position, _direction, Faction.BARBARIAN);
-    }
-  }
-  
-  /* METHODS */
-  
-  // constructors
-  public BarbarianRegiment(V2 start_position)
-  {
-    super(start_position, STRENGTH_START, Faction.BARBARIAN);
-  }
-  
-  @Override
-  public Soldier createSoldier(V2 position, V2 direction)
-  {
-    return new Barbarian(position, direction);
-  }
+  /* INTERFACE */
+  public boolean isColliding(IPhysical other);
 }

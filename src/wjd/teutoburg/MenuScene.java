@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg;
 
+import wjd.teutoburg.simulation.SimulationScene;
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
