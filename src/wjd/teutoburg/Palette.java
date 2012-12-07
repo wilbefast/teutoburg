@@ -28,10 +28,21 @@ public class Palette
 {
   /* CONSTANTS */
   // grass
-  public static final Colour GRASS = new Colour(100, 200, 11);
-  public static final Colour GRASS_SHADOW = GRASS.clone().mult(0.5f);
+  public static final Colour GRASS = new Colour(162, 242, 93);
+  public static final Colour GRASS_SHADOW = GRASS.clone().mult(0.2f);
   // trees
   public static final Colour TREE_TRUNK = new Colour(100, 200, 50);
   public static final Colour TREE_LEAVES = new Colour(50, 150, 100);
+  public static final Colour TREE_DISTANCE = TREE_TRUNK.clone().avg(TREE_LEAVES);
+  // romans
+  public static final Colour ROMAN_BODY = new Colour(255, 255, 0);
+  public static final Colour ROMAN_HEAD = new Colour(255, 225, 225);
+  public static final Colour ROMAN_SHIELD = new Colour(255, 0, 0);
+  public static final Colour ROMAN_WEAPON = new Colour(100, 50, 25);
+  // barbarians
+  public static final Colour BARBARIAN_BODY = new Colour(0, 255, 255);
+  public static final Colour BARBARIAN_HEAD = new Colour(225, 225, 255);
+  public static final Colour BARBARIAN_SHIELD = new Colour(0, 0, 255);
+  public static final Colour BARBARIAN_WEAPON = new Colour(25, 50, 100);
   
 }

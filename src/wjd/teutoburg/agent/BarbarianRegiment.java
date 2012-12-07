@@ -16,7 +16,6 @@
  */
 package wjd.teutoburg.agent;
 
-import wjd.amb.view.Colour;
 import wjd.math.V2;
 
 /**
@@ -28,17 +27,13 @@ public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int STRENGTH_START = 7*7;
-  private static final Colour C_IMPOSTER = new Colour(0, 196, 196);
   
   /* NESTING */
   public static class Barbarian extends Soldier
   {
-    private static final Colour C_BODY = Colour.TEAL;
-    private static final Colour C_HEAD = Colour.BLUE;
-    private static final Colour C_SHIELD = Colour.WHITE;
     public Barbarian(V2 _position, V2 _direction)
     {
-      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
+      super(_position, _direction, Faction.BARBARIAN);
     }
   }
   
@@ -47,10 +42,8 @@ public class BarbarianRegiment extends RegimentAgent
   // constructors
   public BarbarianRegiment(V2 start_position)
   {
-    super(start_position, STRENGTH_START, C_IMPOSTER);
+    super(start_position, STRENGTH_START, Faction.BARBARIAN);
   }
-
-  /* IMPLEMENTS -- SOLDIER */
   
   @Override
   public Soldier createSoldier(V2 position, V2 direction)

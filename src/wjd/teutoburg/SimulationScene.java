@@ -38,7 +38,6 @@ import wjd.teutoburg.agent.Tree;
 public class SimulationScene extends AScene
 {
   /* CONSTANTS */
-  private static final Colour C_GRASS = new Colour(120, 255, 33);
   // forest
   private static final int N_COPSES = 50;
   private static final int COPSE_N_TREES = 30;
@@ -92,8 +91,6 @@ public class SimulationScene extends AScene
   
   private void generateForest()
   {
-    
-    
     Rect copse = new Rect(0, 0, COPSE_SIZE, COPSE_SIZE);
     for(int c = 0; c < N_COPSES; c++)
     {
@@ -166,18 +163,16 @@ public class SimulationScene extends AScene
     canvas.setCamera(camera);
     
     // draw the grass
-    
-
-    
-    canvas.setColour(C_GRASS);
+    canvas.setColour(Palette.GRASS);
     canvas.box(area, true);
-
     
+    // draw all the trees
+    for(Tree t : trees)
+      t.render(canvas);
+
     // draw all the agents
     for(Agent a : agents)
       a.render(canvas);
-    for(Tree t : trees)
-      t.render(canvas);
     
     canvas.setColour(Colour.BLUE);
     canvas.box(roman_deployment, false);

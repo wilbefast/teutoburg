@@ -16,7 +16,6 @@
  */
 package wjd.teutoburg.agent;
 
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
@@ -41,12 +40,15 @@ public class Tree implements IVisible, IPhysical
   // branches
   public static final float BRANCHES_W = 16.0f;
   public static final float BRANCHES_RADIUS = BRANCHES_W*0.5f;
-  
+  // model
   public static final float COLLISION_RADIUS = 10.0f;
+  // visibility 
+  private static final float ZOOM_IMPOSTER_THRESHOLD = 0.7f;
   
   /* ATTRIBUTES */
   private V2 position, summit, left, right;
   private Rect trunk;
+  private boolean nearby = true;
   
   
   /* METHODS */
@@ -76,15 +78,32 @@ public class Tree implements IVisible, IPhysical
   {
     if(canvas.getCamera().canSee(position))
     {
-      canvas.setColour(Palette.GRASS_SHADOW);
-      canvas.circle(position, BRANCHES_RADIUS, true);
+      nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
       
-      canvas.setColour(Palette.TREE_TRUNK);
-      canvas.box(trunk, true);
-      
-      canvas.setColour(Palette.TREE_LEAVES);
-      canvas.triangle(summit, left, right, true);
-
+      if(nearby)
+      {
+        // shadow
+        canvas.setColour(Palette.GRASS_SHADOW);
+        canvas.circle(position, BRANCHES_RADIUS, true);
+        // trunk
+        canvas.setColour(Palette.TREE_TRUNK);
+        canvas.box(trunk, true);
+        // leaves
+        canvas.setColour(Palette.TREE_LEAVES);
+        canvas.triangle(summit, left, right, true);
+      }
+      else
+      {
+        left.y = right.y = position.y;
+        
+        
+        // imposter
+        canvas.setColour(Palette.TREE_LEAVES);
+        canvas.triangle(summit, left, right, true);
+        
+        left.xy(position.x - BRANCHES_RADIUS, position.y - TRUNK_H);
+        right.xy(position.x + BRANCHES_RADIUS, position.y - TRUNK_H);
+      }
     }
   }
   

@@ -16,7 +16,6 @@
  */
 package wjd.teutoburg.agent;
 
-import wjd.amb.view.Colour;
 import wjd.math.V2;
 
 /**
@@ -28,17 +27,14 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int STRENGTH_START = 5*5;
-  private static final Colour C_IMPOSTER = new Colour(196, 0, 0);
+  public static final Faction faction = Faction.ROMAN;
   
   /* NESTING */
   private static class Roman extends Soldier
   {
-    private static final Colour C_BODY = Colour.RED;
-    private static final Colour C_HEAD = Colour.YELLOW;
-    private static final Colour C_SHIELD = Colour.VIOLET;
     public Roman(V2 _position, V2 _direction)
     {
-      super(_position, _direction, C_SHIELD, C_BODY, C_HEAD);
+      super(_position, _direction, Faction.ROMAN);
     }
   }
 
@@ -47,7 +43,7 @@ public class RomanRegiment extends RegimentAgent
   // constructors
   public RomanRegiment(V2 start_position)
   {
-    super(start_position, STRENGTH_START, C_IMPOSTER);
+    super(start_position, STRENGTH_START, Faction.ROMAN);
   }
   
   /* IMPLEMENTS -- SOLDIER */

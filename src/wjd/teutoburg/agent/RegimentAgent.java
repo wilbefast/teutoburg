@@ -21,7 +21,6 @@ import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.M;
 import wjd.math.V2;
-import wjd.teutoburg.agent.Agent;
 
 /**
  *
@@ -51,15 +50,18 @@ public abstract class RegimentAgent extends Agent
   private Soldier[] soldiers;
   private boolean visible_previous = true;
   private boolean nearby = true, nearby_previous = true;
-  private final Colour c_imposter;
+  private final V2 arrow_left = new V2(), 
+                    arrow_right = new V2(), 
+                    arrow_top = new V2();
+  private Faction faction;
 
   /* METHODS */
   // constructors
-  public RegimentAgent(V2 start_position, int strength, Colour c_imposter)
+  public RegimentAgent(V2 start_position, int strength, Faction faction)
   {
     super(start_position, 0);
     
-    this.c_imposter = c_imposter;
+    this.faction = faction;
     
     // calculate unit positions based on the strength of the unit
     strength_max = strength_current = strength;
@@ -88,6 +90,13 @@ public abstract class RegimentAgent extends Agent
   @Override
   public EUpdateResult update(int t_delta)
   {
+    /* FIXME */
+    arrow_top.reset(direction).scale(radius*0.5f).add(position);
+    arrow_left.reset(left).scale(radius*0.5f).add(position).add(-direction.x*radius*0.5f, -direction.y*radius*0.5f);
+    arrow_right.reset(left).scale(radius*0.5f).opp().add(position).add(-direction.x*radius*0.5f, -direction.y*0.5f*radius);
+    /* END - FIXME */
+    
+    
     // default
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)
@@ -122,8 +131,10 @@ public abstract class RegimentAgent extends Agent
       // draw far away regiments
       else
       {
-        canvas.setColour(c_imposter);
+        canvas.setColour(faction.colour_shield);
         canvas.angleBox(position, direction, radius, true);
+        canvas.setColour(Colour.WHITE);
+        canvas.triangle(arrow_left, arrow_top, arrow_right, true);
       }
     }
   }
