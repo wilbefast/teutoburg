@@ -159,7 +159,6 @@ public class SimulationScene extends AScene
   {
     // clear the screen
     canvas.clear();
-    
     canvas.setCamera(camera);
     
     // draw the grass
@@ -173,11 +172,6 @@ public class SimulationScene extends AScene
     // draw all the agents
     for(Agent a : agents)
       a.render(canvas);
-    
-    canvas.setColour(Colour.BLUE);
-    canvas.box(roman_deployment, false);
-    canvas.setColour(Colour.RED);
-    canvas.box(barbarian_illegal_deployment, false);
       
     // render GUI elements
     canvas.setCameraActive(false);

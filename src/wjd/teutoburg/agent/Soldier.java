@@ -16,11 +16,11 @@
  */
 package wjd.teutoburg.agent;
 
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
 import wjd.math.V2;
+import wjd.teutoburg.Palette;
 
 /**
  *
@@ -32,7 +32,6 @@ public abstract class Soldier implements IVisible
   /* CONSTANTS */
   // shadow
   private static final float SHADOW_RADIUS =  6.0f;
-  private static final Colour C_SHADOW = new Colour(12, 26, 3);
   // shield
   private static final V2 SHIELD_SIZE = new V2(8.0f, 10.0f);
   private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
@@ -93,7 +92,7 @@ public abstract class Soldier implements IVisible
   public void render(ICanvas canvas)
   {
     // always draw the shadow
-    canvas.setColour(C_SHADOW);
+    canvas.setColour(Palette.GRASS_SHADOW);
     canvas.circle(position, SHADOW_RADIUS, true);
     
     // draw a simplified body if far away

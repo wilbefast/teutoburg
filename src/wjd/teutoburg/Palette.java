@@ -29,11 +29,12 @@ public class Palette
   /* CONSTANTS */
   // grass
   public static final Colour GRASS = new Colour(162, 242, 93);
-  public static final Colour GRASS_SHADOW = GRASS.clone().mult(0.2f);
+  public static final Colour GRASS_SHADOW = GRASS.clone().mult(0.3f);
   // trees
   public static final Colour TREE_TRUNK = new Colour(100, 200, 50);
   public static final Colour TREE_LEAVES = new Colour(50, 150, 100);
-  public static final Colour TREE_DISTANCE = TREE_TRUNK.clone().avg(TREE_LEAVES);
+  public static final Colour TREE_IMPOSTER 
+            = GRASS_SHADOW.clone().avg(TREE_TRUNK).avg(TREE_LEAVES);
   // romans
   public static final Colour ROMAN_BODY = new Colour(255, 255, 0);
   public static final Colour ROMAN_HEAD = new Colour(255, 225, 225);
