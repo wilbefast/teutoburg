@@ -66,7 +66,10 @@ public abstract class RegimentAgent extends Agent
     
     // calculate unit positions based on the strength of the unit
     strength_max = strength_current = strength;
+    
+    // build structures for the first time
     recalculateFormation();
+    recalculateArrow();
   }
 
   // accessors
@@ -88,29 +91,49 @@ public abstract class RegimentAgent extends Agent
   
   
   /* OVERRIDES -- AGENT */
+  
+  @Override
+  protected void directionChange()
+  {
+    // default
+    super.directionChange();
+    
+    // recalculate position of the arrow
+    recalculateArrow();
+    
+    // we need to recache the soldiers' positions if in view close to us
+    if(visible && nearby)
+      repositionSoldiers();
+  }
+  
+  @Override
+  protected void positionChange()
+  {
+    // default
+    super.positionChange();
+    
+    // recalculate position of the arrow
+    recalculateArrow();
+    
+    // we need to recache the soldiers' positions if in view close to us
+    if(visible && nearby)
+      repositionSoldiers();
+  }
+  
+
+  
   @Override
   public EUpdateResult update(int t_delta)
   {
-    /* FIXME */
-    arrow_top.reset(direction).scale(radius*0.5f).add(position);
-    arrow_left.reset(left).scale(radius*0.5f).add(position).add(-direction.x*radius*0.5f, -direction.y*radius*0.5f);
-    arrow_right.reset(left).scale(radius*0.5f).opp().add(position).add(-direction.x*radius*0.5f, -direction.y*0.5f*radius);
-    /* END - FIXME */
-    
-    
     // default
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)
       return result;
 
-    // we need to recache the soldiers' positions if in view close to us
-    if(visible && nearby)
-      // regenerate if the regiment has just moved into view
-      repositionSoldiers(!visible_previous || !nearby_previous);
-    else
+    // NB - superclass Agent doesn't have attribute 'visible'
+    if(!visible || !nearby)
       soldiers = null;
-    visible_previous = visible; // Agent doesn't have this attribute
-
+    
     // all clear!
     return EUpdateResult.CONTINUE;
   }
@@ -118,17 +141,24 @@ public abstract class RegimentAgent extends Agent
   @Override
   public void render(ICanvas canvas)
   {
+     // skip if not in the camera's view
+    visible_previous = visible; 
     super.render(canvas);
-    if(visible && visible_previous) 
+    if(visible) 
     {
+      // skip if not nearby
       nearby_previous = nearby;
       nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
+      if(nearby)
+      {
+        // regenerate if we've just come into previous or distance
+        if(!visible_previous || !nearby_previous)
+          repositionSoldiers();
       
-      // draw close-up regiments
-      if(nearby && nearby_previous) 
+        // draw close-up regiments
         for(Soldier s : soldiers)
           s.render(canvas);
-      
+      }
       // draw far away regiments
       else
       {
@@ -141,6 +171,16 @@ public abstract class RegimentAgent extends Agent
   }
 
   /* SUBROUTINES */
+  
+  private void recalculateArrow()
+  {
+    // the arrow shows us which way the regiment is facing from afar
+    arrow_top.reset(direction).scale(radius*0.5f).add(position);
+    arrow_left.reset(left).scale(radius*0.5f).add(position)
+      .add(-direction.x*radius*0.5f, -direction.y*radius*0.5f);
+    arrow_right.reset(left).scale(radius*0.5f).opp().add(position)
+      .add(-direction.x*radius*0.5f, -direction.y*0.5f*radius);
+  }
   
   private void recalculateFormation()
   {
@@ -157,12 +197,14 @@ public abstract class RegimentAgent extends Agent
     setRadius((float)sqrt_strength * SOLDIER_SPACING * 0.5f);
     
     // we must now reposition the soldiers in their new formation
-    repositionSoldiers(true);
+    soldiers = null;
+    repositionSoldiers();
   }
   
-  private void repositionSoldiers(boolean regenerate)
+  private void repositionSoldiers()
   {
     // reallocate vector if need be
+    boolean regenerate = (soldiers == null);
     if(regenerate)
       soldiers = new Soldier[strength_current];
     

@@ -64,45 +64,64 @@ public class Agent implements IVisible, IDynamic, IPhysical
   
   // mutators
   
-  /**
-   * 
-   * @param degrees angle to turn, in degrees.
-   */
+  //----------------------------------------------------------------------------
+  // DIRECTION
+  //----------------------------------------------------------------------------
   public void turn(float degrees)
   {
     direction.addAngle((float)(INV_2PI*degrees));
-    left.reset(direction).left();
-    front_position.reset(direction).scale(radius).add(position);
+    directionChange();
   }
   
   public void faceRandom()
   {
-    turn((float)Math.random()*360);
+    direction.addAngle((float)Math.random()*360);
+    directionChange();
   }
   
   public void faceTowards(V2 target)
   {
-    direction.reset(target).sub(position);
-    direction.normalise();
+    direction.reset(target).sub(position).normalise();
+    directionChange();
+  }
+  
+  protected void directionChange()
+  {
     left.reset(direction).left();
     front_position.reset(direction).scale(radius).add(position);
   }
   
+  //----------------------------------------------------------------------------
+  // POSITION
+  //----------------------------------------------------------------------------
   public void advance(float distance)
   {
+    // move various spatial components
     direction.scale(distance);
       position.add(direction);
       front_position.add(direction);
     direction.scale(1/distance);
     visibility_box.centrePos(position);
+    
+    // inform subclasses of the move
+    positionChange();
   }
   
+  protected void positionChange()
+  {
+    // override if need be
+  }
+  
+  //----------------------------------------------------------------------------
+  // SIZE
+  //----------------------------------------------------------------------------
   public final void setRadius(float new_radius)
   {
     radius = new_radius;
     visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
   }
   
+
   
   /* IMPLEMENTS -- IVISIBLE */
 
