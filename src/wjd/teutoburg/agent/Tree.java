@@ -21,6 +21,7 @@ import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
 import wjd.math.V2;
+import wjd.teutoburg.Palette;
 
 /**
  *
@@ -30,9 +31,17 @@ import wjd.math.V2;
 public class Tree implements IVisible, IPhysical
 {
   /* CONSTANTS */
-  public static final float HEIGHT_BASE = 20.0f;
-  public static final float HEIGHT_VAR = HEIGHT_BASE*0.2f; // 20% random
-
+  // top of the tree
+  public static final float SUMMIT_H = 30.0f;
+  public static final float SUMMIT_H_VAR = SUMMIT_H*0.3f; // 30% random
+  // trunk
+  public static final float TRUNK_W = 5.0f;
+  public static final float TRUNK_RADIUS = TRUNK_W*0.5f;
+  public static final float TRUNK_H = SUMMIT_H*0.3f;
+  // branches
+  public static final float BRANCHES_W = 16.0f;
+  public static final float BRANCHES_RADIUS = BRANCHES_W*0.5f;
+  
   public static final float COLLISION_RADIUS = 10.0f;
   
   /* ATTRIBUTES */
@@ -46,8 +55,12 @@ public class Tree implements IVisible, IPhysical
   public Tree(V2 position)
   {
     this.position = position;
-    summit = new V2().xy(position.x, position.y - HEIGHT_BASE - HEIGHT_VAR*0.5f 
-                                      + (float)(Math.random()*HEIGHT_VAR));
+    summit = new V2().xy(position.x, position.y - SUMMIT_H - SUMMIT_H_VAR*0.5f 
+                                      + (float)(Math.random()*SUMMIT_H_VAR));
+    left = new V2().xy(position.x - BRANCHES_RADIUS, position.y - TRUNK_H);
+    right = new V2().xy(position.x + BRANCHES_RADIUS, position.y - TRUNK_H);
+    trunk = new Rect(TRUNK_W, TRUNK_H).xy(position.x - TRUNK_RADIUS, 
+                                          position.y - TRUNK_H - 1);
   }
   
   // accessors
@@ -63,8 +76,15 @@ public class Tree implements IVisible, IPhysical
   {
     if(canvas.getCamera().canSee(position))
     {
-      canvas.setColour(Colour.BLACK);
-      canvas.circle(position, 10.0f, true);
+      canvas.setColour(Palette.GRASS_SHADOW);
+      canvas.circle(position, BRANCHES_RADIUS, true);
+      
+      canvas.setColour(Palette.TREE_TRUNK);
+      canvas.box(trunk, true);
+      
+      canvas.setColour(Palette.TREE_LEAVES);
+      canvas.triangle(summit, left, right, true);
+
     }
   }
   

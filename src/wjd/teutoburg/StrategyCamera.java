@@ -38,7 +38,7 @@ public class StrategyCamera implements ICamera
   private static final float ZOOM_SPEED = 0.001f;
   private static final float ZOOM_MIN = 0.1f;
   private static final float ZOOM_MAX = 2.0f;
-  private static final float ZOOM_DEFAULT = 1.0f;
+  private static final float ZOOM_DEFAULT = ZOOM_MIN;
   
   /* ATTRIBUTES */
   private V2 projection_size = new V2();
