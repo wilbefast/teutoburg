@@ -28,15 +28,6 @@ public class RomanRegiment extends RegimentAgent
   /* CONSTANTS */
   private static final int STRENGTH_START = 5*5;
   public static final Faction faction = Faction.ROMAN;
-  
-  /* NESTING */
-  private static class Roman extends Soldier
-  {
-    public Roman(V2 _position, V2 _direction)
-    {
-      super(_position, _direction, Faction.ROMAN);
-    }
-  }
 
   /* METHODS */
   
@@ -44,13 +35,5 @@ public class RomanRegiment extends RegimentAgent
   public RomanRegiment(V2 start_position)
   {
     super(start_position, STRENGTH_START, Faction.ROMAN);
-  }
-  
-  /* IMPLEMENTS -- SOLDIER */
-  
-  @Override
-  public Soldier createSoldier(V2 position, V2 direction)
-  {
-    return new Roman(position, direction);
   }
 }

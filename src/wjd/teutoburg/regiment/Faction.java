@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.view.Colour;
+import wjd.math.V2;
 import wjd.teutoburg.simulation.Palette;
 
 /**
@@ -24,13 +25,15 @@ import wjd.teutoburg.simulation.Palette;
  * @author wdyce
  * @since Dec 7, 2012
  */
-public class Faction 
+public abstract class Faction 
 {
   /* ATTRIBUTES */
   public final Colour colour_shield, colour_tunic, colour_face, colour_weapon, 
                       colour_imposter;
   
   /* METHODS */
+  
+  // constructors
   private Faction(Colour shield, Colour body, Colour head, Colour weapon)
   {
     colour_shield = shield;
@@ -40,13 +43,75 @@ public class Faction
     colour_imposter = body.clone().avg(shield);
   }
   
+  /* INTERFACE */
+  public abstract RegimentAgent createRegiment(V2 position);
+  public abstract Formation createFormation();
+  public abstract Soldier createSoldier(V2 position, V2 offset);
+  
   /* IMPLEMENTATIONS */
   
+  //----------------------------------------------------------------------------
+  // ROMANS
+  //----------------------------------------------------------------------------
   public static final Faction ROMAN = new Faction(
       Palette.ROMAN_SHIELD, Palette.ROMAN_BODY, Palette.ROMAN_HEAD, 
-      Palette.ROMAN_WEAPON);
+      Palette.ROMAN_WEAPON)
+  {
+    /* CONSTANTS */
+    private static final int REGIMENT_SIZE = 5*5;
+    
+    /* IMPLEMENTS -- FACTION */
+    @Override
+    public RegimentAgent createRegiment(V2 position)
+    {
+      return new RegimentAgent(position, REGIMENT_SIZE, this);
+    }
+
+    @Override
+    public Formation createFormation()
+    {
+      return new Formation.Turtle();
+    }
+    
+    @Override
+    public Soldier createSoldier(V2 position, V2 direction)
+    {
+      return new Soldier(position, direction, Faction.ROMAN);
+    }
+    
+  };
   
+  
+  //----------------------------------------------------------------------------
+  // BARBARIANS
+  //----------------------------------------------------------------------------
   public static final Faction BARBARIAN = new Faction(
       Palette.BARBARIAN_SHIELD, Palette.BARBARIAN_BODY, Palette.BARBARIAN_HEAD,
-      Palette.ROMAN_WEAPON);
+      Palette.ROMAN_WEAPON)
+  {
+    /* CONSTANTS */
+    private static final int REGIMENT_SIZE = 7*7;
+    
+    /* IMPLEMENTS -- FACTION */
+    @Override
+    public RegimentAgent createRegiment(V2 position)
+    {
+      return new RegimentAgent(position, REGIMENT_SIZE, this);
+    }
+
+    @Override
+    public Formation createFormation()
+    {
+      return new Formation.Turtle(); // FIXME
+    }
+    
+    @Override
+    public Soldier createSoldier(V2 position, V2 direction)
+    {
+      return new Soldier(position, direction, this);
+    }
+    
+  };
+
+
 }

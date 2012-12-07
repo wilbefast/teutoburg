@@ -27,7 +27,7 @@ import wjd.teutoburg.simulation.Palette;
  * @author wdyce
  * @since Dec 4, 2012
  */
-public abstract class Soldier implements IVisible
+public class Soldier implements IVisible
 {
   /* CONSTANTS */
   // shadow

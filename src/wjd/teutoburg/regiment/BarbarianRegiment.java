@@ -30,13 +30,7 @@ public class BarbarianRegiment extends RegimentAgent
   private static final int STRENGTH_START = 7*7;
   
   /* NESTING */
-  public static class Barbarian extends Soldier
-  {
-    public Barbarian(V2 _position, V2 _direction)
-    {
-      super(_position, _direction, Faction.BARBARIAN);
-    }
-  }
+
   
   /* METHODS */
   
@@ -44,11 +38,5 @@ public class BarbarianRegiment extends RegimentAgent
   public BarbarianRegiment(V2 start_position)
   {
     super(start_position, STRENGTH_START, Faction.BARBARIAN);
-  }
-  
-  @Override
-  public Soldier createSoldier(V2 position, V2 direction)
-  {
-    return new Barbarian(position, direction);
   }
 }
