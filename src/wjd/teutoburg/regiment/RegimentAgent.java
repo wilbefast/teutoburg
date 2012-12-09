@@ -38,8 +38,8 @@ public class RegimentAgent extends Agent
   // organisation
   private Formation formation;
   // view
-  private boolean visible_previous = true;
-  private boolean nearby = true, nearby_previous = true;
+  private boolean nearby = true;
+  private V2 left = new V2();
 
 
   /* METHODS */
@@ -48,6 +48,7 @@ public class RegimentAgent extends Agent
   {
     // default
     super(start_position, 0);
+    left.reset(direction).left();
     
     // save parameters
     this.strength = start_strength;
@@ -55,7 +56,7 @@ public class RegimentAgent extends Agent
     
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
-    setRadius(formation.rebuild());
+    setRadius(formation.reform());
   }
 
   // accessors
@@ -93,7 +94,7 @@ public class RegimentAgent extends Agent
     if(strength <= 0)
       return EUpdateResult.DELETE_ME;
     
-    setRadius(formation.rebuild());
+    setRadius(formation.reform());
     return EUpdateResult.CONTINUE;
   }  
   
@@ -104,10 +105,11 @@ public class RegimentAgent extends Agent
   {
     // default
     super.directionChange();
+    left.reset(direction).left();
     
     // we need to recache the soldiers' positions if in view close to us
-    if(visible && nearby)
-      formation.refresh();
+    if(visible)
+      formation.reposition();
   }
   
   @Override
@@ -117,8 +119,8 @@ public class RegimentAgent extends Agent
     super.positionChange();
     
     // we need to recache the soldiers' positions if in view close to us
-    if(visible && nearby)
-      formation.refresh();
+    if(visible)
+      formation.reposition();
   }
   
 
@@ -131,9 +133,8 @@ public class RegimentAgent extends Agent
     if (result != EUpdateResult.CONTINUE)
       return result;
 
-    // NB - superclass Agent doesn't have attribute 'visible'
-    if(!visible || !nearby)
-      formation.deleteSoldiers();
+    // set level of detail
+    formation.setDetail(visible && nearby);
     
     // all clear!
     return EUpdateResult.CONTINUE;
@@ -143,23 +144,15 @@ public class RegimentAgent extends Agent
   public void render(ICanvas canvas)
   {
      // skip if not in the camera's view
-    visible_previous = visible; 
-    visible = (canvas.getCamera().canSee(visibility_box));
-    if(visible) 
+    if(visible = (canvas.getCamera().canSee(visibility_box)))
     {
-      nearby_previous = nearby;
+      // we'll turn off the details if we're too far away
       nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
-      
-      if(nearby)
-        formation.render(canvas);
-      
-      
-      if(!nearby)
-      {
-
-      }
+     
+      // render the formation depending on the level of detail
+      formation.render(canvas);
     }
+    else
+      nearby = false;
   }
-
-
 }

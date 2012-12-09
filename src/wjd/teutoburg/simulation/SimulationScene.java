@@ -38,8 +38,9 @@ import wjd.teutoburg.regiment.RegimentAgent;
 public class SimulationScene extends AScene
 {
   /* CONSTANTS */
+  private static final int GENERATOR_MAX_ATTEMPTS = 20;
   // forest
-  private static final int N_COPSES = 50;
+  private static final int COPSE_BASE_N = 2;
   private static final int COPSE_N_TREES = 30;
   private static final float COPSE_SIZE = Tree.COLLISION_RADIUS*COPSE_N_TREES*4;
   // romans
@@ -50,7 +51,7 @@ public class SimulationScene extends AScene
   private static final int BARBARIAN_N_REGIMENTS = 20;
   
   /* ATTRIBUTES */
-  private Rect area;
+  private Rect map;
   private Rect roman_deployment;
   private Rect barbarian_illegal_deployment;
   private StrategyCamera camera;
@@ -62,11 +63,10 @@ public class SimulationScene extends AScene
   // constructors
   public SimulationScene(V2 size)
   {
-
     // boundaries
-    area = new Rect(V2.ORIGIN, size);
-    roman_deployment = area.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
-    barbarian_illegal_deployment = area.clone().scale(1 - BARBARIAN_DEPLOYMENT_FRACTION);
+    map = new Rect(V2.ORIGIN, size);
+    roman_deployment = map.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
+    barbarian_illegal_deployment = map.clone().scale(1 - BARBARIAN_DEPLOYMENT_FRACTION);
     
     // generate forest
     trees = new LinkedList<Tree>();
@@ -78,7 +78,7 @@ public class SimulationScene extends AScene
     deployBarbarians();
     
     // view
-    camera = new StrategyCamera(area);
+    camera = new StrategyCamera(map);
   }
 
   // mutators
@@ -91,15 +91,20 @@ public class SimulationScene extends AScene
   
   private void generateForest()
   {
+    float copse_n = COPSE_BASE_N * (map.w * map.h) / (COPSE_SIZE * COPSE_SIZE);
+    
+    
     Rect copse = new Rect(0, 0, COPSE_SIZE, COPSE_SIZE);
-    for(int c = 0; c < N_COPSES; c++)
+    for(int c = 0; c < copse_n; c++)
     {
+      int attempts = 0;
       do
       {
-      copse.xy((float)(Math.random()*(area.w - copse.w)), 
-               (float)(Math.random()*(area.h - copse.h)));
+        copse.xy((float)(Math.random()*(map.w - copse.w)), 
+                 (float)(Math.random()*(map.h - copse.h)));
+        attempts++;
       }
-      while(copse.collides(roman_deployment));
+      while(copse.collides(roman_deployment) && attempts < 10);
       
       for(int t = 0; t < COPSE_N_TREES; t++)
       {
@@ -124,15 +129,17 @@ public class SimulationScene extends AScene
   
   private void deployBarbarians()
   {
-    V2 centre = area.getCentre();
+    V2 centre = map.getCentre();
     for(int i = 0; i < BARBARIAN_N_REGIMENTS; i++)
     {
       V2 p = new V2();
+      int attempts = 0;
       do
       {
-        area.randomPoint(p);
+        map.randomPoint(p);
+        attempts++;
       }
-      while(barbarian_illegal_deployment.contains(p));
+      while(barbarian_illegal_deployment.contains(p) && attempts < GENERATOR_MAX_ATTEMPTS);
       RegimentAgent r = Faction.BARBARIAN.createRegiment(p);
       r.faceTowards(centre);
       agents.add(r);
@@ -163,7 +170,7 @@ public class SimulationScene extends AScene
     
     // draw the grass
     canvas.setColour(Palette.GRASS);
-    canvas.box(area, true);
+    canvas.box(map, true);
     
     // draw all the trees
     for(Tree t : trees)

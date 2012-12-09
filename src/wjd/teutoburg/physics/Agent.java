@@ -38,14 +38,13 @@ public class Agent implements IVisible, IDynamic, IPhysical
   
   /* ATTRIBUTES */
   // model
-  protected V2 direction = new V2(1.0f, 0.0f);
-  protected V2 left = new V2(0.0f, 1.0f);
+  protected final V2 direction = new V2(1.0f, 0.0f);
   protected float radius;
-  protected V2 position;
-  protected V2 front_position;
+  protected final V2 position;
+  protected final V2 front_position;
   // view
   protected Rect visibility_box;
-  protected boolean visible = false;
+  protected boolean visible = true;
   // brain
   protected Map<String, String> belief = new HashMap<String, String>();
 
@@ -92,7 +91,6 @@ public class Agent implements IVisible, IDynamic, IPhysical
   
   protected void directionChange()
   {
-    left.reset(direction).left();
     front_position.reset(direction).scale(radius).add(position);
   }
   

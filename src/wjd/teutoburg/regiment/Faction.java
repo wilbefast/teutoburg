@@ -90,7 +90,7 @@ public abstract class Faction
       Palette.ROMAN_WEAPON)
   {
     /* CONSTANTS */
-    private static final int REGIMENT_SIZE = 7*7;
+    private static final int REGIMENT_SIZE = 31; // = 1 + 2 + 4 + ... + 16
     
     /* IMPLEMENTS -- FACTION */
     @Override
@@ -102,7 +102,7 @@ public abstract class Faction
     @Override
     public Formation createFormation(RegimentAgent r)
     {
-      return new Formation.Turtle(r); // FIXME
+      return new Formation.Rabble(r);
     }
     
     @Override

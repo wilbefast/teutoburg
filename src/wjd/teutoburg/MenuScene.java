@@ -16,13 +16,13 @@
  */
 package wjd.teutoburg;
 
-import wjd.teutoburg.simulation.SimulationScene;
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
+import wjd.teutoburg.simulation.SimulationScene;
 
 /**
  *
@@ -33,7 +33,7 @@ public class MenuScene extends AScene
 {
   /* CONSTANTS */
   private static final V2 HELLO_POS = new V2(32, 32);
-  private static final V2 MAP_SIZE = new V2(10000, 10000);
+  private static final V2 MAP_SIZE = new V2(14000, 14000);
   
   /* METHODS */
   
