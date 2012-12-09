@@ -21,17 +21,15 @@ import java.util.List;
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.MenuScene;
-import wjd.teutoburg.MenuScene;
 import wjd.teutoburg.physics.Agent;
-import wjd.teutoburg.regiment.BarbarianRegiment;
-import wjd.teutoburg.regiment.RomanRegiment;
 import wjd.teutoburg.physics.Tree;
+import wjd.teutoburg.regiment.Faction;
+import wjd.teutoburg.regiment.RegimentAgent;
 
 /**
  * @author wdyce
@@ -64,7 +62,7 @@ public class SimulationScene extends AScene
   // constructors
   public SimulationScene(V2 size)
   {
-    
+
     // boundaries
     area = new Rect(V2.ORIGIN, size);
     roman_deployment = area.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
@@ -118,7 +116,7 @@ public class SimulationScene extends AScene
     {
       V2 p = new V2();
       roman_deployment.randomPoint(p);
-      RomanRegiment r = new RomanRegiment(p);
+      RegimentAgent r = Faction.ROMAN.createRegiment(p);
       r.faceRandom();
       agents.add(r);
     }
@@ -135,7 +133,7 @@ public class SimulationScene extends AScene
         area.randomPoint(p);
       }
       while(barbarian_illegal_deployment.contains(p));
-      BarbarianRegiment r = new BarbarianRegiment(p);
+      RegimentAgent r = Faction.BARBARIAN.createRegiment(p);
       r.faceTowards(centre);
       agents.add(r);
     }

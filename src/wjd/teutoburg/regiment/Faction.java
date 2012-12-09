@@ -45,7 +45,7 @@ public abstract class Faction
   
   /* INTERFACE */
   public abstract RegimentAgent createRegiment(V2 position);
-  public abstract Formation createFormation();
+  public abstract Formation createFormation(RegimentAgent r);
   public abstract Soldier createSoldier(V2 position, V2 offset);
   
   /* IMPLEMENTATIONS */
@@ -68,9 +68,9 @@ public abstract class Faction
     }
 
     @Override
-    public Formation createFormation()
+    public Formation createFormation(RegimentAgent r)
     {
-      return new Formation.Turtle();
+      return new Formation.Turtle(r);
     }
     
     @Override
@@ -100,9 +100,9 @@ public abstract class Faction
     }
 
     @Override
-    public Formation createFormation()
+    public Formation createFormation(RegimentAgent r)
     {
-      return new Formation.Turtle(); // FIXME
+      return new Formation.Turtle(r); // FIXME
     }
     
     @Override

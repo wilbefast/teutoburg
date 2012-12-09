@@ -62,6 +62,11 @@ public class Agent implements IVisible, IDynamic, IPhysical
 
   // accessors
   
+  public float getRadius()
+  {
+    return radius;
+  }
+  
   // mutators
   
   //----------------------------------------------------------------------------
@@ -128,10 +133,6 @@ public class Agent implements IVisible, IDynamic, IPhysical
   @Override
   public void render(ICanvas canvas)
   {
-    if(canvas.getCamera().canSee(visibility_box))
-      visible = true;
-    else
-      visible = false;
   }
 
   /* IMPLEMENTS -- IDYNAMIC */

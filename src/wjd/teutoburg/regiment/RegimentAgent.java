@@ -17,7 +17,6 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
 import wjd.teutoburg.physics.Agent;
@@ -28,7 +27,7 @@ import wjd.teutoburg.physics.Agent;
  * @since Dec 4, 2012
  */
 public class RegimentAgent extends Agent
-{
+{  
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   
@@ -41,9 +40,7 @@ public class RegimentAgent extends Agent
   // view
   private boolean visible_previous = true;
   private boolean nearby = true, nearby_previous = true;
-  private final V2 arrow_left = new V2(), 
-                    arrow_right = new V2(), 
-                    arrow_top = new V2();
+
 
   /* METHODS */
   // constructors
@@ -57,11 +54,8 @@ public class RegimentAgent extends Agent
     this.faction = faction;
     
     // calculate unit positions based on the strength of the unit
-    formation = faction.createFormation();
-    setRadius(formation.rebuild(this));
-    
-    // calculate arrow graphic vertices for the first time, just in case
-    recalculateArrow();
+    formation = faction.createFormation(this);
+    setRadius(formation.rebuild());
   }
 
   // accessors
@@ -99,7 +93,7 @@ public class RegimentAgent extends Agent
     if(strength <= 0)
       return EUpdateResult.DELETE_ME;
     
-    setRadius(formation.rebuild(this));
+    setRadius(formation.rebuild());
     return EUpdateResult.CONTINUE;
   }  
   
@@ -111,12 +105,9 @@ public class RegimentAgent extends Agent
     // default
     super.directionChange();
     
-    // recalculate position of the arrow
-    recalculateArrow();
-    
     // we need to recache the soldiers' positions if in view close to us
     if(visible && nearby)
-      formation.refresh(this);
+      formation.refresh();
   }
   
   @Override
@@ -125,12 +116,9 @@ public class RegimentAgent extends Agent
     // default
     super.positionChange();
     
-    // recalculate position of the arrow
-    recalculateArrow();
-    
     // we need to recache the soldiers' positions if in view close to us
     if(visible && nearby)
-      formation.refresh(this);
+      formation.refresh();
   }
   
 
@@ -156,42 +144,22 @@ public class RegimentAgent extends Agent
   {
      // skip if not in the camera's view
     visible_previous = visible; 
-    super.render(canvas);
+    visible = (canvas.getCamera().canSee(visibility_box));
     if(visible) 
     {
-      // skip if not nearby
       nearby_previous = nearby;
       nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
-      if(nearby)
-      {
-        // regenerate if we've just come into previous or distance
-        if(!visible_previous || !nearby_previous)
-          formation.refresh(this);
       
-        // draw close-up regiments
-        for(Soldier s : formation)
-          s.render(canvas);
-      }
-      // draw far away regiments
-      else
+      if(nearby)
+        formation.render(canvas);
+      
+      
+      if(!nearby)
       {
-        canvas.setColour(faction.colour_shield);
-        canvas.angleBox(position, direction, radius, true);
-        canvas.setColour(Colour.WHITE);
-        canvas.triangle(arrow_left, arrow_top, arrow_right, true);
+
       }
     }
   }
 
-  /* SUBROUTINES */
-  
-  private void recalculateArrow()
-  {
-    // the arrow shows us which way the regiment is facing from afar
-    arrow_top.reset(direction).scale(radius*0.5f).add(position);
-    arrow_left.reset(left).scale(radius*0.5f).add(position)
-      .add(-direction.x*radius*0.5f, -direction.y*radius*0.5f);
-    arrow_right.reset(left).scale(radius*0.5f).opp().add(position)
-      .add(-direction.x*radius*0.5f, -direction.y*0.5f*radius);
-  }
+
 }
