@@ -44,7 +44,7 @@ public class SimulationScene extends AScene
   private static final int COPSE_N_TREES = 30;
   private static final float COPSE_SIZE = Tree.COLLISION_RADIUS*COPSE_N_TREES*4;
   // romans
-  private static final float ROMAN_DEPLOYMENT_FRACTION = 0.3f;
+  private static final float ROMAN_DEPLOYMENT_FRACTION = 0.2f;
   private static final int ROMAN_N_REGIMENTS = 15;
   // barbarians
   private static final float BARBARIAN_DEPLOYMENT_FRACTION = 0.3f;

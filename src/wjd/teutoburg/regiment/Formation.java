@@ -75,11 +75,11 @@ public abstract class Formation implements IVisible
   public void reposition()
   {
     // the arrow shows us which way the regiment is facing from afar
-    arrow_top.reset(direction).scale(radius * 0.5f).add(position);
+    arrow_top.reset(direction).scale(radius * 0.7f).add(position);
     arrow_left.reset(left).scale(radius * 0.5f).add(position)
-      .add(-direction.x * radius * 0.5f, -direction.y * radius * 0.5f);
+      .add(-direction.x * radius * 0.3f, -direction.y * radius * 0.3f);
     arrow_right.reset(left).scale(radius*0.5f).opp().add(position)
-      .add(-direction.x * radius * 0.5f, -direction.y * 0.5f*radius);
+      .add(-direction.x * radius * 0.3f, -direction.y * 0.3f*radius);
     
     // also refresh the soldiers if at the required detail level
     if(detail)
@@ -108,7 +108,7 @@ public abstract class Formation implements IVisible
       // draw an imposter if not
       canvas.setColour(owner.getFaction().colour_shield);
       renderImposter(canvas);
-      canvas.setColour(Colour.WHITE);
+      canvas.setColour(owner.getFaction().colour_tunic);
       canvas.triangle(arrow_left, arrow_top, arrow_right, true);
     }
   }

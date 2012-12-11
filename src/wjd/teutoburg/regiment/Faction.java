@@ -58,7 +58,7 @@ public abstract class Faction
       Palette.ROMAN_WEAPON)
   {
     /* CONSTANTS */
-    private static final int REGIMENT_SIZE = 5*5;
+    private static final int REGIMENT_SIZE = 6*6;
     
     /* IMPLEMENTS -- FACTION */
     @Override
@@ -90,7 +90,7 @@ public abstract class Faction
       Palette.ROMAN_WEAPON)
   {
     /* CONSTANTS */
-    private static final int REGIMENT_SIZE = 31; // = 1 + 2 + 4 + ... + 16
+    private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
     
     /* IMPLEMENTS -- FACTION */
     @Override
