@@ -16,6 +16,8 @@
  */
 package wjd.teutoburg.physics;
 
+import wjd.math.Rect;
+
 /**
  *
  * @author wdyce
@@ -23,18 +25,83 @@ package wjd.teutoburg.physics;
  */
 public class QuadTree 
 {
+  /* CONSTANTS */
+  public static final int NODE_CAPACITY = 4;
+  
+  
   /* ATTRIBUTES */
-  private Quad root;
+  private final Physical[] objects = new Physical[NODE_CAPACITY];
+  private int n_objects = 0;
+  private QuadTree[] children;
+  private final Rect area;
   
   /* METHODS */
-  public QuadTree()
-  {
-    
-  }
 
   // constructors
+  public QuadTree(Rect area_)
+  {
+    this.area = area_;
+  }
 
   // accessors
+  
+  public boolean intersects(Rect query)
+  {
+    return area.collides(query);
+  }
+  
+  public Physical getObject(int i)
+  {
+    return (i >= 0 && i < NODE_CAPACITY) ? objects[i] : null;
+  }
+  
+  public QuadTree getChildTree(int i)
+  {
+    return (i >= 0 && i < 4) ? children[i] : null;
+  }
 
   // mutators
+  
+  public boolean insert(Physical p)
+  {
+    // ignore objects outside of this quad's area
+    if(!area.contains(p.getPosition()))
+      return false;
+    
+    // if this node's capacity has been reached, subdivide it
+    if(n_objects < NODE_CAPACITY)
+    {
+      objects[n_objects] = p;
+      return true;
+    }
+    // otherwise we may need to subdivide
+    else if(children[0] == null)
+      subdivide();
+      
+    // add to the first appropriate child instead
+    for(int i = 0; i < 4; i++)
+      if(children[i].insert(p))
+        return true;
+    
+    // point could not be added
+    return false;
+  }
+  
+  /* SUBROUTINES */
+  
+  private void subdivide()
+  {
+    // local variables
+    float sub_w = area.w * 0.5f, 
+          sub_h = area.h * 0.5f,
+          centre_x = area.x + sub_w,
+          centre_y = area.y + sub_h;
+    
+    // create children
+    children = new QuadTree[4];
+    children[0] = new QuadTree(new Rect(area.x, area.y, sub_w, sub_h));
+    children[1] = new QuadTree(new Rect(centre_x, area.y, sub_w, sub_h));
+    children[2] = new QuadTree(new Rect(centre_x, centre_y, sub_w, sub_h));
+    children[3] = new QuadTree(new Rect(area.x, centre_y, sub_w, sub_h));
+  }
 }
