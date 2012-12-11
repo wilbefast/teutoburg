@@ -22,7 +22,6 @@ import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IDynamic;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
-import wjd.math.M;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -31,7 +30,7 @@ import wjd.math.V2;
  * @author wdyce
  * @since Dec 4, 2012
  */
-public class Agent implements IVisible, IDynamic, IPhysical
+public class Agent extends Physical implements IVisible, IDynamic
 {
   /* CONSTANTS */
   private static final double INV_2PI = 1/(2*Math.PI);
@@ -39,8 +38,6 @@ public class Agent implements IVisible, IDynamic, IPhysical
   /* ATTRIBUTES */
   // model
   protected final V2 direction = new V2(1.0f, 0.0f);
-  protected float radius;
-  protected final V2 position;
   protected final V2 front_position;
   // view
   protected Rect visibility_box;
@@ -51,21 +48,14 @@ public class Agent implements IVisible, IDynamic, IPhysical
   /* METHODS */
   
   // constructors
-  public Agent(V2 start_position, float start_radius)
+  public Agent(V2 start_position)
   {
-    position = start_position;
-      front_position = direction.clone().scale(radius).add(position);
-    setRadius(start_radius);
+    super(start_position);
+    
+    front_position = direction.clone().scale(radius).add(position);
     visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
   }
 
-  // accessors
-  
-  public float getRadius()
-  {
-    return radius;
-  }
-  
   // mutators
   
   //----------------------------------------------------------------------------
@@ -118,6 +108,7 @@ public class Agent implements IVisible, IDynamic, IPhysical
   //----------------------------------------------------------------------------
   // SIZE
   //----------------------------------------------------------------------------
+  @Override
   public final void setRadius(float new_radius)
   {
     radius = new_radius;
@@ -145,19 +136,4 @@ public class Agent implements IVisible, IDynamic, IPhysical
     // override if needed
     return EUpdateResult.CONTINUE;
   }
-  
-  /* IMPLEMENTS -- IPHYSICAL */
-
-  @Override
-  public boolean isColliding(IPhysical other)
-  {
-    if(other instanceof Agent)
-    {
-      Agent a = (Agent)other;
-      return (a.position.distance2(position) < M.sqr(a.radius+radius));
-    }
-    else
-      return false;
-  }
- 
 }

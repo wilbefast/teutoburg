@@ -16,7 +16,6 @@
  */
 package wjd.teutoburg.physics;
 
-import wjd.teutoburg.physics.IPhysical;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
@@ -28,7 +27,7 @@ import wjd.teutoburg.simulation.Palette;
  * @author wdyce
  * @since Dec 6, 2012
  */
-public class Tree implements IVisible, IPhysical
+public class Tree extends Physical implements IVisible
 {
   /* CONSTANTS */
   public static final float SHADOW_RADIUS = 5.0f;
@@ -48,7 +47,7 @@ public class Tree implements IVisible, IPhysical
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.45f;
   
   /* ATTRIBUTES */
-  private V2 position, summit, left, right, imposter_left, imposter_right;
+  private V2 summit, left, right, imposter_left, imposter_right;
   private Rect trunk;
   private boolean nearby = true;
   
@@ -58,14 +57,8 @@ public class Tree implements IVisible, IPhysical
   // constructors
   public Tree(V2 position)
   {
-    this.position = position;
+    super(position);
     loadDetailedModel();
-  }
-  
-  // accessors
-  public V2 getPosition()
-  {
-    return position;
   }
   
   /* IMPLEMENTS -- IVISIBLE */
@@ -110,15 +103,6 @@ public class Tree implements IVisible, IPhysical
       }
     }
   }
-  
-  /* IMPLEMENTS -- IPHYSICAL */
-
-  @Override
-  public boolean isColliding(IPhysical other)
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-  
   /* SUBROUTINES */
   
   private void clearModels()

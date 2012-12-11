@@ -19,10 +19,22 @@ package wjd.teutoburg.physics;
 /**
  *
  * @author wdyce
- * @since Dec 6, 2012
+ * @since Dec 11, 2012
  */
-public interface IPhysical 
+public class QuadTree 
 {
-  /* INTERFACE */
-  public boolean isColliding(IPhysical other);
+  /* ATTRIBUTES */
+  private Quad root;
+  
+  /* METHODS */
+  public QuadTree()
+  {
+    
+  }
+
+  // constructors
+
+  // accessors
+
+  // mutators
 }

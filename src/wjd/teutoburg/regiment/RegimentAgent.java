@@ -47,7 +47,7 @@ public class RegimentAgent extends Agent
   public RegimentAgent(V2 start_position, int start_strength, Faction faction)
   {
     // default
-    super(start_position, 0);
+    super(start_position);
     left.reset(direction).left();
     
     // save parameters
@@ -64,11 +64,6 @@ public class RegimentAgent extends Agent
   int getStrength()
   {
     return strength;
-  }
-
-  V2 getPosition()
-  {
-    return position;
   }
 
   V2 getDirection()
