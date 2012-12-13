@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.physics;
+package wjd.teutoburg.collision;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import wjd.math.V2;
  * @author wdyce
  * @since Dec 4, 2012
  */
-public class Agent extends Physical implements IVisible, IDynamic
+public class Agent extends Collider implements IVisible, IDynamic
 {
   /* CONSTANTS */
   private static final double INV_2PI = 1/(2*Math.PI);
@@ -129,8 +129,8 @@ public class Agent extends Physical implements IVisible, IDynamic
   @Override
   public EUpdateResult update(int t_delta)
   {
-    //advance(0.1f*t_delta);
-    //turn(0.005f*t_delta);
+    advance(0.1f*t_delta);
+    turn(0.001f*t_delta);
     
     
     // override if needed

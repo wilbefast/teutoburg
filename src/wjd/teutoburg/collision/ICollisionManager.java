@@ -14,50 +14,23 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.physics;
+package wjd.teutoburg.collision;
 
-import wjd.math.M;
+import wjd.math.Rect;
 import wjd.math.V2;
 
 /**
  *
  * @author wdyce
- * @since Dec 6, 2012
+ * @since Dec 11, 2012
  */
-public class Physical 
+public interface ICollisionManager 
 {
-  /* ATTRIBUTES */
-  protected final V2 position;
-  protected float radius = 0;
+  /* INTERFACE */
   
+  public Iterable<Collider> getInRect(Rect area);
   
-  /* METHODS */
+  public Iterable<Collider> getInCircle(V2 centre, float radius);
   
-  // constructors
-  public Physical(V2 position_)
-  {
-    this.position = position_;
-  }
-  
-  // mutators
-  public void setRadius(float radius_)
-  {
-    this.radius = radius_;
-  }
-  
-  // accessors
-  public boolean isColliding(Physical p)
-  {
-    return (p.position.distance2(position) <= M.sqr(p.radius+radius));
-  }
-  
-  public float getRadius()
-  {
-    return radius;
-  }
-  
-  public V2 getPosition()
-  {
-    return position;
-  }
+  public void addObject(Collider p);
 }

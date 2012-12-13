@@ -26,8 +26,8 @@ import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.MenuScene;
-import wjd.teutoburg.physics.Agent;
-import wjd.teutoburg.physics.Tree;
+import wjd.teutoburg.collision.Agent;
+import wjd.teutoburg.collision.Tree;
 import wjd.teutoburg.regiment.Faction;
 import wjd.teutoburg.regiment.RegimentAgent;
 

@@ -19,7 +19,7 @@ package wjd.teutoburg.regiment;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
-import wjd.teutoburg.physics.Agent;
+import wjd.teutoburg.collision.Agent;
 
 /**
  *

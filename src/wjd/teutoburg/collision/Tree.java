@@ -14,7 +14,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.physics;
+package wjd.teutoburg.collision;
 
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
@@ -27,7 +27,7 @@ import wjd.teutoburg.simulation.Palette;
  * @author wdyce
  * @since Dec 6, 2012
  */
-public class Tree extends Physical implements IVisible
+public class Tree extends Collider implements IVisible
 {
   /* CONSTANTS */
   public static final float SHADOW_RADIUS = 5.0f;

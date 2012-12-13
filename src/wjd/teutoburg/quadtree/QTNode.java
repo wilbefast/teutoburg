@@ -14,31 +14,33 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.physics;
+package wjd.teutoburg.quadtree;
 
 import wjd.math.Rect;
+import wjd.teutoburg.collision.Collider;
 
 /**
  *
  * @author wdyce
  * @since Dec 11, 2012
  */
-public class QuadTree 
+public class QTNode 
 {
   /* CONSTANTS */
   public static final int NODE_CAPACITY = 4;
   
   
   /* ATTRIBUTES */
-  private final Physical[] objects = new Physical[NODE_CAPACITY];
+  private final Collider[] objects = new Collider[NODE_CAPACITY];
   private int n_objects = 0;
-  private QuadTree[] children;
-  private final Rect area;
+  private QTNode[] children;
+  final Rect area;
+  private boolean leaf = true;
   
   /* METHODS */
 
   // constructors
-  public QuadTree(Rect area_)
+  public QTNode(Rect area_)
   {
     this.area = area_;
   }
@@ -50,19 +52,28 @@ public class QuadTree
     return area.collides(query);
   }
   
-  public Physical getObject(int i)
+  public int getNObjects()
+  {
+    return n_objects;
+  }
+  
+  public Collider getObject(int i)
   {
     return (i >= 0 && i < NODE_CAPACITY) ? objects[i] : null;
   }
   
-  public QuadTree getChildTree(int i)
+  public boolean isLeaf()
+  {
+    return leaf;
+  }
+  
+  public QTNode getChildTree(int i)
   {
     return (i >= 0 && i < 4) ? children[i] : null;
   }
-
   // mutators
   
-  public boolean insert(Physical p)
+  public boolean insert(Collider p)
   {
     // ignore objects outside of this quad's area
     if(!area.contains(p.getPosition()))
@@ -75,7 +86,7 @@ public class QuadTree
       return true;
     }
     // otherwise we may need to subdivide
-    else if(children[0] == null)
+    else if(leaf)
       subdivide();
       
     // add to the first appropriate child instead
@@ -91,6 +102,8 @@ public class QuadTree
   
   private void subdivide()
   {
+    leaf = false;
+    
     // local variables
     float sub_w = area.w * 0.5f, 
           sub_h = area.h * 0.5f,
@@ -98,10 +111,10 @@ public class QuadTree
           centre_y = area.y + sub_h;
     
     // create children
-    children = new QuadTree[4];
-    children[0] = new QuadTree(new Rect(area.x, area.y, sub_w, sub_h));
-    children[1] = new QuadTree(new Rect(centre_x, area.y, sub_w, sub_h));
-    children[2] = new QuadTree(new Rect(centre_x, centre_y, sub_w, sub_h));
-    children[3] = new QuadTree(new Rect(area.x, centre_y, sub_w, sub_h));
+    children = new QTNode[4];
+    children[0] = new QTNode(new Rect(area.x, area.y, sub_w, sub_h));
+    children[1] = new QTNode(new Rect(centre_x, area.y, sub_w, sub_h));
+    children[2] = new QTNode(new Rect(centre_x, centre_y, sub_w, sub_h));
+    children[3] = new QTNode(new Rect(area.x, centre_y, sub_w, sub_h));
   }
 }
