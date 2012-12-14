@@ -86,9 +86,21 @@ public class RegimentAgent extends Agent
   
   // accessors -- public 
   
-  public boolean isInFormation()
+  public boolean isFormedUp()
   {
     return (formation instanceof Formation.Turtle);
+  }
+  
+  public void setFormedUp(boolean form_up)
+  {
+    if(form_up == isFormedUp())
+      return;
+      
+    if(form_up)
+      formation = new Formation.Turtle(this);
+    else
+      formation = new Formation.Rabble(this);
+    setRadius(formation.reform());
   }
   
 
@@ -167,8 +179,9 @@ public class RegimentAgent extends Agent
   public void treatCollision(Collider other, V2 collision_point)
   {
     if(other instanceof Copse)
-      if(isInFormation())
-        this.turn(180);
+      setFormedUp(false);
+      //if(isFormedUp())
+        //this.turn(180);
   }
 
   @Override
