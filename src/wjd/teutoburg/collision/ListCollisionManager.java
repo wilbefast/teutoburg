@@ -84,17 +84,11 @@ public class ListCollisionManager implements ICollisionManager
     for(Collider a : objects)
     {
       // check collisions with boundary
-      if(!a.getCircle().inside(boundary))
-        a.treatBoundaryCross(boundary);
+      CollisionEvent.BoundaryCollision.tryGenerate(a, boundary);
       
       // check collisions between pairs of objects
       for(Collider b : objects)
-      if(!a.equals(b) && a.isColliding(b))
-      {
-        collision_point.inter(a.getCircle().centre, b.getCircle().centre, 0.5f);
-        a.treatCollision(b, collision_point);
-        b.treatCollision(a, collision_point);
-      }
+        CollisionEvent.ObjectCollision.tryGenerate(a, b);
     }
       
   }

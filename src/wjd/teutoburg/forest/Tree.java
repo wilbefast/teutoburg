@@ -141,18 +141,4 @@ public class Tree extends Collider implements IVisible
     imposter_left = new V2().xy(c.centre.x - BRANCHES_W, c.centre.y + TRUNK_H);
     imposter_right = new V2().xy(c.centre.x + BRANCHES_W, c.centre.y + TRUNK_H);
   }
-  
-  /* IMPLEMENTS -- COLLIDER */
-
-  @Override
-  public void treatCollision(Collider b, V2 collision_point)
-  {
-    // do nothing
-  }
-
-  @Override
-  public void treatBoundaryCross(Rect boundary)
-  {
-    // do nothing
-  }
 }

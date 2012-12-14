@@ -120,19 +120,4 @@ public class Copse extends Collider implements IVisible
       trees = null;
     }
   }
-
-  
-  /* IMPLEMENTS -- ICOLLIDER */
-  
-  @Override
-  public void treatCollision(Collider other, V2 collision_point)
-  {
-    // do nothing
-  }
-  
-  @Override
-  public void treatBoundaryCross(Rect boundary)
-  {
-    // do nothing
-  }
 }

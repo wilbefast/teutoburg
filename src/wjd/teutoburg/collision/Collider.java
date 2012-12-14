@@ -16,8 +16,8 @@
  */
 package wjd.teutoburg.collision;
 
+import java.util.LinkedList;
 import wjd.math.Circle;
-import wjd.math.M;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -30,6 +30,8 @@ public abstract class Collider
 {
   /* ATTRIBUTES */
   protected final Circle c = new Circle();
+  protected final LinkedList<CollisionEvent> collisions 
+                                        = new LinkedList<CollisionEvent>();
   
   
   /* METHODS */
@@ -46,6 +48,11 @@ public abstract class Collider
     c.radius = radius_;
   }
   
+  public void putEvent(CollisionEvent e)
+  {
+    collisions.add(e);
+  }
+  
   // accessors
   public boolean isColliding(Collider other)
   {
@@ -56,10 +63,4 @@ public abstract class Collider
   {
     return c;
   }
-  
-  /* INTERFACE */
-
-  public abstract void treatCollision(Collider b, V2 collision_point);
-
-  public abstract void treatBoundaryCross(Rect boundary);
 }

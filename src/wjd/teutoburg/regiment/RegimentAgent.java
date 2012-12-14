@@ -43,6 +43,8 @@ public class RegimentAgent extends Agent
   // view
   private boolean nearby = true;
   private V2 left = new V2();
+  // belief
+  private boolean in_forest = false;
 
 
   /* METHODS */
@@ -93,14 +95,27 @@ public class RegimentAgent extends Agent
   
   public void setFormedUp(boolean form_up)
   {
+    // skip if this is already the case
     if(form_up == isFormedUp())
       return;
       
+    // otherwise change formation...
     if(form_up)
       formation = new Formation.Turtle(this);
     else
       formation = new Formation.Rabble(this);
+    
+    // ... and reform!
     setRadius(formation.reform());
+  }
+  
+  public void enterForest()
+  {
+    // skip if this is already the case
+    if(in_forest)
+      return;
+    
+    in_forest = true;
   }
   
 
@@ -171,22 +186,11 @@ public class RegimentAgent extends Agent
     }
     else
       nearby = false;
-  }
-  
-  /* IMPLEMENTS -- COLLIDER */
-
-  @Override
-  public void treatCollision(Collider other, V2 collision_point)
-  {
-    if(other instanceof Copse)
-      setFormedUp(false);
-      //if(isFormedUp())
-        //this.turn(180);
-  }
-
-  @Override
-  public void treatBoundaryCross(Rect boundary)
-  {
-    // do nothing
+    
+    
+    canvas.text(""+in_forest, this.front_position);
+    
+    // set "not in forest" last of all - it will be reset to true if we are*
+    in_forest = false;
   }
 }
