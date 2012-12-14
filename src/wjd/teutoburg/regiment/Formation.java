@@ -252,8 +252,10 @@ public abstract class Formation implements IVisible
         for(int s = 0; s < ((l < n_layers) ? layer_size : incomplete_layer); s++)
         {
           // calculate absolute position and move there
-          float angle_noise = angle + signedRand(0.3f)*angle_step,
-                radius_noise = l * (LAYER_RADIUS + signedRand(RADIUS_VAR));
+          float angle_noise = angle + 
+                              (float)M.signedRand(0.3, randomiser)*angle_step,
+                radius_noise = l * (LAYER_RADIUS + 
+                              (float)M.signedRand(RADIUS_VAR, randomiser));
           
           soldier_position.xy((float)Math.cos(angle_noise), 
                               (float)Math.sin(angle_noise))
@@ -280,14 +282,6 @@ public abstract class Formation implements IVisible
     public void renderImposter(ICanvas canvas)
     {
       canvas.circle(position, owner.getCircle().radius, true);
-    }
-    
-    /* SUBROUTINES */
-    
-    private float signedRand(float value)
-    {
-      float r = randomiser.nextFloat();
-      return (r < 0.5f) ? value*2*r : value*2*(r-0.5f);
     }
   }
 }

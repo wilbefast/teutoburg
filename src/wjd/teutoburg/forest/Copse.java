@@ -20,6 +20,7 @@ import java.util.Random;
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
+import wjd.math.M;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Collider;
@@ -34,9 +35,10 @@ import wjd.teutoburg.simulation.Palette;
 public class Copse extends Collider implements IVisible
 {
   /* CONSTANTS */
-  public static final int N_TREES = 15;
-  public static final float NUMBER_FACTOR = 0.2f;
+  public static final int N_TREES = 90;
+  public static final float NUMBER_FACTOR = 0.1f;
   public static final float SIZE = Tree.COLLISION_RADIUS * N_TREES;
+  public static final float SIZE_VAR = 0.5f; // percent
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.15f;
   
   /* ATTRIBUTES */
@@ -46,15 +48,19 @@ public class Copse extends Collider implements IVisible
   private final V2 tree_position = new V2();
   // view
   private boolean detail = true;
-  private final int n_trees = N_TREES;
+  private final int n_trees;
   private Tree[] trees = null;
   private boolean visible = true, nearby = true;
   
   /* METHODS */
-  public Copse(V2 position_, float radius_)
+  public Copse(V2 position_)
   {
     super(position_);
-    setRadius(radius_);
+    
+    
+    float size_var = (float)M.signedRand(SIZE_VAR, randomiser);
+    setRadius((1.0f + size_var) * SIZE);
+    n_trees = (int)((1.0f + size_var) * N_TREES);
     seed = randomiser.nextLong();
     
     generateTrees();
@@ -119,9 +125,9 @@ public class Copse extends Collider implements IVisible
   /* IMPLEMENTS -- ICOLLIDER */
   
   @Override
-  public void treatCollision(Collider b, V2 collision_point)
+  public void treatCollision(Collider other, V2 collision_point)
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    // do nothing
   }
   
   @Override

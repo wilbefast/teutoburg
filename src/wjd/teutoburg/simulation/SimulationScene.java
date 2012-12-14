@@ -96,22 +96,24 @@ public class SimulationScene extends AScene
   {
     float copse_n = Copse.NUMBER_FACTOR * (map.w * map.h) / (Copse.SIZE * Copse.SIZE);
     
-    
-    Circle copse_stamp = new Circle(Copse.SIZE);
     for(int c = 0; c < copse_n; c++)
     {
+      Copse copse = new Copse(V2.ORIGIN);
+      Circle copse_c = copse.getCircle();
       int attempts = 0;
       do
       {
-        copse_stamp.setCentre(copse_stamp.radius + 
-                        (float)(Math.random()*(map.w - 2*copse_stamp.radius)), 
-                              copse_stamp.radius + 
-                        (float)(Math.random()*(map.h - 2*copse_stamp.radius)));
+        copse_c.setCentre(copse_c.radius + 
+                        (float)(Math.random()*(map.w - 2*copse_c.radius)), 
+                              copse_c.radius + 
+                        (float)(Math.random()*(map.h - 2*copse_c.radius)));
         attempts++;
       }
-      while(copse_stamp.collides(roman_deployment) && attempts < 10);
+      while(copse_c.collides(roman_deployment) && attempts < 10);
           
-      copses.add(new Copse(copse_stamp.centre, copse_stamp.radius));
+      // add the finished copse to the list
+      copses.add(copse);
+      collision_manager.register(copse);
     }
   }
   

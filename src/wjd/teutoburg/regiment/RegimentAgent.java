@@ -22,6 +22,7 @@ import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.collision.Collider;
+import wjd.teutoburg.forest.Copse;
 
 /**
  *
@@ -165,7 +166,9 @@ public class RegimentAgent extends Agent
   @Override
   public void treatCollision(Collider other, V2 collision_point)
   {
-    // do nothing
+    if(other instanceof Copse)
+      if(isInFormation())
+        this.turn(180);
   }
 
   @Override
