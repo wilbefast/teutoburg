@@ -16,7 +16,9 @@
  */
 package wjd.teutoburg.collision;
 
+import wjd.math.Circle;
 import wjd.math.M;
+import wjd.math.Rect;
 import wjd.math.V2;
 
 /**
@@ -24,40 +26,40 @@ import wjd.math.V2;
  * @author wdyce
  * @since Dec 6, 2012
  */
-public class Collider 
+public abstract class Collider 
 {
   /* ATTRIBUTES */
-  protected final V2 position;
-  protected float radius = 0;
+  protected final Circle c = new Circle();
   
   
   /* METHODS */
   
   // constructors
-  public Collider(V2 position_)
+  public Collider(V2 position)
   {
-    this.position = position_;
+    c.setCentre(position);
   }
   
   // mutators
   public void setRadius(float radius_)
   {
-    this.radius = radius_;
+    c.radius = radius_;
   }
   
   // accessors
-  public boolean isColliding(Collider p)
+  public boolean isColliding(Collider other)
   {
-    return (p.position.distance2(position) <= M.sqr(p.radius+radius));
+    return (c.collides(other.c));
   }
   
-  public float getRadius()
+  public Circle getCircle()
   {
-    return radius;
+    return c;
   }
   
-  public V2 getPosition()
-  {
-    return position;
-  }
+  /* INTERFACE */
+
+  public abstract void treatCollision(Collider b, V2 collision_point);
+
+  public abstract void treatBoundaryCross(Rect boundary);
 }

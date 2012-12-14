@@ -14,16 +14,18 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package wjd.teutoburg.collision;
+package wjd.teutoburg.forest;
 
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
 import wjd.math.V2;
+import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.Palette;
 
 /**
- *
+ * A single tree in a copse.
+ * 
  * @author wdyce
  * @since Dec 6, 2012
  */
@@ -67,7 +69,7 @@ public class Tree extends Collider implements IVisible
   public void render(ICanvas canvas)
   {
     // check if in view
-    if(canvas.getCamera().canSee(position))
+    if(canvas.getCamera().canSee(c.centre))
     {
       // check if nearby
       if(canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD)
@@ -81,7 +83,7 @@ public class Tree extends Collider implements IVisible
         
         // shadow
         canvas.setColour(Palette.GRASS_SHADOW);
-        canvas.circle(position, SHADOW_RADIUS, true);
+        canvas.circle(c.centre, SHADOW_RADIUS, true);
         // trunk
         canvas.setColour(Palette.TREE_TRUNK);
         canvas.box(trunk, true);
@@ -118,12 +120,12 @@ public class Tree extends Collider implements IVisible
     
     // generate detailed model
     if(summit == null) 
-      summit = new V2().xy(position.x, position.y - SUMMIT_H - SUMMIT_H_VAR*0.5f 
+      summit = new V2().xy(c.centre.x, c.centre.y - SUMMIT_H - SUMMIT_H_VAR*0.5f 
                                       + (float)(Math.random()*SUMMIT_H_VAR));
-    left = new V2().xy(position.x - BRANCHES_RADIUS, position.y - TRUNK_H);
-    right = new V2().xy(position.x + BRANCHES_RADIUS, position.y - TRUNK_H);
-    trunk = new Rect(TRUNK_W, TRUNK_H).xy(position.x - TRUNK_RADIUS, 
-                                          position.y - TRUNK_H - 1);
+    left = new V2().xy(c.centre.x - BRANCHES_RADIUS, c.centre.y - TRUNK_H);
+    right = new V2().xy(c.centre.x + BRANCHES_RADIUS, c.centre.y - TRUNK_H);
+    trunk = new Rect(TRUNK_W, TRUNK_H).xy(c.centre.x - TRUNK_RADIUS, 
+                                          c.centre.y - TRUNK_H - 1);
   }
 
   private void loadImposterModel()
@@ -134,9 +136,23 @@ public class Tree extends Collider implements IVisible
     
     // generate imposter model
     if(summit == null) 
-      summit = new V2().xy(position.x, position.y - SUMMIT_H - SUMMIT_H_VAR*0.5f 
+      summit = new V2().xy(c.centre.x, c.centre.y - SUMMIT_H - SUMMIT_H_VAR*0.5f 
                                       + (float)(Math.random()*SUMMIT_H_VAR));
-    imposter_left = new V2().xy(position.x - BRANCHES_W, position.y + TRUNK_H);
-    imposter_right = new V2().xy(position.x + BRANCHES_W, position.y + TRUNK_H);
+    imposter_left = new V2().xy(c.centre.x - BRANCHES_W, c.centre.y + TRUNK_H);
+    imposter_right = new V2().xy(c.centre.x + BRANCHES_W, c.centre.y + TRUNK_H);
+  }
+  
+  /* IMPLEMENTS -- COLLIDER */
+
+  @Override
+  public void treatCollision(Collider b, V2 collision_point)
+  {
+    // do nothing
+  }
+
+  @Override
+  public void treatBoundaryCross(Rect boundary)
+  {
+    // do nothing
   }
 }

@@ -73,16 +73,16 @@ public class QTNode
   }
   // mutators
   
-  public boolean insert(Collider p)
+  public boolean insert(Collider c)
   {
     // ignore objects outside of this quad's area
-    if(!area.contains(p.getPosition()))
+    if(!c.getCircle().collides(area))
       return false;
     
     // if this node's capacity has been reached, subdivide it
     if(n_objects < NODE_CAPACITY)
     {
-      objects[n_objects] = p;
+      objects[n_objects] = c;
       return true;
     }
     // otherwise we may need to subdivide
@@ -91,7 +91,7 @@ public class QTNode
       
     // add to the first appropriate child instead
     for(int i = 0; i < 4; i++)
-      if(children[i].insert(p))
+      if(children[i].insert(c))
         return true;
     
     // point could not be added

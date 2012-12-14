@@ -17,7 +17,6 @@
 package wjd.teutoburg.regiment;
 
 import java.util.Random;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.M;
@@ -52,7 +51,7 @@ public abstract class Formation implements IVisible
   {
     this.owner = owner;
     direction = owner.getDirection();
-    position = owner.getPosition();
+    position = owner.getCircle().centre;
     left = owner.getLeft();
   }
   
@@ -96,7 +95,6 @@ public abstract class Formation implements IVisible
   @Override
   public void render(ICanvas canvas)
   {
-   
     if(detail)
     {
       // draw soldiers if available
@@ -105,6 +103,8 @@ public abstract class Formation implements IVisible
     }
     else
     {
+      reposition();
+      
       // draw an imposter if not
       canvas.setColour(owner.getFaction().colour_shield);
       renderImposter(canvas);
@@ -190,7 +190,7 @@ public abstract class Formation implements IVisible
     @Override
     public void renderImposter(ICanvas canvas)
     {
-      canvas.angleBox(position, direction, owner.getRadius(), true);
+      canvas.angleBox(position, direction, owner.getCircle().radius, true);
     }
   }
 
@@ -199,10 +199,8 @@ public abstract class Formation implements IVisible
     /* CONSTANTS */
     
     private static final float FULL_CIRCLE  = (float)(2 * Math.PI);
-    private static final float LAYER_ANGLE_OFFSET  = (float)(FULL_CIRCLE / M.PHI);
     private static final float LAYER_RADIUS = 26.0f;
     private static final float RADIUS_VAR = LAYER_RADIUS * 0.4f;
-    private static final float ANGLE_VAR = 0.3f;
 
     
     /* ATTRIBUTES */
@@ -281,7 +279,7 @@ public abstract class Formation implements IVisible
     @Override
     public void renderImposter(ICanvas canvas)
     {
-      canvas.circle(position, owner.getRadius(), true);
+      canvas.circle(position, owner.getCircle().radius, true);
     }
     
     /* SUBROUTINES */

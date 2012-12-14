@@ -35,6 +35,8 @@ public class Palette
   public static final Colour TREE_LEAVES = new Colour(50, 150, 100);
   public static final Colour TREE_IMPOSTER 
             = GRASS_SHADOW.clone().avg(TREE_TRUNK).avg(TREE_LEAVES);
+  public static final Colour COPSE_IMPOSTER
+            = TREE_IMPOSTER.clone().avg(GRASS);
   // romans
   public static final Colour ROMAN_BODY = new Colour(255, 255, 0);
   public static final Colour ROMAN_HEAD = new Colour(255, 225, 225);

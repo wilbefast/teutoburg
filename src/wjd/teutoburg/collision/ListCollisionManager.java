@@ -17,7 +17,8 @@
 package wjd.teutoburg.collision;
 
 import java.util.LinkedList;
-import wjd.math.M;
+import java.util.List;
+import wjd.math.Circle;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -29,11 +30,19 @@ import wjd.math.V2;
 public class ListCollisionManager implements ICollisionManager 
 {
   /* ATTRIBUTES */
-  private final LinkedList<Collider> objects = new LinkedList<Collider>();
+  private final List<Collider> objects = new LinkedList<Collider>(),
+                              query_result = new LinkedList<Collider>();
+  private final V2 collision_point = new V2();
+  private final Rect boundary, bounding_rect = new Rect();
   
   /* METHODS */
 
   // constructors
+  
+  public ListCollisionManager(Rect boundary_)
+  {
+    this.boundary = boundary_;
+  }
 
   // accessors
 
@@ -44,26 +53,49 @@ public class ListCollisionManager implements ICollisionManager
   @Override
   public Iterable<Collider> getInRect(Rect area)
   {
-    LinkedList<Collider> result = new LinkedList<Collider>();
+    query_result.clear();
     for(Collider c : objects)
-      if(area.contains(c.getPosition()))
-        result.add(c);
-    return result;
+    {
+      if(c.getCircle().collides(area))
+        query_result.add(c);
+    }
+    return query_result;
   }
 
   @Override
-  public Iterable<Collider> getInCircle(V2 centre, float radius)
+  public Iterable<Collider> getInCircle(Circle circle_query)
   {
-    LinkedList<Collider> result = new LinkedList<Collider>();
+    query_result.clear();
     for(Collider c : objects)
-      if(c.getPosition().distance2(centre) < M.sqr(radius) + M.sqr(c.getRadius()))
-        result.add(c);
-    return result;
+      if(circle_query.collides(c.getCircle()))
+        query_result.add(c);
+    return query_result;
   }
 
   @Override
-  public void addObject(Collider c)
+  public void register(Collider c)
   {
     objects.add(c);
+  }
+
+  @Override
+  public void generateCollisions()
+  {
+    for(Collider a : objects)
+    {
+      // check collisions with boundary
+      if(!a.getCircle().inside(boundary))
+        a.treatBoundaryCross(boundary);
+      
+      // check collisions between pairs of objects
+      for(Collider b : objects)
+      if(!a.equals(b) && a.isColliding(b))
+      {
+        collision_point.inter(a.getCircle().centre, b.getCircle().centre, 0.5f);
+        a.treatCollision(b, collision_point);
+        b.treatCollision(a, collision_point);
+      }
+    }
+      
   }
 }

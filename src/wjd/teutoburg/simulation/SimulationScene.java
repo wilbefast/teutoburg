@@ -23,11 +23,14 @@ import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
+import wjd.math.Circle;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.MenuScene;
 import wjd.teutoburg.collision.Agent;
-import wjd.teutoburg.collision.Tree;
+import wjd.teutoburg.collision.ICollisionManager;
+import wjd.teutoburg.collision.ListCollisionManager;
+import wjd.teutoburg.forest.Copse;
 import wjd.teutoburg.regiment.Faction;
 import wjd.teutoburg.regiment.RegimentAgent;
 
@@ -39,10 +42,6 @@ public class SimulationScene extends AScene
 {
   /* CONSTANTS */
   private static final int GENERATOR_MAX_ATTEMPTS = 20;
-  // forest
-  private static final int COPSE_BASE_N = 2;
-  private static final int COPSE_N_TREES = 30;
-  private static final float COPSE_SIZE = Tree.COLLISION_RADIUS*COPSE_N_TREES*4;
   // romans
   private static final float ROMAN_DEPLOYMENT_FRACTION = 0.2f;
   private static final int ROMAN_N_REGIMENTS = 15;
@@ -55,8 +54,9 @@ public class SimulationScene extends AScene
   private Rect roman_deployment;
   private Rect barbarian_illegal_deployment;
   private StrategyCamera camera;
+  private ICollisionManager collision_manager;
   private List<Agent> agents;
-  private List<Tree> trees;
+  private List<Copse> copses;
 
   /* METHODS */
   
@@ -68,8 +68,11 @@ public class SimulationScene extends AScene
     roman_deployment = map.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
     barbarian_illegal_deployment = map.clone().scale(1 - BARBARIAN_DEPLOYMENT_FRACTION);
     
+    // collision manager
+    collision_manager = new ListCollisionManager(map);
+    
     // generate forest
-    trees = new LinkedList<Tree>();
+    copses = new LinkedList<Copse>();
     generateForest();
     
     // deploy soldiers
@@ -91,27 +94,24 @@ public class SimulationScene extends AScene
   
   private void generateForest()
   {
-    float copse_n = COPSE_BASE_N * (map.w * map.h) / (COPSE_SIZE * COPSE_SIZE);
+    float copse_n = Copse.NUMBER_FACTOR * (map.w * map.h) / (Copse.SIZE * Copse.SIZE);
     
     
-    Rect copse = new Rect(0, 0, COPSE_SIZE, COPSE_SIZE);
+    Circle copse_stamp = new Circle(Copse.SIZE);
     for(int c = 0; c < copse_n; c++)
     {
       int attempts = 0;
       do
       {
-        copse.xy((float)(Math.random()*(map.w - copse.w)), 
-                 (float)(Math.random()*(map.h - copse.h)));
+        copse_stamp.setCentre(copse_stamp.radius + 
+                        (float)(Math.random()*(map.w - 2*copse_stamp.radius)), 
+                              copse_stamp.radius + 
+                        (float)(Math.random()*(map.h - 2*copse_stamp.radius)));
         attempts++;
       }
-      while(copse.collides(roman_deployment) && attempts < 10);
-      
-      for(int t = 0; t < COPSE_N_TREES; t++)
-      {
-        V2 p = new V2();
-        copse.randomPoint(p);
-        trees.add(new Tree(p));
-      }
+      while(copse_stamp.collides(roman_deployment) && attempts < 10);
+          
+      copses.add(new Copse(copse_stamp.centre, copse_stamp.radius));
     }
   }
   
@@ -124,6 +124,7 @@ public class SimulationScene extends AScene
       RegimentAgent r = Faction.ROMAN.createRegiment(p);
       r.faceRandom();
       agents.add(r);
+      collision_manager.register(r);
     }
   }
   
@@ -143,6 +144,7 @@ public class SimulationScene extends AScene
       RegimentAgent r = Faction.BARBARIAN.createRegiment(p);
       r.faceTowards(centre);
       agents.add(r);
+      collision_manager.register(r);
     }
   }
   
@@ -151,6 +153,9 @@ public class SimulationScene extends AScene
   @Override
   public EUpdateResult update(int t_delta)
   {
+    // generate collisions
+    collision_manager.generateCollisions();
+    
     // update all the agents
     for(Agent a : agents)
       a.update(t_delta);
@@ -173,8 +178,8 @@ public class SimulationScene extends AScene
     canvas.box(map, true);
     
     // draw all the trees
-    for(Tree t : trees)
-      t.render(canvas);
+    for(Copse c : copses)
+      c.render(canvas);
 
     // draw all the agents
     for(Agent a : agents)

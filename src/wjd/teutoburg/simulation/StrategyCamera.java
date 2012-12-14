@@ -19,6 +19,7 @@ package wjd.teutoburg.simulation;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
 import wjd.amb.view.ICamera;
+import wjd.math.Circle;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -108,6 +109,12 @@ public class StrategyCamera implements ICamera
   public boolean canSee(Rect area)
   {
     return area.collides(view);
+  }
+  
+  @Override
+  public boolean canSee(Circle circle)
+  {
+    return circle.collides(view);
   }
 
   // modification

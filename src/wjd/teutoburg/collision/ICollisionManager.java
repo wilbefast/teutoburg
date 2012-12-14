@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.collision;
 
+import wjd.math.Circle;
 import wjd.math.Rect;
 import wjd.math.V2;
 
@@ -28,9 +29,11 @@ public interface ICollisionManager
 {
   /* INTERFACE */
   
-  public Iterable<Collider> getInRect(Rect area);
+  public Iterable<Collider> getInRect(Rect rect_query);
   
-  public Iterable<Collider> getInCircle(V2 centre, float radius);
+  public Iterable<Collider> getInCircle(Circle circle_query);
   
-  public void addObject(Collider p);
+  public void register(Collider p);
+
+  public void generateCollisions();
 }

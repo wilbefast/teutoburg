@@ -30,7 +30,7 @@ import wjd.math.V2;
  * @author wdyce
  * @since Dec 4, 2012
  */
-public class Agent extends Collider implements IVisible, IDynamic
+public abstract class Agent extends Collider implements IVisible, IDynamic
 {
   /* CONSTANTS */
   private static final double INV_2PI = 1/(2*Math.PI);
@@ -52,8 +52,8 @@ public class Agent extends Collider implements IVisible, IDynamic
   {
     super(start_position);
     
-    front_position = direction.clone().scale(radius).add(position);
-    visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
+    front_position = direction.clone().scale(c.radius).add(c.centre);
+    visibility_box = new Rect(0, 0, 2.5f*c.radius, 2.5f*c.radius).centrePos(c.centre);
   }
 
   // mutators
@@ -75,13 +75,15 @@ public class Agent extends Collider implements IVisible, IDynamic
   
   public void faceTowards(V2 target)
   {
-    direction.reset(target).sub(position).normalise();
+    direction.reset(target).sub(c.centre).normalise();
     directionChange();
   }
   
   protected void directionChange()
   {
-    front_position.reset(direction).scale(radius).add(position);
+    front_position.reset(direction).scale(c.radius).add(c.centre);
+    
+    // override if need be
   }
   
   //----------------------------------------------------------------------------
@@ -91,10 +93,10 @@ public class Agent extends Collider implements IVisible, IDynamic
   {
     // move various spatial components
     direction.scale(distance);
-      position.add(direction);
+      c.centre.add(direction);
       front_position.add(direction);
     direction.scale(1/distance);
-    visibility_box.centrePos(position);
+    visibility_box.centrePos(c.centre);
     
     // inform subclasses of the move
     positionChange();
@@ -111,8 +113,8 @@ public class Agent extends Collider implements IVisible, IDynamic
   @Override
   public final void setRadius(float new_radius)
   {
-    radius = new_radius;
-    visibility_box = new Rect(0, 0, 2.5f*radius, 2.5f*radius).centrePos(position);
+    c.radius = new_radius;
+    visibility_box = new Rect(0, 0, 2.5f*c.radius, 2.5f*c.radius).centrePos(c.centre);
   }
   
 

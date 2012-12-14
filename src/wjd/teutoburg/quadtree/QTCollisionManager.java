@@ -17,8 +17,8 @@
 package wjd.teutoburg.quadtree;
 
 import java.util.Iterator;
+import wjd.math.Circle;
 import wjd.math.Rect;
-import wjd.math.V2;
 import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.collision.ICollisionManager;
 
@@ -27,7 +27,7 @@ import wjd.teutoburg.collision.ICollisionManager;
  * @author wdyce
  * @since Dec 13, 2012
  */
-public class QTPhysicsManager implements ICollisionManager
+public class QTCollisionManager implements ICollisionManager
 {
   /* ATTRIBUTES */
   private QTNode quad_tree;
@@ -36,7 +36,7 @@ public class QTPhysicsManager implements ICollisionManager
   /* METHODS */
 
   // constructors
-  public QTPhysicsManager(Rect bounds_)
+  public QTCollisionManager(Rect bounds_)
   {
     this.bounds = bounds_;
     quad_tree = new QTNode(bounds_);
@@ -62,15 +62,23 @@ public class QTPhysicsManager implements ICollisionManager
   }
 
   @Override
-  public Iterable<Collider> getInCircle(V2 centre, float radius)
+  public Iterable<Collider> getInCircle(Circle circle_query)
   {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
-  public void addObject(Collider c)
+  public void register(Collider c)
   {
     quad_tree.insert(c);
   }
+
+  @Override
+  public void generateCollisions()
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+
 
 }

@@ -18,8 +18,10 @@ package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.ICanvas;
+import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
+import wjd.teutoburg.collision.Collider;
 
 /**
  *
@@ -59,7 +61,7 @@ public class RegimentAgent extends Agent
     setRadius(formation.reform());
   }
 
-  // accessors
+  // accessors -- package
   
   int getStrength()
   {
@@ -79,6 +81,13 @@ public class RegimentAgent extends Agent
   Faction getFaction()
   {
     return faction;
+  }
+  
+  // accessors -- public 
+  
+  public boolean isInFormation()
+  {
+    return (formation instanceof Formation.Turtle);
   }
   
 
@@ -149,5 +158,19 @@ public class RegimentAgent extends Agent
     }
     else
       nearby = false;
+  }
+  
+  /* IMPLEMENTS -- COLLIDER */
+
+  @Override
+  public void treatCollision(Collider other, V2 collision_point)
+  {
+    // do nothing
+  }
+
+  @Override
+  public void treatBoundaryCross(Rect boundary)
+  {
+    // do nothing
   }
 }
