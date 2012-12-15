@@ -119,10 +119,4 @@ public class RomanRegiment extends RegimentAgent
 		  }
 	  }
   }
-
-  @Override
-  protected void fight(RegimentAgent r)
-  {
-	  
-  }
 }
