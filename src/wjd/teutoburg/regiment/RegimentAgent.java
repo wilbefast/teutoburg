@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
@@ -30,8 +31,9 @@ import wjd.teutoburg.simulation.Tile;
  */
 public abstract class RegimentAgent extends Agent
 {  
-	  public enum State {
-		    waiting, charging, fighting, dead
+	  public enum State 
+    {
+		    WAITING, CHARGING, FIGHTING, DEAD
 		}
 	  
   /* CONSTANTS */
@@ -77,7 +79,7 @@ public abstract class RegimentAgent extends Agent
     defense_potential = 5;
 
     // initialize status
-    state = State.waiting;
+    state = State.WAITING;
   }
 
   // accessors -- package
@@ -104,7 +106,7 @@ public abstract class RegimentAgent extends Agent
   
   float getPerceptionRadius()
   {
-	  return (perception_box.w/2.0f);
+    return (perception_box.w * 0.5f);
   }
   
   // accessors -- public 
@@ -117,11 +119,11 @@ public abstract class RegimentAgent extends Agent
   public void setFormedUp(boolean form_up)
   {
     // skip if this is already the case
-    if(form_up == isFormedUp())
+    if (form_up == isFormedUp())
       return;
       
     // otherwise change formation...
-    if(form_up)
+    if (form_up)
       formation = new Formation.Turtle(this);
     else
       formation = new Formation.Rabble(this);
@@ -135,14 +137,13 @@ public abstract class RegimentAgent extends Agent
   public EUpdateResult killSoldiers(int n_killed)
   {
     strength -= n_killed;
-    if(strength <= 0)
+    if (strength <= 0)
       return EUpdateResult.DELETE_ME;
     
     setRadius(formation.reform());
     return EUpdateResult.CONTINUE;
-  }  
-  
-  
+  }
+
   /* INTERFACE */
   
   protected abstract void ai(int t_delta, Iterable<Tile> percepts);
@@ -185,7 +186,7 @@ public abstract class RegimentAgent extends Agent
 	  {
 		  if(killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
 		  {
-			  state = State.dead;
+			  r.state = State.DEAD;
 		  }
 		  return 0;
 	  }
@@ -206,7 +207,7 @@ public abstract class RegimentAgent extends Agent
     left.reset(direction).left();
     
     // we need to recache the soldiers' positions if in view close to us
-    if(visible)
+    if (visible)
       formation.reposition();
   }
   
@@ -217,25 +218,46 @@ public abstract class RegimentAgent extends Agent
     super.positionChange();
     
     grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
-    if(grid_pos.x != tile.grid_position.x
-      || grid_pos.y != tile.grid_position.y)
+    if (grid_pos.x != tile.grid_position.x
+        || grid_pos.y != tile.grid_position.y)
     {
-        Tile new_tile = tile.grid.tiles[(int)grid_pos.y][(int)grid_pos.x];
-        if(new_tile.setRegiment(this))
-        {
-          tile.setRegiment(null);
-          tile = new_tile;
-        }
+      Tile new_tile = tile.grid.tiles[(int) grid_pos.y][(int) grid_pos.x];
+      
+      // try to claim new tile
+      if (new_tile.setRegiment(this))
+      {
+        tile.setRegiment(null);
+        tile = new_tile;
+      }
+      
+      // try to claim neighbouring tile instead
+      else
+      {
+        for(Tile t : new_tile.grid.getNeighbours(new_tile, true))
+          if(t.setRegiment(this))
+          {
+            tile.setRegiment(null);
+            tile = t;
+            break;
+          }
+      }
     }
     
     // we need to recache the soldiers' positions if in view close to us
-    if(visible)
+    if (visible)
       formation.reposition();
   }
   
   @Override
   public EUpdateResult update(int t_delta)
   {
+    // dead
+    if(state == State.DEAD)
+    {
+      tile.setRegiment(null);
+      return EUpdateResult.DELETE_ME;
+    }
+    
     // default
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)
@@ -255,8 +277,8 @@ public abstract class RegimentAgent extends Agent
   @Override
   public void render(ICanvas canvas)
   {
-     // skip if not in the camera's view
-    if(visible = (canvas.getCamera().canSee(visibility_box)))
+    // skip if not in the camera's view
+    if (visible = (canvas.getCamera().canSee(visibility_box)))
     {
       // we'll turn off the details if we're too far away
       nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
@@ -268,5 +290,9 @@ public abstract class RegimentAgent extends Agent
     }
     else
       nearby = false;
+    
+    
+    canvas.setColour(Colour.WHITE);
+    canvas.line(c.centre, tile.pixel_position);
   }
 }

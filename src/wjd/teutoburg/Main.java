@@ -17,7 +17,6 @@ public class Main
 
   public static void main(String[] args)
   {
-
     AWTAmbition.launch("Teutoburg", new V2(640, 480), new MenuScene(), null);
   }
 }

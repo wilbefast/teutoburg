@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.simulation;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import wjd.amb.AScene;
@@ -40,7 +41,6 @@ import wjd.teutoburg.regiment.RegimentAgent;
 public class SimulationScene extends AScene
 {
 	/* CONSTANTS */
-	private static final int GENERATOR_MAX_ATTEMPTS = 20;
 	// romans
 	private static final float ROMAN_DEPLOY_FRAC = 0.1f;
 	private static final int ROMAN_N_REGIMENTS = 15;
@@ -189,8 +189,13 @@ public class SimulationScene extends AScene
 	public EUpdateResult update(int t_delta)
 	{
 		// update all the agents
-		for(Agent a : agents)
-			a.update(t_delta);
+    Iterator<Agent> i = agents.iterator();
+    while(i.hasNext())
+    {
+      Agent a = i.next();
+			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
+        i.remove();
+    }
 
 		// all clear!
 		return EUpdateResult.CONTINUE;
