@@ -17,13 +17,10 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
-import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.simulation.Tile;
-import wjd.teutoburg.simulation.TileGrid;
 
 /**
  *
@@ -32,6 +29,10 @@ import wjd.teutoburg.simulation.TileGrid;
  */
 public abstract class RegimentAgent extends Agent
 {  
+	  public enum State {
+		    waiting, charging, fighting
+		}
+	  
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   
@@ -39,8 +40,9 @@ public abstract class RegimentAgent extends Agent
   // model
   private int strength;
   private Faction faction;
-  private Tile tile;
   private final V2 grid_pos = new V2();
+  protected Tile tile;
+  protected State state;
   // organisation
   private Formation formation;
   // view
@@ -67,6 +69,9 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
+
+    // initialize status
+    state = State.waiting;
   }
 
   // accessors -- package
@@ -130,6 +135,7 @@ public abstract class RegimentAgent extends Agent
   /* INTERFACE */
   
   protected abstract void ai(int t_delta, Iterable<Tile> percepts);
+  protected abstract void fight(RegimentAgent r);
   
   
   /* OVERRIDES -- AGENT */
@@ -178,9 +184,7 @@ public abstract class RegimentAgent extends Agent
       return result;
     
     // choose action
-    perception_box.centrePos(c.centre);
-    TileGrid percepts = tile.grid.createSubGrid(perception_box);
-    ai(t_delta, percepts);
+    ai(t_delta);
 
     // set level of detail
     formation.setDetail(visible && nearby);

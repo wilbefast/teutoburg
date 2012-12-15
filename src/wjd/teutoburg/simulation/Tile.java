@@ -43,8 +43,8 @@ public class Tile implements IVisible, IDynamic
   public final V2 grid_position, pixel_position;
   private final Rect pixel_area;
   
-  BoundedValue forest_amount = new BoundedValue(1.0f);
-  RegimentAgent agent = null;
+  public BoundedValue forest_amount = new BoundedValue(1.0f);
+  public RegimentAgent agent = null;
   
   /* METHODS */
   
