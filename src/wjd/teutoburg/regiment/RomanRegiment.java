@@ -52,4 +52,10 @@ public class RomanRegiment extends RegimentAgent
     // turn around in circles
     advance(0.01f*t_delta);
   }
+
+  @Override
+  protected void fight(RegimentAgent r)
+  {
+	  
+  }
 }

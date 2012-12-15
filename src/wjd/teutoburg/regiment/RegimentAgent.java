@@ -40,7 +40,6 @@ public abstract class RegimentAgent extends Agent
   // model
   private int strength;
   private Faction faction;
-  private Tile tile;
   private final V2 grid_pos = new V2();
   protected Tile tile;
   protected State state;
