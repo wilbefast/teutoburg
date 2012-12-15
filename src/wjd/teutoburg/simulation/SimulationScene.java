@@ -190,7 +190,10 @@ public class SimulationScene extends AScene
 	{
 		// update all the agents
 		for(Agent a : agents)
-			a.update(t_delta);
+    {
+			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
+        agents.remove(a);
+    }
 
 		// all clear!
 		return EUpdateResult.CONTINUE;
