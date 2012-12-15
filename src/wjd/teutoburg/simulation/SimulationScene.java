@@ -30,6 +30,8 @@ import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.MenuScene;
 import wjd.teutoburg.collision.Agent;
+import wjd.teutoburg.collision.ICollisionManager;
+import wjd.teutoburg.collision.ListCollisionManager;
 import wjd.teutoburg.forest.Copse;
 import wjd.teutoburg.regiment.Faction;
 import wjd.teutoburg.regiment.RegimentAgent;
@@ -49,13 +51,20 @@ public class SimulationScene extends AScene
 	private static final int BARBARIAN_N_REGIMENTS = 20;
 
 	/* ATTRIBUTES */
+  
+  // boundaries
 	private Rect map;
 	private Rect roman_deploy;
 	private Rect barb_deploy_E, barb_deploy_W;
+  
+  
 	private StrategyCamera camera;
+  
+  // objects
 	private TileGrid grid;
 	private List<Agent> agents;
 	private List<Copse> copses;
+  private ICollisionManager collisionManager;
 
 	/* METHODS */
 
@@ -79,6 +88,7 @@ public class SimulationScene extends AScene
 		// collisions and percepts
 		grid = new TileGrid(size.clone().scale(Tile.ISIZE).ceil());
 		grid.clear();
+    collisionManager = new ListCollisionManager(map);
 
 		// generate forest
 		copses = new LinkedList<Copse>();
@@ -134,6 +144,7 @@ public class SimulationScene extends AScene
 			RegimentAgent r = Faction.ROMAN.createRegiment(p, grid.pixelToTile(p));
 			r.faceTowards(target);
 			agents.add(r);
+      collisionManager.register(r);
 		}
 	}
 
@@ -180,6 +191,7 @@ public class SimulationScene extends AScene
 			RegimentAgent r = Faction.BARBARIAN.createRegiment(p, grid.pixelToTile(p));
 			r.faceTowards(roman_deploy.getCentre());
 			agents.add(r);
+      collisionManager.register(r);
 		}
 	}
 
@@ -196,6 +208,9 @@ public class SimulationScene extends AScene
 			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
         i.remove();
     }
+    
+    // generate collision and boundary events
+    collisionManager.generateCollisions();
 
 		// all clear!
 		return EUpdateResult.CONTINUE;

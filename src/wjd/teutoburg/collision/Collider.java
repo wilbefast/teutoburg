@@ -30,8 +30,6 @@ public abstract class Collider
 {
   /* ATTRIBUTES */
   protected final Circle c = new Circle();
-  protected final LinkedList<CollisionEvent> collisions 
-                                        = new LinkedList<CollisionEvent>();
   
   
   /* METHODS */
@@ -47,12 +45,6 @@ public abstract class Collider
   {
     c.radius = radius_;
   }
-  
-  public void putEvent(CollisionEvent e)
-  {
-    collisions.add(e);
-  }
-  
   // accessors
   public boolean isColliding(Collider other)
   {
@@ -63,4 +55,8 @@ public abstract class Collider
   {
     return c;
   }
+
+  public abstract void  boundaryEvent(Rect boundary);
+
+  public abstract void  collisionEvent(Collider a);
 }

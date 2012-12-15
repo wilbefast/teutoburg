@@ -22,6 +22,7 @@ import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
+import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.Tile;
 
 /**
@@ -236,15 +237,13 @@ public abstract class RegimentAgent extends Agent
     
     // snap out of collisions
     if(sharing_tile)
-    {
+    {      
       Tile t = tile.grid.gridToTile(grid_pos);
-      if(t == tile)
-        System.out.println("FUU");
-      else
+      if(t.agent != null)
       {
-        
-        c.centre.add(t.agent.c.centre);
-        
+        V2 push = t.agent.c.centre.clone().sub(c.centre).scale(0.1f);
+        c.centre.sub(push);
+        positionChange();
       }
     }
 
@@ -310,5 +309,21 @@ public abstract class RegimentAgent extends Agent
           }
       }
     }
+  }
+  
+    /* IMPLEMENTS -- COLLIDERS */
+  
+  @Override
+  public void boundaryEvent(Rect boundary)
+  {
+    // do nothing
+  }
+
+  @Override
+  public void collisionEvent(Collider other)
+  {
+    V2 push = other.getCircle().centre.clone().sub(c.centre).scale(0.1f);
+    c.centre.sub(push);
+    positionChange();
   }
 }

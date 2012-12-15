@@ -17,7 +17,6 @@
 package wjd.teutoburg.forest;
 
 import java.util.Random;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.M;
@@ -119,5 +118,20 @@ public class Copse extends Collider implements IVisible
       nearby = false;
       trees = null;
     }
+  }
+
+  
+  /* IMPLEMENTS -- COLLIDERS */
+  
+  @Override
+  public void boundaryEvent(Rect boundary)
+  {
+    // do nothing
+  }
+
+  @Override
+  public void collisionEvent(Collider a)
+  {
+    // do nothing
   }
 }

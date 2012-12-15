@@ -16,7 +16,9 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.math.Rect;
 import wjd.math.V2;
+import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.Tile;
 
 /**
@@ -123,6 +125,4 @@ public class BarbarianRegiment extends RegimentAgent
 		  }
 	  }
   }
-  
-  
 }
