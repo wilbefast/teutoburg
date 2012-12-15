@@ -62,6 +62,12 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
+    
+    
+    if(tile == null)
+    {
+      int i = 3;
+    }
   }
 
   // accessors -- package
@@ -147,21 +153,16 @@ public abstract class RegimentAgent extends Agent
     // default
     super.positionChange();
     
-    try{
     grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
     if(grid_pos.x != tile.grid_position.x
       || grid_pos.y != tile.grid_position.y)
     {
-      if(tile.setRegiment(null))
-      {
-        tile = tile.grid.tiles[(int)grid_pos.y][(int)grid_pos.x];
-        tile.setRegiment(this);
-      }
-    }
-    }
-    catch(Exception e)
-    {
-      System.out.println("FUU");
+        Tile new_tile = tile.grid.tiles[(int)grid_pos.y][(int)grid_pos.x];
+        if(new_tile.setRegiment(this))
+        {
+          tile.setRegiment(null);
+          tile = new_tile;
+        }
     }
     
     // we need to recache the soldiers' positions if in view close to us

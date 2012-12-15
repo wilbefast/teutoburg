@@ -83,7 +83,15 @@ public class TileGrid implements Iterable<Tile>
    */
   public Tile pixelToTile(V2 pixel_pos)
   {
-    V2 grid_pos = pixel_pos.clone().scale(Tile.ISIZE).floor();
+    
+    
+    
+    V2 grid_pos = pixel_pos.clone().floor().scale(Tile.ISIZE);
+    
+    
+    if(!validGridPos(grid_pos))
+      System.out.println("bink");
+    
     return (validGridPos(grid_pos) 
             ? tiles[(int)grid_pos.y][(int)grid_pos.x] 
             : null);

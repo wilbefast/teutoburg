@@ -275,7 +275,6 @@ public abstract class Formation implements IVisible
         }
         layer_size *= 2;
       }
-      System.out.println("");
     }
     
     @Override

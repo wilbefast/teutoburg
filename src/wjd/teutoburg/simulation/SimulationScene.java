@@ -25,7 +25,6 @@ import wjd.amb.rts.StrategyCamera;
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
-import wjd.math.Circle;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.MenuScene;
@@ -71,14 +70,14 @@ public class SimulationScene extends AScene
                             size.y * ROMAN_DEPLOY_FRAC);
     
     
-    barb_deploy_W = new Rect(0, 0, size.x * BARB_DEPLOY_FRAC, size.y);
+    barb_deploy_W = new Rect(0, 0, size.x * BARB_DEPLOY_FRAC - 1, size.y);
     barb_deploy_E = new Rect(size.x * (1.0f - BARB_DEPLOY_FRAC), 
                               0,
                               size.x * BARB_DEPLOY_FRAC, 
                               size.y);
     
     // collisions and percepts
-    grid = new TileGrid(size.clone().scale(Tile.ISIZE));
+    grid = new TileGrid(size.clone().scale(Tile.ISIZE).ceil());
     grid.clear();
     
     // generate forest
