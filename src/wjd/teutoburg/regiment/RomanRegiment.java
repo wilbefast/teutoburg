@@ -50,7 +50,7 @@ public class RomanRegiment extends RegimentAgent
   protected void ai(int t_delta, Iterable<Tile> percepts)
   {
     // turn around in circles
-    advance(0.01f*t_delta);
+    advance(0.1f*t_delta);
   }
 
   @Override

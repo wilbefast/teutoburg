@@ -34,7 +34,7 @@ import wjd.util.BoundedValue;
 public class Tile implements IVisible, IDynamic
 {
   /* CONSTANTS */
-  public static final V2 SIZE = new V2(128, 128);
+  public static final V2 SIZE = new V2(256, 256);
   public static final V2 HSIZE = SIZE.clone().scale(0.5f);
   public static final V2 ISIZE = SIZE.clone().inv();
 

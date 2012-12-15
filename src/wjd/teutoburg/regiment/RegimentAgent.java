@@ -50,7 +50,7 @@ public abstract class RegimentAgent extends Agent
   private boolean nearby = true;
   private V2 left = new V2();
   // ai
-  private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(80));
+  private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(5));
 
 
   /* METHODS */
@@ -66,6 +66,7 @@ public abstract class RegimentAgent extends Agent
     this.strength = start_strength;
     this.faction = faction;
     this.tile = tile_;
+    tile.agent = this;
     
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
@@ -95,6 +96,11 @@ public abstract class RegimentAgent extends Agent
   Faction getFaction()
   {
     return faction;
+  }
+  
+  float getPerceptionRadius()
+  {
+	  return (perception_box.w/2.0f);
   }
   
   // accessors -- public 
@@ -206,6 +212,8 @@ public abstract class RegimentAgent extends Agent
      
       // render the formation depending on the level of detail
       formation.render(canvas);
+      
+      //canvas.box(perception_box, false);
     }
     else
       nearby = false;

@@ -35,8 +35,8 @@ import wjd.teutoburg.simulation.Palette;
 public class Copse extends Collider implements IVisible
 {
   /* CONSTANTS */
-  public static final int N_TREES = 90;
-  public static final float NUMBER_FACTOR = 0.1f;
+  public static final int N_TREES = 50;
+  public static final float NUMBER_FACTOR = 0.4f;
   public static final float SIZE = Tree.COLLISION_RADIUS * N_TREES;
   public static final float SIZE_VAR = 0.5f; // percent
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.15f;
