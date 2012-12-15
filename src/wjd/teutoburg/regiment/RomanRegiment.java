@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
@@ -118,5 +119,15 @@ public class RomanRegiment extends RegimentAgent
 			  state = State.waiting;
 		  }
 	  }
+  }
+  
+  @Override
+  protected int defense(int attack_value, V2 attacker_direction)
+  {
+	  if(V2.angleBetween(getDirection(), attacker_direction) < 135)
+	  {
+		  this.setFormedUp(false);
+	  }
+	  return super.defense(attack_value, attacker_direction);
   }
 }

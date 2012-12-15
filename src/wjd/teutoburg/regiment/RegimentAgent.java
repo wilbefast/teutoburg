@@ -40,8 +40,8 @@ public abstract class RegimentAgent extends Agent
   /* ATTRIBUTES */
   // model
   private int strength;
-  protected int attack;
-  protected int defense;
+  protected int attack_potential;
+  protected int defense_potential;
   private Faction faction;
   private final V2 grid_pos = new V2();
   protected Tile tile;
@@ -73,8 +73,8 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
-    attack = 5;
-    defense = 5;
+    attack_potential = 5;
+    defense_potential = 5;
 
     // initialize status
     state = State.waiting;
@@ -147,37 +147,51 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract void ai(int t_delta, Iterable<Tile> percepts);
   
-  protected void fight(RegimentAgent r)
+  protected void attack(RegimentAgent r)
   {
-	  int attack_role, defense_role, attack_value = 0, defense_value = 0;
+	  int attack_role, attack_value = 0;
 	  // compute attack value
 	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
 	  {
 		  attack_role = (int)(Math.random()*9.0)+1;
-		  attack_role += this.attack;
+		  attack_role += this.attack_potential;
 		  attack_value += attack_role;
 	  }
-	  for(int soldier = 1 ; soldier < r.getStrength() ; soldier++)
+
+	  int nb_dead_attackers = r.defense(attack_value, getDirection());
+	  if(nb_dead_attackers != 0)
+	  {
+		  if(killSoldiers(nb_dead_attackers) == EUpdateResult.DELETE_ME)
+		  {
+			  state = State.dead;
+		  }
+	  }
+
+  }
+
+  protected int defense(int attack_value, V2 attacker_direction)
+  {
+	  int defense_role, defense_value = 0;
+	  
+	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
 	  {
 		  defense_role = (int)(Math.random()*9.0)+1;
-		  defense_role += this.defense;
+		  defense_role += this.defense_potential;
 		  defense_value += defense_role;
 	  }
 	  
 	  int nb_dead_defensers = (attack_value - defense_value)/10;
 	  if(nb_dead_defensers > 0)
 	  {
-		  if(r.killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
-		  {
-			  r.state = State.dead;
-		  }
-	  }
-	  else if(nb_dead_defensers < 0)
-	  {
-		  if(killSoldiers(-nb_dead_defensers) == EUpdateResult.DELETE_ME)
+		  if(killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
 		  {
 			  state = State.dead;
 		  }
+		  return 0;
+	  }
+	  else 
+	  {
+		  return -nb_dead_defensers;
 	  }
   }
   
