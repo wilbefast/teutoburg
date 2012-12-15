@@ -20,13 +20,14 @@ import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.ICanvas;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
+import wjd.teutoburg.simulation.Tile;
 
 /**
  *
  * @author wdyce
  * @since Dec 4, 2012
  */
-public class RegimentAgent extends Agent
+public abstract class RegimentAgent extends Agent
 {  
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
@@ -35,13 +36,12 @@ public class RegimentAgent extends Agent
   // model
   private int strength;
   private Faction faction;
+  private Tile tile;
   // organisation
   private Formation formation;
   // view
   private boolean nearby = true;
   private V2 left = new V2();
-  // belief
-  private boolean in_forest = false;
 
 
   /* METHODS */
@@ -106,15 +106,6 @@ public class RegimentAgent extends Agent
     setRadius(formation.reform());
   }
   
-  public void enterForest()
-  {
-    // skip if this is already the case
-    if(in_forest)
-      return;
-    
-    in_forest = true;
-  }
-  
 
   // mutators
   public EUpdateResult killSoldiers(int n_killed)
@@ -126,6 +117,12 @@ public class RegimentAgent extends Agent
     setRadius(formation.reform());
     return EUpdateResult.CONTINUE;
   }  
+  
+  
+  /* INTERFACE */
+  
+  protected abstract void ai(int t_delta);
+  
   
   /* OVERRIDES -- AGENT */
   
@@ -152,8 +149,6 @@ public class RegimentAgent extends Agent
       formation.reposition();
   }
   
-
-  
   @Override
   public EUpdateResult update(int t_delta)
   {
@@ -161,6 +156,9 @@ public class RegimentAgent extends Agent
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)
       return result;
+    
+    // choose action
+    ai(t_delta);
 
     // set level of detail
     formation.setDetail(visible && nearby);
@@ -183,11 +181,5 @@ public class RegimentAgent extends Agent
     }
     else
       nearby = false;
-    
-    
-    //canvas.text(""+in_forest, this.front_position);
-    
-    // set "not in forest" last of all - it will be reset to true if we are*
-    in_forest = false;
   }
 }

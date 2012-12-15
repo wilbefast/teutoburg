@@ -57,14 +57,11 @@ public abstract class Faction
       Palette.ROMAN_SHIELD, Palette.ROMAN_BODY, Palette.ROMAN_HEAD, 
       Palette.ROMAN_WEAPON)
   {
-    /* CONSTANTS */
-    private static final int REGIMENT_SIZE = 6*6;
-    
     /* IMPLEMENTS -- FACTION */
     @Override
     public RegimentAgent createRegiment(V2 position)
     {
-      return new RegimentAgent(position, REGIMENT_SIZE, this);
+      return new RomanRegiment(position, this);
     }
 
     @Override
@@ -89,14 +86,11 @@ public abstract class Faction
       Palette.BARBARIAN_SHIELD, Palette.BARBARIAN_BODY, Palette.BARBARIAN_HEAD,
       Palette.ROMAN_WEAPON)
   {
-    /* CONSTANTS */
-    private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-    
     /* IMPLEMENTS -- FACTION */
     @Override
     public RegimentAgent createRegiment(V2 position)
     {
-      return new RegimentAgent(position, REGIMENT_SIZE, this);
+      return new BarbarianRegiment(position, this);
     }
 
     @Override

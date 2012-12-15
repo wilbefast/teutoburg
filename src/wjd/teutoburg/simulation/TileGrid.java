@@ -122,7 +122,7 @@ public class TileGrid implements Iterable<Tile>
     Rect sub_grid_area 
       = new Rect(min_col, min_row, max_col-min_col, max_row-min_row);
     
-    // constrain
+    // constraints
     sub_grid_area = sub_grid_area.getIntersection(grid_area);
     return (sub_grid_area == null) ? null : new TileGrid(tiles, sub_grid_area);
   }
