@@ -30,8 +30,9 @@ import wjd.teutoburg.simulation.Tile;
  */
 public abstract class RegimentAgent extends Agent
 {  
-	  public enum State {
-		    waiting, charging, fighting, dead
+	  public enum State 
+    {
+		    WAITING, CHARGING, FIGHTING, DEAD
 		}
 	  
   /* CONSTANTS */
@@ -77,7 +78,7 @@ public abstract class RegimentAgent extends Agent
     defense = 5;
 
     // initialize status
-    state = State.waiting;
+    state = State.WAITING;
   }
 
   // accessors -- package
@@ -168,14 +169,14 @@ public abstract class RegimentAgent extends Agent
 	  {
 		  if(r.killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
 		  {
-			  r.state = State.dead;
+			  r.state = State.DEAD;
 		  }
 	  }
 	  else if(nb_dead_defensers < 0)
 	  {
 		  if(killSoldiers(-nb_dead_defensers) == EUpdateResult.DELETE_ME)
 		  {
-			  state = State.dead;
+			  state = State.DEAD;
 		  }
 	  }
   }
@@ -235,6 +236,10 @@ public abstract class RegimentAgent extends Agent
   @Override
   public EUpdateResult update(int t_delta)
   {
+    // dead
+    if(state == State.DEAD)
+      return EUpdateResult.DELETE_ME;
+    
     // default
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)

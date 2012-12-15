@@ -16,8 +16,6 @@
  */
 package wjd.teutoburg.regiment;
 
-import wjd.amb.control.EUpdateResult;
-import wjd.math.Circle;
 import wjd.math.V2;
 import wjd.teutoburg.simulation.Tile;
 
@@ -71,7 +69,7 @@ public class BarbarianRegiment extends RegimentAgent
 		  else if(t.agent instanceof BarbarianRegiment && t.agent != this)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if((t.agent.state == State.charging || t.agent.state == State.fighting) && tmp < distanceFromBarbarian)
+			  if((t.agent.state == State.CHARGING || t.agent.state == State.FIGHTING) && tmp < distanceFromBarbarian)
 			  {
 				  nearestChargingBarbarian = (BarbarianRegiment)t.agent;
 				  distanceFromBarbarian = tmp;
@@ -83,22 +81,22 @@ public class BarbarianRegiment extends RegimentAgent
 	  // else if not charging or fighting, charge !!!
 	  // else if charging, charge
 	  // else if fighting and has an ennemy, fight
-	  if(nearestRoman != null && state != State.fighting && c.collides(nearestRoman.getCircle()))
+	  if(nearestRoman != null && state != State.FIGHTING && c.collides(nearestRoman.getCircle()))
 	  {
-		  state = State.fighting;
+		  state = State.FIGHTING;
 	  }
-	  if(state == State.fighting)
+	  if(state == State.FIGHTING)
 	  {
 		  if(nearestRoman != null)
 			  fight(nearestRoman);
 		  else
-			  state = State.waiting;
+			  state = State.WAITING;
 	  }
-	  else if(state == State.waiting)
+	  else if(state == State.WAITING)
 	  {
 		  if(nearestRoman != null)// && distanceFromRoman <= getPerceptionRadius())
 		  {
-			  state = State.charging;
+			  state = State.CHARGING;
 		  }
 		  else if(nearestChargingBarbarian != null)
 		  {
@@ -107,7 +105,7 @@ public class BarbarianRegiment extends RegimentAgent
 			  advance(min);
 		  }
 	  }
-	  else if(state == State.charging)
+	  else if(state == State.CHARGING)
 	  {
 		  if(nearestRoman != null)
 		  {
@@ -116,12 +114,12 @@ public class BarbarianRegiment extends RegimentAgent
 			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromRoman));
 			  advance(min);
 			  if(min == distanceFromRoman)
-				  state = State.fighting;
+				  state = State.FIGHTING;
 			  //System.out.println("je suis "+this+" et ma nouvelle tuile c'est : "+tile);
 		  }
 		  else
 		  {
-			  state = State.waiting;
+			  state = State.WAITING;
 		  }
 	  }
   }

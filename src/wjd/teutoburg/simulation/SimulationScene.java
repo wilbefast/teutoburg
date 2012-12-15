@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.simulation;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import wjd.amb.AScene;
@@ -188,10 +189,12 @@ public class SimulationScene extends AScene
 	public EUpdateResult update(int t_delta)
 	{
 		// update all the agents
-		for(Agent a : agents)
+    Iterator<Agent> i = agents.iterator();
+    while(i.hasNext())
     {
+      Agent a = i.next();
 			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
-        agents.remove(a);
+        i.remove();
     }
 
 		// all clear!

@@ -80,22 +80,22 @@ public class RomanRegiment extends RegimentAgent
 		  }
 	  }
 
-	  if(nearestBarbarian != null && state != State.fighting && c.collides(nearestBarbarian.getCircle()))
+	  if(nearestBarbarian != null && state != State.FIGHTING && c.collides(nearestBarbarian.getCircle()))
 	  {
-		  state = State.fighting;
+		  state = State.FIGHTING;
 	  }
-	  if(state == State.fighting)
+	  if(state == State.FIGHTING)
 	  {
 		  if(nearestBarbarian != null)
 			  fight(nearestBarbarian);
 		  else
-			  state = State.waiting;
+			  state = State.WAITING;
 	  }
-	  else if(state == State.waiting)
+	  else if(state == State.WAITING)
 	  {
 		  if(nearestBarbarian != null)
 		  {
-			  state = State.charging;
+			  state = State.CHARGING;
 		  }
 		  else
 		  {
@@ -103,7 +103,7 @@ public class RomanRegiment extends RegimentAgent
 			  advance(SPEED_FACTOR*t_delta);
 		  }
 	  }
-	  else if(state == State.charging)
+	  else if(state == State.CHARGING)
 	  {
 		  if(nearestBarbarian != null)
 		  {
@@ -111,11 +111,11 @@ public class RomanRegiment extends RegimentAgent
 			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromBarbarian));
 			  advance(min);
 			  if(min == distanceFromBarbarian)
-				  state = State.fighting;
+				  state = State.FIGHTING;
 		  }
 		  else
 		  {
-			  state = State.waiting;
+			  state = State.WAITING;
 		  }
 	  }
   }
