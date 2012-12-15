@@ -270,10 +270,6 @@ public abstract class RegimentAgent extends Agent
     }
     else
       nearby = false;
-    
-    
-    canvas.setColour(Colour.WHITE);
-    canvas.line(c.centre, tile.pixel_position);
   }
   
   /* SUBROUTINES */
@@ -309,21 +305,5 @@ public abstract class RegimentAgent extends Agent
           }
       }
     }
-  }
-  
-    /* IMPLEMENTS -- COLLIDERS */
-  
-  @Override
-  public void boundaryEvent(Rect boundary)
-  {
-    // do nothing
-  }
-
-  @Override
-  public void collisionEvent(Collider other)
-  {
-    V2 push = other.getCircle().centre.clone().sub(c.centre).scale(0.1f);
-    c.centre.sub(push);
-    positionChange();
   }
 }
