@@ -36,6 +36,8 @@ public abstract class RegimentAgent extends Agent
 		    WAITING, CHARGING, FIGHTING, DEAD
 		}
 	  
+  private static final V2 push = new V2();
+    
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   
@@ -233,6 +235,18 @@ public abstract class RegimentAgent extends Agent
     ai(t_delta, tile.grid.createSubGrid(perception_box));
     
     // snap out of collisions
+    if(sharing_tile)
+    {
+      Tile t = tile.grid.gridToTile(grid_pos);
+      if(t == tile)
+        System.out.println("FUU");
+      else
+      {
+        
+        c.centre.add(t.agent.c.centre);
+        
+      }
+    }
 
     // set level of detail
     formation.setDetail(visible && nearby);
