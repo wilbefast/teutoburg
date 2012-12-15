@@ -19,6 +19,7 @@ package wjd.teutoburg.regiment;
 import wjd.amb.view.Colour;
 import wjd.math.V2;
 import wjd.teutoburg.simulation.Palette;
+import wjd.teutoburg.simulation.Tile;
 
 /**
  *
@@ -44,7 +45,7 @@ public abstract class Faction
   }
   
   /* INTERFACE */
-  public abstract RegimentAgent createRegiment(V2 position);
+  public abstract RegimentAgent createRegiment(V2 position, Tile t);
   public abstract Formation createFormation(RegimentAgent r);
   public abstract Soldier createSoldier(V2 position, V2 offset);
   
@@ -59,9 +60,9 @@ public abstract class Faction
   {
     /* IMPLEMENTS -- FACTION */
     @Override
-    public RegimentAgent createRegiment(V2 position)
+    public RegimentAgent createRegiment(V2 position, Tile t)
     {
-      return new RomanRegiment(position, this);
+      return new RomanRegiment(position, t, this);
     }
 
     @Override
@@ -88,9 +89,9 @@ public abstract class Faction
   {
     /* IMPLEMENTS -- FACTION */
     @Override
-    public RegimentAgent createRegiment(V2 position)
+    public RegimentAgent createRegiment(V2 position, Tile t)
     {
-      return new BarbarianRegiment(position, this);
+      return new BarbarianRegiment(position, t, this);
     }
 
     @Override

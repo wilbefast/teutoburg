@@ -18,6 +18,7 @@ package wjd.teutoburg.simulation;
 
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IDynamic;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
 import wjd.math.Rect;
@@ -55,11 +56,27 @@ public class Tile implements IVisible, IDynamic
     pixel_area = new Rect(pixel_position, SIZE);
     this.grid = grid;
   }
+  
+  // mutators
+  public boolean setRegiment(RegimentAgent agent_)
+  {
+    if(agent == null || agent_ == null)
+    {
+      agent = agent_;
+      return true;
+    }
+    else
+      return false;
+    
+  }
 
   /* OVERRIDES -- IDYNAMIC */
   @Override
   public void render(ICanvas canvas)
   {
+    canvas.setColour(Colour.BLACK);
+    if(agent != null)
+      canvas.line(pixel_position, agent.getCircle().centre);
   }
   
   /* OVERRIDES -- OBJECT */
