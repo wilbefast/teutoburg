@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.math.V2;
+import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
 
 /**
@@ -28,6 +29,7 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
+  private static final float SPEED_FACTOR = 0.5f;
   
   /* ATTRIBUTES */
   
@@ -49,8 +51,73 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected void ai(int t_delta, Iterable<Tile> percepts)
   {
-    // turn around in circles
-    advance(0.1f*t_delta);
+	  V2 escape_point = getCircle().centre.clone();
+	  escape_point.add(0, -10);
+	  RomanRegiment nearestRoman = null;
+	  float distanceFromRoman = Float.MAX_VALUE, tmp;
+	  BarbarianRegiment nearestBarbarian = null;
+	  float distanceFromBarbarian = Float.MAX_VALUE;
+	  
+	  for(Tile t : percepts)
+	  {
+		  if(t.agent instanceof RomanRegiment)
+		  {
+			  tmp = t.agent.getCircle().centre.distance2(c.centre);
+			  if(tmp < distanceFromRoman)
+			  {
+				  nearestRoman = (RomanRegiment)t.agent;
+				  distanceFromRoman = tmp;
+			  }
+		  }
+		  else if(t.agent instanceof BarbarianRegiment)
+		  {
+			  tmp = t.agent.getCircle().centre.distance2(c.centre);
+			  if(tmp < distanceFromBarbarian)
+			  {
+				  nearestBarbarian = (BarbarianRegiment)t.agent;
+				  distanceFromBarbarian = tmp;
+			  }
+		  }
+	  }
+
+	  if(nearestBarbarian != null && state != State.fighting && c.collides(nearestBarbarian.getCircle()))
+	  {
+		  state = State.fighting;
+	  }
+	  if(state == State.fighting)
+	  {
+		  if(nearestBarbarian != null)
+			  fight(nearestBarbarian);
+		  else
+			  state = State.waiting;
+	  }
+	  else if(state == State.waiting)
+	  {
+		  if(nearestBarbarian != null)
+		  {
+			  state = State.charging;
+		  }
+		  else
+		  {
+			  faceTowards(escape_point);
+			  advance(SPEED_FACTOR*t_delta);
+		  }
+	  }
+	  else if(state == State.charging)
+	  {
+		  if(nearestBarbarian != null)
+		  {
+			  faceTowards(nearestBarbarian.getCircle().centre);
+			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromBarbarian));
+			  advance(min);
+			  if(min == distanceFromBarbarian)
+				  state = State.fighting;
+		  }
+		  else
+		  {
+			  state = State.waiting;
+		  }
+	  }
   }
 
   @Override

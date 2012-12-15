@@ -172,7 +172,7 @@ public class SimulationScene extends AScene
 				dir_target.normalise();
 				dir_target.add(((i%2 == 0) ? -1 : 1),0);
 				dir_target.normalise();
-				dir_target.scale(100);
+				dir_target.scale(1);
 				p.add(dir_target);
 				
 				tilep = grid.pixelToTile(p);

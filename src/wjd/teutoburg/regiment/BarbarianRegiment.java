@@ -30,7 +30,7 @@ public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-  private static final float SPEED_FACTOR = 0.06f;
+  private static final float SPEED_FACTOR = 1.0f;
   
   /* ATTRIBUTES */
   
@@ -68,7 +68,7 @@ public class BarbarianRegiment extends RegimentAgent
 				  distanceFromRoman = tmp;
 			  }
 		  }
-		  else if(t.agent instanceof BarbarianRegiment)
+		  else if(t.agent instanceof BarbarianRegiment && t.agent != this)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);
 			  if((t.agent.state == State.charging || t.agent.state == State.fighting) && tmp < distanceFromBarbarian)
@@ -83,7 +83,6 @@ public class BarbarianRegiment extends RegimentAgent
 	  // else if not charging or fighting, charge !!!
 	  // else if charging, charge
 	  // else if fighting and has an ennemy, fight
-
 	  if(nearestRoman != null && state != State.fighting && c.collides(nearestRoman.getCircle()))
 	  {
 		  state = State.fighting;
@@ -103,7 +102,9 @@ public class BarbarianRegiment extends RegimentAgent
 		  }
 		  else if(nearestChargingBarbarian != null)
 		  {
-			  state = State.charging;
+			  faceTowards(nearestChargingBarbarian.getCircle().centre);
+			  float min = Math.min(SPEED_FACTOR*t_delta, ((float)Math.sqrt(distanceFromBarbarian)-2*c.radius));
+			  advance(min);
 		  }
 	  }
 	  else if(state == State.charging)
@@ -116,12 +117,10 @@ public class BarbarianRegiment extends RegimentAgent
 			  advance(min);
 			  if(min == distanceFromRoman)
 				  state = State.fighting;
+			  //System.out.println("je suis "+this+" et ma nouvelle tuile c'est : "+tile);
 		  }
-		  else if(nearestChargingBarbarian != null)
+		  else
 		  {
-			  faceTowards(nearestChargingBarbarian.getCircle().centre);
-			  float min = Math.min(SPEED_FACTOR*t_delta, ((float)Math.sqrt(distanceFromBarbarian)-2*c.radius));
-			  advance(min);
 			  state = State.waiting;
 		  }
 	  }
