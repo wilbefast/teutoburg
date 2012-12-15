@@ -29,18 +29,19 @@ import wjd.teutoburg.simulation.Tile;
  * @since Dec 4, 2012
  */
 public abstract class RegimentAgent extends Agent
-{
-
-  public enum State
-  {
-
-    waiting, charging, fighting
-  }
+{  
+	  public enum State {
+		    waiting, charging, fighting, dead
+		}
+	  
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
+  
   /* ATTRIBUTES */
   // model
   private int strength;
+  protected int attack;
+  protected int defense;
   private Faction faction;
   private final V2 grid_pos = new V2();
   protected Tile tile;
@@ -56,28 +57,31 @@ public abstract class RegimentAgent extends Agent
 
   /* METHODS */
   // constructors
-  public RegimentAgent(V2 start_position, int start_strength, Tile tile_,
-                       Faction faction)
+  public RegimentAgent(V2 start_position, int start_strength, Tile tile_, 
+                                                              Faction faction)
   {
     // default
     super(start_position);
     left.reset(direction).left();
-
+    
     // save parameters
     this.strength = start_strength;
     this.faction = faction;
     this.tile = tile_;
     tile.agent = this;
-
+    
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
+    attack = 5;
+    defense = 5;
 
     // initialize status
     state = State.waiting;
   }
 
   // accessors -- package
+  
   int getStrength()
   {
     return strength;
@@ -92,38 +96,40 @@ public abstract class RegimentAgent extends Agent
   {
     return left;
   }
-
+  
   Faction getFaction()
   {
     return faction;
   }
-
+  
   float getPerceptionRadius()
   {
-    return (perception_box.w / 2.0f);
+    return (perception_box.w * 0.5f);
   }
-
+  
   // accessors -- public 
+  
   public boolean isFormedUp()
   {
     return (formation instanceof Formation.Turtle);
   }
-
+  
   public void setFormedUp(boolean form_up)
   {
     // skip if this is already the case
     if (form_up == isFormedUp())
       return;
-
+      
     // otherwise change formation...
     if (form_up)
       formation = new Formation.Turtle(this);
     else
       formation = new Formation.Rabble(this);
-
+    
     // ... and reform!
     setRadius(formation.reform());
   }
+  
 
   // mutators
   public EUpdateResult killSoldiers(int n_killed)
@@ -131,35 +137,70 @@ public abstract class RegimentAgent extends Agent
     strength -= n_killed;
     if (strength <= 0)
       return EUpdateResult.DELETE_ME;
-
+    
     setRadius(formation.reform());
     return EUpdateResult.CONTINUE;
   }
 
   /* INTERFACE */
+  
   protected abstract void ai(int t_delta, Iterable<Tile> percepts);
-
-  protected abstract void fight(RegimentAgent r);
-
+  
+  protected void fight(RegimentAgent r)
+  {
+	  int attack_role, defense_role, attack_value = 0, defense_value = 0;
+	  // compute attack value
+	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
+	  {
+		  attack_role = (int)(Math.random()*9.0)+1;
+		  attack_role += this.attack;
+		  attack_value += attack_role;
+	  }
+	  for(int soldier = 1 ; soldier < r.getStrength() ; soldier++)
+	  {
+		  defense_role = (int)(Math.random()*9.0)+1;
+		  defense_role += this.defense;
+		  defense_value += defense_role;
+	  }
+	  
+	  int nb_dead_defensers = (attack_value - defense_value)/10;
+	  if(nb_dead_defensers > 0)
+	  {
+		  if(r.killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
+		  {
+			  r.state = State.dead;
+		  }
+	  }
+	  else if(nb_dead_defensers < 0)
+	  {
+		  if(killSoldiers(-nb_dead_defensers) == EUpdateResult.DELETE_ME)
+		  {
+			  state = State.dead;
+		  }
+	  }
+  }
+  
+  
   /* OVERRIDES -- AGENT */
+  
   @Override
   protected void directionChange()
   {
     // default
     super.directionChange();
     left.reset(direction).left();
-
+    
     // we need to recache the soldiers' positions if in view close to us
     if (visible)
       formation.reposition();
   }
-
+  
   @Override
   protected void positionChange()
   {
     // default
     super.positionChange();
-
+    
     grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
     if (grid_pos.x != tile.grid_position.x
         || grid_pos.y != tile.grid_position.y)
@@ -185,12 +226,12 @@ public abstract class RegimentAgent extends Agent
           }
       }
     }
-
+    
     // we need to recache the soldiers' positions if in view close to us
     if (visible)
       formation.reposition();
   }
-
+  
   @Override
   public EUpdateResult update(int t_delta)
   {
@@ -198,14 +239,14 @@ public abstract class RegimentAgent extends Agent
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)
       return result;
-
+    
     // choose action
     perception_box.centrePos(c.centre);
     ai(t_delta, tile.grid.createSubGrid(perception_box));
 
     // set level of detail
     formation.setDetail(visible && nearby);
-
+    
     // all clear!
     return EUpdateResult.CONTINUE;
   }
@@ -218,10 +259,10 @@ public abstract class RegimentAgent extends Agent
     {
       // we'll turn off the details if we're too far away
       nearby = (canvas.getCamera().getZoom() >= ZOOM_IMPOSTER_THRESHOLD);
-
+     
       // render the formation depending on the level of detail
       formation.render(canvas);
-
+      
       //canvas.box(perception_box, false);
     }
     else

@@ -126,11 +126,5 @@ public class BarbarianRegiment extends RegimentAgent
 	  }
   }
   
-  @Override
-  protected void fight(RegimentAgent r)
-  {
-	  
-  }
-  
   
 }

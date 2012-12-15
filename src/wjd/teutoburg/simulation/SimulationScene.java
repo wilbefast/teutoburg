@@ -40,7 +40,6 @@ import wjd.teutoburg.regiment.RegimentAgent;
 public class SimulationScene extends AScene
 {
 	/* CONSTANTS */
-	private static final int GENERATOR_MAX_ATTEMPTS = 20;
 	// romans
 	private static final float ROMAN_DEPLOY_FRAC = 0.1f;
 	private static final int ROMAN_N_REGIMENTS = 15;
