@@ -45,9 +45,11 @@ public abstract class RegimentAgent extends Agent
   protected int attack;
   protected int defense;
   private Faction faction;
+  protected State state;
+  // position
   private final V2 grid_pos = new V2();
   protected Tile tile;
-  protected State state;
+  private boolean sharing_tile = false;
   // organisation
   private Formation formation;
   // view
@@ -203,31 +205,8 @@ public abstract class RegimentAgent extends Agent
     // default
     super.positionChange();
     
-    grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
-    if (grid_pos.x != tile.grid_position.x
-        || grid_pos.y != tile.grid_position.y)
-    {
-      Tile new_tile = tile.grid.tiles[(int) grid_pos.y][(int) grid_pos.x];
-      
-      // try to claim new tile
-      if (new_tile.setRegiment(this))
-      {
-        tile.setRegiment(null);
-        tile = new_tile;
-      }
-      
-      // try to claim neighbouring tile instead
-      else
-      {
-        for(Tile t : new_tile.grid.getNeighbours(new_tile, true))
-          if(t.setRegiment(this))
-          {
-            tile.setRegiment(null);
-            tile = t;
-            break;
-          }
-      }
-    }
+    // change tile
+    tryClaimTile();
     
     // we need to recache the soldiers' positions if in view close to us
     if (visible)
@@ -252,6 +231,8 @@ public abstract class RegimentAgent extends Agent
     // choose action
     perception_box.centrePos(c.centre);
     ai(t_delta, tile.grid.createSubGrid(perception_box));
+    
+    // snap out of collisions
 
     // set level of detail
     formation.setDetail(visible && nearby);
@@ -280,5 +261,40 @@ public abstract class RegimentAgent extends Agent
     
     canvas.setColour(Colour.WHITE);
     canvas.line(c.centre, tile.pixel_position);
+  }
+  
+  /* SUBROUTINES */
+  
+  private void tryClaimTile()
+  {
+    // have we moved into a new tile?
+    grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
+    if (grid_pos.x != tile.grid_position.x || grid_pos.y != tile.grid_position.y)
+    {
+      Tile new_tile = tile.grid.tiles[(int) grid_pos.y][(int) grid_pos.x];
+
+      // try to claim new tile
+      if (new_tile.setRegiment(this))
+      {
+        // success :)
+        sharing_tile = false;
+        tile.setRegiment(null);
+        tile = new_tile;
+      }
+
+      // failure :(
+      else
+      {
+        // try to claim neighbouring tile instead
+        sharing_tile = true;
+        for(Tile t : new_tile.grid.getNeighbours(new_tile, true))
+          if(t.setRegiment(this))
+          {
+            tile.setRegiment(null);
+            tile = t;
+            break;
+          }
+      }
+    }
   }
 }
