@@ -238,7 +238,10 @@ public abstract class RegimentAgent extends Agent
   {
     // dead
     if(state == State.DEAD)
+    {
+      tile.setRegiment(null);
       return EUpdateResult.DELETE_ME;
+    }
     
     // default
     EUpdateResult result = super.update(t_delta);
