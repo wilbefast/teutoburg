@@ -17,10 +17,13 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
+import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.simulation.Tile;
+import wjd.teutoburg.simulation.TileGrid;
 
 /**
  *
@@ -43,6 +46,8 @@ public abstract class RegimentAgent extends Agent
   // view
   private boolean nearby = true;
   private V2 left = new V2();
+  // ai
+  private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(80));
 
 
   /* METHODS */
@@ -62,12 +67,6 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
-    
-    
-    if(tile == null)
-    {
-      int i = 3;
-    }
   }
 
   // accessors -- package
@@ -130,7 +129,7 @@ public abstract class RegimentAgent extends Agent
   
   /* INTERFACE */
   
-  protected abstract void ai(int t_delta);
+  protected abstract void ai(int t_delta, Iterable<Tile> percepts);
   
   
   /* OVERRIDES -- AGENT */
@@ -179,7 +178,9 @@ public abstract class RegimentAgent extends Agent
       return result;
     
     // choose action
-    ai(t_delta);
+    perception_box.centrePos(c.centre);
+    TileGrid percepts = tile.grid.createSubGrid(perception_box);
+    ai(t_delta, percepts);
 
     // set level of detail
     formation.setDetail(visible && nearby);

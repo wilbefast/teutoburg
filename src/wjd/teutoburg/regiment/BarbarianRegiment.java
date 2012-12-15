@@ -47,7 +47,7 @@ public class BarbarianRegiment extends RegimentAgent
   /* IMPLEMENTS -- REGIMENTAGENT */
 
   @Override
-  protected void ai(int t_delta)
+  protected void ai(int t_delta, Iterable<Tile> percepts)
   {
     // ran forwards
     advance(0.1f*t_delta);
