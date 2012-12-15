@@ -123,7 +123,7 @@ public class SimulationScene extends AScene
     {
       V2 p = new V2();
       roman_deployment.randomPoint(p);
-      RegimentAgent r = Faction.BARBARIAN.createRegiment(p, grid.pixelToTile(p));
+      RegimentAgent r = Faction.ROMAN.createRegiment(p, grid.pixelToTile(p));
       r.faceRandom();
       agents.add(r);
     }
