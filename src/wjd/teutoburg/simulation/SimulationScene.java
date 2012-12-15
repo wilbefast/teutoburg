@@ -22,6 +22,7 @@ import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
 import wjd.amb.rts.StrategyCamera;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.Circle;
@@ -42,16 +43,16 @@ public class SimulationScene extends AScene
   /* CONSTANTS */
   private static final int GENERATOR_MAX_ATTEMPTS = 20;
   // romans
-  private static final float ROMAN_DEPLOYMENT_FRACTION = 0.2f;
+  private static final float ROMAN_DEPLOY_FRAC = 0.2f;
   private static final int ROMAN_N_REGIMENTS = 15;
   // barbarians
-  private static final float BARBARIAN_DEPLOYMENT_FRACTION = 0.3f;
+  private static final float BARB_DEPLOY_FRAC = 0.2f;
   private static final int BARBARIAN_N_REGIMENTS = 20;
   
   /* ATTRIBUTES */
   private Rect map;
-  private Rect roman_deployment;
-  private Rect barbarian_illegal_deployment;
+  private Rect roman_deploy;
+  private Rect barb_deploy_E, barb_deploy_W;
   private StrategyCamera camera;
   private TileGrid grid;
   private List<Agent> agents;
@@ -64,8 +65,17 @@ public class SimulationScene extends AScene
   {
     // boundaries
     map = new Rect(V2.ORIGIN, size);
-    roman_deployment = map.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
-    barbarian_illegal_deployment = map.clone().scale(1 - BARBARIAN_DEPLOYMENT_FRACTION);
+    roman_deploy = new Rect(size.x * (1.0f - ROMAN_DEPLOY_FRAC) * 0.5f, 
+                            size.y * (1.0f - ROMAN_DEPLOY_FRAC), 
+                            size.x * ROMAN_DEPLOY_FRAC, 
+                            size.y * ROMAN_DEPLOY_FRAC);
+    
+    
+    barb_deploy_W = new Rect(0, 0, size.x * BARB_DEPLOY_FRAC, size.y);
+    barb_deploy_E = new Rect(size.x * (1.0f - BARB_DEPLOY_FRAC), 
+                              0,
+                              size.x * BARB_DEPLOY_FRAC, 
+                              size.y);
     
     // collisions and percepts
     grid = new TileGrid(size.clone().scale(Tile.ISIZE));
@@ -99,17 +109,8 @@ public class SimulationScene extends AScene
     for(int c = 0; c < copse_n; c++)
     {
       Copse copse = new Copse(V2.ORIGIN);
-      Circle copse_c = copse.getCircle();
-      int attempts = 0;
-      do
-      {
-        copse_c.setCentre(copse_c.radius + 
-                        (float)(Math.random()*(map.w - 2*copse_c.radius)), 
-                              copse_c.radius + 
-                        (float)(Math.random()*(map.h - 2*copse_c.radius)));
-        attempts++;
-      }
-      while(copse_c.collides(roman_deployment) && attempts < 10);
+      V2 p = copse.getCircle().centre;
+      ((c%2 == 0) ? barb_deploy_W : barb_deploy_E).randomPoint(p);
           
       // add the finished copse to the list
       grid.registerCopse(copse);
@@ -119,32 +120,27 @@ public class SimulationScene extends AScene
   
   private void deployRomans()
   {
+    V2 target = roman_deploy.getCentre();
+      target.y = 0;
     for(int i = 0; i < ROMAN_N_REGIMENTS; i++)
     {
       V2 p = new V2();
-      roman_deployment.randomPoint(p);
+      roman_deploy.randomPoint(p);
       RegimentAgent r = Faction.ROMAN.createRegiment(p, grid.pixelToTile(p));
-      r.faceRandom();
+      r.faceTowards(target);
       agents.add(r);
     }
   }
   
   private void deployBarbarians()
   {
-    V2 centre = map.getCentre();
+    V2 target = roman_deploy.getCentre();
     for(int i = 0; i < BARBARIAN_N_REGIMENTS; i++)
     {
-      V2 p = new V2(), grid_p = new V2();
-      int attempts = 0;
-      do
-      {
-        map.randomPoint(p);
-        attempts++;
-      }
-      while(barbarian_illegal_deployment.contains(p) && attempts < GENERATOR_MAX_ATTEMPTS);
-      grid_p = p.clone().scale(Tile.ISIZE);
+      V2 p = new V2();
+      ((i%2 == 0) ? barb_deploy_W : barb_deploy_E).randomPoint(p);
       RegimentAgent r = Faction.BARBARIAN.createRegiment(p, grid.pixelToTile(p));
-      r.faceTowards(centre);
+      r.faceTowards(target);
       agents.add(r);
     }
   }
@@ -185,6 +181,13 @@ public class SimulationScene extends AScene
     
     for(Tile t : grid)
       t.render(canvas);
+    
+    
+    canvas.setColour(Colour.RED);
+    canvas.box(roman_deploy, false);
+    canvas.setColour(Colour.BLUE);
+    canvas.box(barb_deploy_E, false);
+    canvas.box(barb_deploy_W, false);
       
     // render GUI elements
     canvas.setCameraActive(false);

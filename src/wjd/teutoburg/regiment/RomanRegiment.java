@@ -50,6 +50,6 @@ public class RomanRegiment extends RegimentAgent
   protected void ai(int t_delta)
   {
     // turn around in circles
-    turn(0.01f*t_delta);
+    advance(0.01f*t_delta);
   }
 }

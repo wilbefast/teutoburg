@@ -161,7 +161,7 @@ public abstract class RegimentAgent extends Agent
     }
     catch(Exception e)
     {
-      int i = 3;
+      System.out.println("FUU");
     }
     
     // we need to recache the soldiers' positions if in view close to us
