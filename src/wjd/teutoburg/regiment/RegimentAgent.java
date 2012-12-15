@@ -130,6 +130,8 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract void ai(int t_delta);
   
+  protected abstract void fight(RegimentAgent r);
+  
   
   /* OVERRIDES -- AGENT */
   
