@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.math.V2;
+import wjd.teutoburg.simulation.Tile;
 
 /**
  *
@@ -34,9 +35,9 @@ public class BarbarianRegiment extends RegimentAgent
 
   // constructors
   
-  public BarbarianRegiment(V2 position, Faction faction)
+  public BarbarianRegiment(V2 position, Tile t, Faction faction)
   {
-    super(position, REGIMENT_SIZE, faction);
+    super(position, REGIMENT_SIZE, t, faction);
   }
 
   // accessors

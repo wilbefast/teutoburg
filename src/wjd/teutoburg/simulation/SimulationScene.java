@@ -29,8 +29,6 @@ import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.MenuScene;
 import wjd.teutoburg.collision.Agent;
-import wjd.teutoburg.collision.ICollisionManager;
-import wjd.teutoburg.collision.ListCollisionManager;
 import wjd.teutoburg.forest.Copse;
 import wjd.teutoburg.regiment.Faction;
 import wjd.teutoburg.regiment.RegimentAgent;
@@ -125,7 +123,7 @@ public class SimulationScene extends AScene
     {
       V2 p = new V2();
       roman_deployment.randomPoint(p);
-      RegimentAgent r = Faction.ROMAN.createRegiment(p);
+      RegimentAgent r = Faction.BARBARIAN.createRegiment(p, grid.pixelToTile(p));
       r.faceRandom();
       agents.add(r);
     }
@@ -136,7 +134,7 @@ public class SimulationScene extends AScene
     V2 centre = map.getCentre();
     for(int i = 0; i < BARBARIAN_N_REGIMENTS; i++)
     {
-      V2 p = new V2();
+      V2 p = new V2(), grid_p = new V2();
       int attempts = 0;
       do
       {
@@ -144,7 +142,8 @@ public class SimulationScene extends AScene
         attempts++;
       }
       while(barbarian_illegal_deployment.contains(p) && attempts < GENERATOR_MAX_ATTEMPTS);
-      RegimentAgent r = Faction.BARBARIAN.createRegiment(p);
+      grid_p = p.clone().scale(Tile.ISIZE);
+      RegimentAgent r = Faction.BARBARIAN.createRegiment(p, grid.pixelToTile(p));
       r.faceTowards(centre);
       agents.add(r);
     }

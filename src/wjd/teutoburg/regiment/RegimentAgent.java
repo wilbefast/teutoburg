@@ -37,6 +37,7 @@ public abstract class RegimentAgent extends Agent
   private int strength;
   private Faction faction;
   private Tile tile;
+  private final V2 grid_pos = new V2();
   // organisation
   private Formation formation;
   // view
@@ -46,7 +47,8 @@ public abstract class RegimentAgent extends Agent
 
   /* METHODS */
   // constructors
-  public RegimentAgent(V2 start_position, int start_strength, Faction faction)
+  public RegimentAgent(V2 start_position, int start_strength, Tile tile_, 
+                                                              Faction faction)
   {
     // default
     super(start_position);
@@ -55,6 +57,7 @@ public abstract class RegimentAgent extends Agent
     // save parameters
     this.strength = start_strength;
     this.faction = faction;
+    this.tile = tile_;
     
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
@@ -143,6 +146,23 @@ public abstract class RegimentAgent extends Agent
   {
     // default
     super.positionChange();
+    
+    try{
+    grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
+    if(grid_pos.x != tile.grid_position.x
+      || grid_pos.y != tile.grid_position.y)
+    {
+      if(tile.setRegiment(null))
+      {
+        tile = tile.grid.tiles[(int)grid_pos.y][(int)grid_pos.x];
+        tile.setRegiment(this);
+      }
+    }
+    }
+    catch(Exception e)
+    {
+      int i = 3;
+    }
     
     // we need to recache the soldiers' positions if in view close to us
     if(visible)

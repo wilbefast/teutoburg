@@ -19,7 +19,6 @@ package wjd.teutoburg.simulation;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import wjd.math.M;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.forest.Copse;
