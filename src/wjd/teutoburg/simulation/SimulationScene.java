@@ -21,6 +21,7 @@ import java.util.List;
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
+import wjd.amb.rts.StrategyCamera;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.Circle;
@@ -54,7 +55,7 @@ public class SimulationScene extends AScene
   private Rect roman_deployment;
   private Rect barbarian_illegal_deployment;
   private StrategyCamera camera;
-  private ICollisionManager collision_manager;
+  private TileGrid grid;
   private List<Agent> agents;
   private List<Copse> copses;
 
@@ -68,8 +69,9 @@ public class SimulationScene extends AScene
     roman_deployment = map.clone().scale(ROMAN_DEPLOYMENT_FRACTION);
     barbarian_illegal_deployment = map.clone().scale(1 - BARBARIAN_DEPLOYMENT_FRACTION);
     
-    // collision manager
-    collision_manager = new ListCollisionManager(map);
+    // collisions and percepts
+    grid = new TileGrid(size.clone().scale(Tile.ISIZE));
+    grid.clear();
     
     // generate forest
     copses = new LinkedList<Copse>();
@@ -112,8 +114,8 @@ public class SimulationScene extends AScene
       while(copse_c.collides(roman_deployment) && attempts < 10);
           
       // add the finished copse to the list
+      grid.registerCopse(copse);
       copses.add(copse);
-      collision_manager.register(copse);
     }
   }
   
@@ -126,7 +128,6 @@ public class SimulationScene extends AScene
       RegimentAgent r = Faction.ROMAN.createRegiment(p);
       r.faceRandom();
       agents.add(r);
-      collision_manager.register(r);
     }
   }
   
@@ -146,7 +147,6 @@ public class SimulationScene extends AScene
       RegimentAgent r = Faction.BARBARIAN.createRegiment(p);
       r.faceTowards(centre);
       agents.add(r);
-      collision_manager.register(r);
     }
   }
   
@@ -155,9 +155,6 @@ public class SimulationScene extends AScene
   @Override
   public EUpdateResult update(int t_delta)
   {
-    // generate collisions
-    collision_manager.generateCollisions();
-    
     // update all the agents
     for(Agent a : agents)
       a.update(t_delta);
@@ -186,6 +183,9 @@ public class SimulationScene extends AScene
     // draw all the agents
     for(Agent a : agents)
       a.render(canvas);
+    
+    for(Tile t : grid)
+      t.render(canvas);
       
     // render GUI elements
     canvas.setCameraActive(false);

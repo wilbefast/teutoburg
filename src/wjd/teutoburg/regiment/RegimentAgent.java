@@ -18,11 +18,8 @@ package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.ICanvas;
-import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
-import wjd.teutoburg.collision.Collider;
-import wjd.teutoburg.forest.Copse;
 
 /**
  *
@@ -188,7 +185,7 @@ public class RegimentAgent extends Agent
       nearby = false;
     
     
-    canvas.text(""+in_forest, this.front_position);
+    //canvas.text(""+in_forest, this.front_position);
     
     // set "not in forest" last of all - it will be reset to true if we are*
     in_forest = false;
