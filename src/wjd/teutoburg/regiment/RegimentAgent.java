@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
@@ -275,5 +276,9 @@ public abstract class RegimentAgent extends Agent
     }
     else
       nearby = false;
+    
+    
+    canvas.setColour(Colour.WHITE);
+    canvas.line(c.centre, tile.pixel_position);
   }
 }
