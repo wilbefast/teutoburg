@@ -29,6 +29,10 @@ import wjd.teutoburg.simulation.Tile;
  */
 public abstract class RegimentAgent extends Agent
 {  
+	  public enum State {
+		    waiting, charging, fighting
+		}
+	  
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   
@@ -36,13 +40,13 @@ public abstract class RegimentAgent extends Agent
   // model
   private int strength;
   private Faction faction;
-  private Tile tile;
+  protected Tile tile;
+  protected State state;
   // organisation
   private Formation formation;
   // view
   private boolean nearby = true;
   private V2 left = new V2();
-
 
   /* METHODS */
   // constructors
@@ -59,6 +63,9 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
+    
+    // initialize status
+    state = State.waiting;
   }
 
   // accessors -- package
