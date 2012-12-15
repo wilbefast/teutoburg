@@ -18,6 +18,7 @@ package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.ICanvas;
+import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.simulation.Tile;
@@ -184,7 +185,8 @@ public abstract class RegimentAgent extends Agent
       return result;
     
     // choose action
-    ai(t_delta);
+    perception_box.centrePos(c.centre);
+    ai(t_delta, tile.grid.createSubGrid(perception_box));
 
     // set level of detail
     formation.setDetail(visible && nearby);
