@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
@@ -55,7 +56,7 @@ public class RomanRegiment extends RegimentAgent
   /* IMPLEMENTS -- REGIMENTAGENT */
 
   @Override
-  protected void ai(int t_delta, Iterable<Tile> percepts)
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
 	  V2 escape_point = getCircle().centre.clone().add(0, -10);
 
@@ -85,7 +86,8 @@ public class RomanRegiment extends RegimentAgent
 		  else
 		  {
 			  faceTowards(escape_point);
-			  advance(SPEED_FACTOR*t_delta);
+			  if(advance(SPEED_FACTOR*t_delta) == EUpdateResult.DELETE_ME)
+				  return EUpdateResult.DELETE_ME;
 		  }
 	  }
     
@@ -108,6 +110,7 @@ public class RomanRegiment extends RegimentAgent
 			  state = State.WAITING;
 		  }
 	  }
+	  return EUpdateResult.CONTINUE;
   }
   
   @Override

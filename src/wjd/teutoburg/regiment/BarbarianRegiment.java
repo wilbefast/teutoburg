@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.simulation.Tile;
 
@@ -52,7 +53,7 @@ public class BarbarianRegiment extends RegimentAgent
   /* IMPLEMENTS -- REGIMENTAGENT */
 
   @Override
-  protected void ai(int t_delta, Iterable<Tile> percepts)
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
 	  RomanRegiment nearestRoman = null;
 	  float distanceFromRoman = Float.MAX_VALUE, tmp;
@@ -119,7 +120,8 @@ public class BarbarianRegiment extends RegimentAgent
 			  // charge : turn in front of roman, then advance
 			  faceTowards(nearestRoman.getCircle().centre);
 			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromRoman));
-			  advance(min);
+			  if(advance(min) == EUpdateResult.DELETE_ME)
+			  	return EUpdateResult.DELETE_ME;
 			  if(min == distanceFromRoman)
 				  state = State.FIGHTING;
 			  //System.out.println("je suis "+this+" et ma nouvelle tuile c'est : "+tile);
@@ -129,6 +131,7 @@ public class BarbarianRegiment extends RegimentAgent
 			  state = State.WAITING;
 		  }
 	  }
+	  return EUpdateResult.CONTINUE;
   }
   
   @Override

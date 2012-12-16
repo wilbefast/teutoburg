@@ -81,6 +81,7 @@ public abstract class RegimentAgent extends Agent
     this.faction = faction;
     this.tile = tile_;
     tile.agent = this;
+    grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
     
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
@@ -159,7 +160,7 @@ public abstract class RegimentAgent extends Agent
 
   /* INTERFACE */
   
-  protected abstract void ai(int t_delta, Iterable<Tile> percepts);
+  protected abstract EUpdateResult ai(int t_delta, Iterable<Tile> percepts);
   
   protected abstract double chanceToHit(RegimentAgent defender);
   
@@ -221,7 +222,8 @@ public abstract class RegimentAgent extends Agent
     perception_box.centrePos(c.centre);
     Iterable<Tile> percepts = tile.grid.createSubGrid(perception_box);
     cachePercepts(percepts);
-    ai(t_delta, percepts);
+    if(ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
+    	return EUpdateResult.DELETE_ME;
     
     // snap out of collisions
     if(sharing_tile)
@@ -261,6 +263,18 @@ public abstract class RegimentAgent extends Agent
   }
   
   /* SUBROUTINES */
+  
+  @Override
+  public EUpdateResult advance(float distance)
+  {
+	  V2 new_pos = grid_pos.clone();
+	  V2 new_direction = direction.clone();
+	  new_direction.scale(distance);
+      new_pos.add(direction);
+	  if(new_pos.x < 0 || new_pos.y < 0)
+		  return EUpdateResult.DELETE_ME;
+    return super.advance(distance);
+  }
   
   private void tryClaimTile()
   {

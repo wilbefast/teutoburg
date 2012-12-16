@@ -144,7 +144,7 @@ public class SimulationScene extends AScene
 			RegimentAgent r = Faction.ROMAN.createRegiment(p, grid.pixelToTile(p));
 			r.faceTowards(target);
 			agents.add(r);
-      collisionManager.register(r);
+			collisionManager.register(r);
 		}
 	}
 

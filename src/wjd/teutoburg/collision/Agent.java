@@ -89,7 +89,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   //----------------------------------------------------------------------------
   // POSITION
   //----------------------------------------------------------------------------
-  public void advance(float distance)
+  public EUpdateResult advance(float distance)
   {
     // move various spatial components
     direction.scale(distance);
@@ -100,6 +100,8 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     
     // inform subclasses of the move
     positionChange();
+    
+    return EUpdateResult.CONTINUE;
   }
   
   protected void positionChange()
