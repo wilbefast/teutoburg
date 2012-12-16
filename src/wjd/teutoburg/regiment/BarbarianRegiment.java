@@ -30,7 +30,7 @@ public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-  private static final float SPEED_FACTOR = 1.0f;
+  private static final float SPEED_FACTOR = 0.12f;
   
   /* ATTRIBUTES */
   
@@ -41,6 +41,8 @@ public class BarbarianRegiment extends RegimentAgent
   public BarbarianRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
+    defense_potential = 1;
+    attack_potential = 5;
   }
 
   // accessors
@@ -90,10 +92,10 @@ public class BarbarianRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestRoman != null)
-      {
-        if(attackArmed)
-          fight(nearestRoman);
-      }
+      	  {
+            if(attackArmed)
+            fight(nearestRoman);
+          }
 		  else
 			  state = State.WAITING;
 	  }
@@ -128,4 +130,6 @@ public class BarbarianRegiment extends RegimentAgent
 		  }
 	  }
   }
+  
+  
 }

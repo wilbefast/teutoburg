@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
@@ -44,8 +45,8 @@ public abstract class RegimentAgent extends Agent
   /* ATTRIBUTES */
   // model
   private int strength;
-  protected int attack;
-  protected int defense;
+  protected int attack_potential;
+  protected int defense_potential;
   private Faction faction;
   protected State state;
   // combat
@@ -82,8 +83,8 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
-    attack = 5;
-    defense = 5;
+    attack_potential = 5;
+    defense_potential = 5;
 
     // initialize status
     state = State.WAITING;
@@ -155,41 +156,37 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract void ai(int t_delta, Iterable<Tile> percepts);
   
-  protected void fight(RegimentAgent r)
+  protected void attack(RegimentAgent r)
   {
-    // discharge attack
-    attackArmed = false;
-    
-    
-	  int attack_role, defense_role, attack_value = 0, defense_value = 0;
+	  System.out.print("Je suis "+this+" et j'attaque "+r+" ; ");
+	  int attack_role, attack_value = 0;
 	  // compute attack value
 	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
 	  {
 		  attack_role = (int)(Math.random()*9.0)+1;
-		  attack_role += this.attack;
+		  attack_role += this.attack_potential;
 		  attack_value += attack_role;
 	  }
 	  for(int soldier = 1 ; soldier < r.getStrength() ; soldier++)
 	  {
 		  defense_role = (int)(Math.random()*9.0)+1;
-		  defense_role += this.defense;
+		  defense_role += this.defense_potential;
 		  defense_value += defense_role;
 	  }
+	  System.out.println("jet de defense "+defense_value);
 	  
-	  int nb_dead_defensers = (attack_value - defense_value)/10;
+	  int nb_dead_defensers = (attack_value - defense_value)/20;
 	  if(nb_dead_defensers > 0)
 	  {
-		  if(r.killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
-		  {
-			  r.state = State.DEAD;
-		  }
-	  }
-	  else if(nb_dead_defensers < 0)
-	  {
-		  if(killSoldiers(-nb_dead_defensers) == EUpdateResult.DELETE_ME)
+		  if(killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
 		  {
 			  state = State.DEAD;
 		  }
+		  return 0;
+	  }
+	  else 
+	  {
+		  return -nb_dead_defensers;
 	  }
   }
   

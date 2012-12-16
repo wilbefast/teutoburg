@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
@@ -29,7 +30,7 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
-  private static final float SPEED_FACTOR = 0.5f;
+  private static final float SPEED_FACTOR = 0.06f;
   
   /* ATTRIBUTES */
   
@@ -40,6 +41,8 @@ public class RomanRegiment extends RegimentAgent
   public RomanRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
+    defense_potential = 10;
+    attack_potential = 10;
   }
 
   // accessors
@@ -63,7 +66,7 @@ public class RomanRegiment extends RegimentAgent
 		  if(t.agent instanceof RomanRegiment)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if(tmp < distanceFromRoman)
+			  if(t.agent.state != State.DEAD && tmp < distanceFromRoman)
 			  {
 				  nearestRoman = (RomanRegiment)t.agent;
 				  distanceFromRoman = tmp;
@@ -72,7 +75,7 @@ public class RomanRegiment extends RegimentAgent
 		  else if(t.agent instanceof BarbarianRegiment)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if(tmp < distanceFromBarbarian)
+			  if(t.agent.state != State.DEAD && tmp < distanceFromBarbarian)
 			  {
 				  nearestBarbarian = (BarbarianRegiment)t.agent;
 				  distanceFromBarbarian = tmp;
@@ -86,13 +89,13 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestBarbarian != null)
-      {
+		if(nearestBarbarian != null)
+        {
         if(attackArmed)
-          fight(nearestBarbarian);
-      }
-		  else
-			  state = State.WAITING;
+          attack(nearestBarbarian);
+        }
+		else
+		  state = State.WAITING;
 	  }
 	  else if(state == State.WAITING)
 	  {
@@ -121,5 +124,15 @@ public class RomanRegiment extends RegimentAgent
 			  state = State.WAITING;
 		  }
 	  }
+  }
+  
+  @Override
+  protected int defense(int attack_value, V2 attacker_direction)
+  {
+	  if(isFormedUp() && V2.angleBetween(getDirection(), attacker_direction) < 135)
+	  {
+		  this.setFormedUp(false);
+	  }
+	  return super.defense(attack_value, attacker_direction);
   }
 }
