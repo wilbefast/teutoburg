@@ -167,7 +167,21 @@ public abstract class RegimentAgent extends Agent
 		  attack_role += this.attack_potential;
 		  attack_value += attack_role;
 	  }
-	  for(int soldier = 1 ; soldier < r.getStrength() ; soldier++)
+	  System.out.print("jet d'attaque "+attack_value+" ; ");
+
+	  int nb_dead_attackers = r.defense(attack_value, getDirection());
+	  if(nb_dead_attackers != 0)
+	  {
+		  if(killSoldiers(nb_dead_attackers) == EUpdateResult.DELETE_ME)
+			  state = State.DEAD;
+	  }
+  }
+  
+  protected int defense(int attack_value, V2 attacker_direction)
+  {
+	  int defense_role, defense_value = 0;
+	  
+	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
 	  {
 		  defense_role = (int)(Math.random()*9.0)+1;
 		  defense_role += this.defense_potential;
@@ -179,15 +193,11 @@ public abstract class RegimentAgent extends Agent
 	  if(nb_dead_defensers > 0)
 	  {
 		  if(killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
-		  {
 			  state = State.DEAD;
-		  }
 		  return 0;
 	  }
 	  else 
-	  {
 		  return -nb_dead_defensers;
-	  }
   }
   
   
