@@ -45,8 +45,6 @@ public class RomanRegiment extends RegimentAgent
   public RomanRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
-    defense_potential = 10;
-    attack_potential = 10;
   }
 
   // accessors
@@ -70,10 +68,13 @@ public class RomanRegiment extends RegimentAgent
     
 	  if(state == State.FIGHTING)
 	  {
-      if(nearestEnemy != null)
-        melee(this, nearestEnemy);
-      else
-        state = State.WAITING;
+		  if(nearestEnemy != null)
+			  if(melee(nearestEnemy) == EUpdateResult.DELETE_ME)
+			  {
+				  return EUpdateResult.DELETE_ME;
+			  }
+		  else
+			  state = State.WAITING;
 	  }
     
     

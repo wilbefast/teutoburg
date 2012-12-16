@@ -44,13 +44,12 @@ public abstract class RegimentAgent extends Agent
   /* ATTRIBUTES */
   // model
   private int strength;
-  protected int attack_potential;
-  protected int defense_potential;
   private Faction faction;
   protected State state;
   // combat
   protected Timer attackRecharge = new Timer(1000);
   protected boolean attackArmed = true;
+  protected int hitsToTake;
   // position
   private final V2 grid_pos = new V2();
   protected Tile tile;
@@ -86,8 +85,7 @@ public abstract class RegimentAgent extends Agent
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
-    attack_potential = 5;
-    defense_potential = 5;
+    hitsToTake = 0;
 
     // initialize status
     state = State.WAITING;
@@ -202,6 +200,14 @@ public abstract class RegimentAgent extends Agent
   @Override
   public EUpdateResult update(int t_delta)
   {
+	  // hitsToTake
+	  if(hitsToTake > 0)
+	  {
+		  if(killSoldiers(hitsToTake) == EUpdateResult.DELETE_ME)
+			  state = State.DEAD;
+		  hitsToTake = 0;
+	  }
+	  
     // dead
     if(state == State.DEAD)
     {
@@ -354,15 +360,15 @@ public abstract class RegimentAgent extends Agent
   
   /* COMBAT */
   
-  protected static void melee(RegimentAgent a, RegimentAgent b)
+  protected EUpdateResult melee(RegimentAgent ennemy)
   {
     // determine the number of kills
-    int aKills = a.rollKillsAgainst(b),
-        bKills = b.rollKillsAgainst(a);
+    int aKills = rollKillsAgainst(ennemy),
+        bKills = ennemy.rollKillsAgainst(this);
     
     // apply this number of kills AFTER determining each side's result
-    a.killSoldiers(bKills);
-    b.killSoldiers(aKills);
+    ennemy.hitsToTake += aKills;
+    return killSoldiers(bKills);
   }
   
   protected int rollKillsAgainst(RegimentAgent other)

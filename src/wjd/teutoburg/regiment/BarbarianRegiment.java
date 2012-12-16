@@ -42,8 +42,6 @@ public class BarbarianRegiment extends RegimentAgent
   public BarbarianRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
-    defense_potential = 1;
-    attack_potential = 5;
   }
 
   // accessors
@@ -96,7 +94,7 @@ public class BarbarianRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestRoman != null)
-        melee(this, nearestRoman);
+			  melee(nearestRoman);
 		  else
 			  state = State.WAITING;
 	  }
