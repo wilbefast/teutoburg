@@ -57,52 +57,28 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected void ai(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 escape_point = getCircle().centre.clone();
-	  escape_point.add(0, -10);
-	  RomanRegiment nearestRoman = null;
-	  float distanceFromRoman = Float.MAX_VALUE, tmp;
-	  BarbarianRegiment nearestBarbarian = null;
-	  float distanceFromBarbarian = Float.MAX_VALUE;
-	  
-	  for(Tile t : percepts)
-	  {
-      if(t.agent == null || t.agent.state == State.DEAD)
-        continue;
-      
-		  if(t.agent instanceof RomanRegiment)
-		  {
-			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if(t.agent.state != State.DEAD && tmp < distanceFromRoman)
-			  {
-				  nearestRoman = (RomanRegiment)t.agent;
-				  distanceFromRoman = tmp;
-			  }
-		  }
-		  else if(t.agent instanceof BarbarianRegiment)
-		  {
-			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if(t.agent.state != State.DEAD && tmp < distanceFromBarbarian)
-			  {
-				  nearestBarbarian = (BarbarianRegiment)t.agent;
-				  distanceFromBarbarian = tmp;
-			  }
-		  }
-	  }
+	  V2 escape_point = getCircle().centre.clone().add(0, -10);
 
-	  if(nearestBarbarian != null && state != State.FIGHTING && c.collides(nearestBarbarian.getCircle()))
+	  if(nearestEnemy != null 
+       && state != State.FIGHTING 
+       && c.collides(nearestEnemy.getCircle()))
 	  {
 		  state = State.FIGHTING;
 	  }
+    
+    
 	  if(state == State.FIGHTING)
 	  {
-      if(nearestBarbarian != null)
-        melee(this, nearestBarbarian);
+      if(nearestEnemy != null)
+        melee(this, nearestEnemy);
       else
         state = State.WAITING;
 	  }
+    
+    
 	  else if(state == State.WAITING)
 	  {
-		  if(nearestBarbarian != null)
+		  if(nearestEnemy != null)
 		  {
 			  state = State.CHARGING;
 		  }
@@ -112,14 +88,19 @@ public class RomanRegiment extends RegimentAgent
 			  advance(SPEED_FACTOR*t_delta);
 		  }
 	  }
+    
+    
 	  else if(state == State.CHARGING)
 	  {
-		  if(nearestBarbarian != null)
+		  if(nearestEnemy != null)
 		  {
-			  faceTowards(nearestBarbarian.getCircle().centre);
-			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromBarbarian));
+			  faceTowards(nearestEnemy.getCircle().centre);
+        
+        float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
+          
+			  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
 			  advance(min);
-			  if(min == distanceFromBarbarian)
+			  if(min == nearestEnemyDist)
 				  state = State.FIGHTING;
 		  }
 		  else

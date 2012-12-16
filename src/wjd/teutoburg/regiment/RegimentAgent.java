@@ -219,7 +219,9 @@ public abstract class RegimentAgent extends Agent
     
     // choose action
     perception_box.centrePos(c.centre);
-    ai(t_delta, tile.grid.createSubGrid(perception_box));
+    Iterable<Tile> percepts = tile.grid.createSubGrid(perception_box);
+    cachePercepts(percepts);
+    ai(t_delta, percepts);
     
     // snap out of collisions
     if(sharing_tile)
@@ -296,6 +298,7 @@ public abstract class RegimentAgent extends Agent
   private void cachePercepts(Iterable<Tile> percepts)
   {
     // reset
+    nearestAlly = nearestEnemy = null;
 	  nearestAllyDist2 = nearestEnemyDist2 = Float.MAX_VALUE;
     
     // check if we're in the woods
