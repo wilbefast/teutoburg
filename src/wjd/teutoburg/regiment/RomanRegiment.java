@@ -34,7 +34,7 @@ public class RomanRegiment extends RegimentAgent
   private static final double BLOCK_CHANCE_TURTLE = 0.6;
   private static final double BLOCK_CHANCE_RABBLE = 0.2;
   private static final double ATTACK_CHANCE = 0.5;
-  private static final int FLANK_MIN_ANGLE = 55;
+  private static final int FLANK_MIN_ANGLE = 135;
   
   /* ATTRIBUTES */
   
@@ -56,7 +56,7 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 escape_point = getCircle().centre.clone().add(0, -15);
+	  V2 escape_point = getCircle().centre.clone().add(0, -10);
 
 	  if(nearestEnemy != null 
        && state != State.FIGHTING 
@@ -87,19 +87,19 @@ public class RomanRegiment extends RegimentAgent
 		  else
 		  {
 			  V2 new_direction = escape_point.clone(), tmp;
-			  int nbCleanNeig = 0;
 			  for(Tile t : percepts)
 			  {
-				  nbCleanNeig++;
-				  if(t == tile)
-					  nbCleanNeig--;
-				  else if(!(t.forest_amount.isEmpty()))
+				  if(	t != tile 
+						&& t.pixel_position.y >= tile.pixel_position.y
+						&& t.pixel_position.x != tile.pixel_position.x)
 				  {
-					  tmp = new V2(t.pixel_position, c.centre);
-					  tmp.normalise();
-					  tmp.scale(t.forest_amount.balance());
-					  new_direction.add(tmp);
-					  nbCleanNeig--;
+					  if(!(t.forest_amount.isEmpty()))
+					  {
+						  tmp = new V2(t.pixel_position, c.centre);
+						  tmp.normalise();
+						  tmp.scale(t.forest_amount.balance());
+						  new_direction.add(tmp);
+					  }
 				  }
 			  }
 			  faceTowards(new_direction);
@@ -136,8 +136,10 @@ public class RomanRegiment extends RegimentAgent
     if(isFormedUp())
     {
       // deform if flank-attack
-      if(V2.angleBetween(getDirection(), attacker.getDirection()) > FLANK_MIN_ANGLE)
+      if((V2.angleBetween(getDirection(), attacker.getDirection())*180.0/2.0) < FLANK_MIN_ANGLE)
+      {
         setFormedUp(false);
+      }
       else
         return BLOCK_CHANCE_TURTLE;
     }
