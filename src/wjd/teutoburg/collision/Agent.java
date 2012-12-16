@@ -34,6 +34,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
 {
   /* CONSTANTS */
   private static final double INV_2PI = 1/(2*Math.PI);
+  private static final V2 tmp_v2  = new V2();
   
   /* ATTRIBUTES */
   // model
@@ -64,6 +65,33 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   public void turn(float degrees)
   {
     direction.addAngle((float)(INV_2PI*degrees));
+    directionChange();
+  }
+  
+
+  public void turnTowardsGradually(V2 target, float max_turn)
+  {
+    // calculate the new angle
+    tmp_v2.reset(target).sub(c.centre).normalise();
+    
+    // calculate angle between the two
+    float angle_between = V2.angleBetween(direction, tmp_v2);
+    if(angle_between < 0.01f) // about 0.6 degrees
+      return;
+
+
+
+    // circular interpolation
+    if(V2.det(direction, tmp_v2) > 0)
+      direction.addAngle(Math.min(max_turn, angle_between));
+    else
+      direction.addAngle(-Math.min(max_turn, angle_between));
+    directionChange();
+  }
+  
+  public void setDirection(V2 new_direction)
+  {
+    direction.reset(new_direction).normalise();
     directionChange();
   }
   

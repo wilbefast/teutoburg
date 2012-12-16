@@ -30,11 +30,21 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
-  private static final float SPEED_FACTOR = 0.1f;
+  
+  // combat
   private static final double BLOCK_CHANCE_TURTLE = 0.7;
   private static final double BLOCK_CHANCE_RABBLE = 0.3;
   private static final double ATTACK_CHANCE = 0.5;
   private static final int FLANK_MIN_ANGLE = 135;
+  
+  // movement
+  private static final float SPEED_FACTOR = 0.1f;
+  private static final float MAX_TURN_TURTLE 
+                        = 10.0f * (float)Math.PI / 180.0f / 1000.0f, 
+                          // 10 degrees per second
+                            MAX_TURN_RABBLE
+                        = 90.0f * (float)Math.PI / 180.0f / 1000.0f; 
+                          // 90 degrees per second
   
   /* ATTRIBUTES */
   
@@ -53,10 +63,12 @@ public class RomanRegiment extends RegimentAgent
   
   /* IMPLEMENTS -- REGIMENTAGENT */
 
+  
+  // artificial intelligence
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 escape_point = getCircle().centre.clone().add(0, -10);
+	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
 
 	  if(nearestEnemy != null 
        && state != State.FIGHTING 
@@ -86,7 +98,7 @@ public class RomanRegiment extends RegimentAgent
 		  }
 		  else
 		  {
-			  V2 new_direction = escape_point.clone(), tmp;
+			  V2 new_direction = escape_direction.clone(), tmp;
 			  int nbPossibleNeigh = 1;
 			  for(Tile t : percepts)
 			  {
@@ -106,9 +118,9 @@ public class RomanRegiment extends RegimentAgent
 				  }
 			  }
 			  if(nbPossibleNeigh == 1)
-				  faceTowards(escape_point);
+				  turnTowardsGradually(escape_direction, getMaxTurn());
 			  else
-				  faceTowards(new_direction);
+				  turnTowardsGradually(new_direction, getMaxTurn());
 			  if(advance(SPEED_FACTOR*t_delta) == EUpdateResult.DELETE_ME)
 				  return EUpdateResult.DELETE_ME;
 		  }
@@ -136,6 +148,8 @@ public class RomanRegiment extends RegimentAgent
 	  return EUpdateResult.CONTINUE;
   }
   
+  
+  // parameters
   @Override
   protected double chanceToBlock(RegimentAgent attacker)
   {
@@ -172,5 +186,13 @@ public class RomanRegiment extends RegimentAgent
     return (other.state == State.DEAD) 
           ? false
           : (other instanceof RomanRegiment);
+  }
+  
+  
+  /* SUBROUTINES */
+
+  private float getMaxTurn()
+  {
+    return ((isFormedUp()) ? MAX_TURN_TURTLE : MAX_TURN_RABBLE); 
   }
 }
