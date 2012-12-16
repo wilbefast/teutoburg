@@ -90,7 +90,10 @@ public class BarbarianRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestRoman != null)
-			  fight(nearestRoman);
+      {
+        if(attackArmed)
+          fight(nearestRoman);
+      }
 		  else
 			  state = State.WAITING;
 	  }

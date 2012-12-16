@@ -74,9 +74,7 @@ public class Tile implements IVisible, IDynamic
   @Override
   public void render(ICanvas canvas)
   {
-    canvas.setColour(Colour.BLACK);
-    if(agent != null)
-      canvas.line(pixel_position, agent.getCircle().centre);
+    // do nothing
   }
   
   /* OVERRIDES -- OBJECT */

@@ -17,13 +17,12 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
-import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.Tile;
+import wjd.util.Timer;
 
 /**
  *
@@ -49,6 +48,9 @@ public abstract class RegimentAgent extends Agent
   protected int defense;
   private Faction faction;
   protected State state;
+  // combat
+  protected Timer attackRecharge = new Timer(1000);
+  protected boolean attackArmed = true;
   // position
   private final V2 grid_pos = new V2();
   protected Tile tile;
@@ -155,6 +157,10 @@ public abstract class RegimentAgent extends Agent
   
   protected void fight(RegimentAgent r)
   {
+    // discharge attack
+    attackArmed = false;
+    
+    
 	  int attack_role, defense_role, attack_value = 0, defense_value = 0;
 	  // compute attack value
 	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
@@ -230,6 +236,10 @@ public abstract class RegimentAgent extends Agent
     EUpdateResult result = super.update(t_delta);
     if (result != EUpdateResult.CONTINUE)
       return result;
+    
+    // timers
+    if(!attackArmed && attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
+      attackArmed = true;
     
     // choose action
     perception_box.centrePos(c.centre);
