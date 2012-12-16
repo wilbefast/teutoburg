@@ -148,4 +148,20 @@ public class RomanRegiment extends RegimentAgent
   {
     return ATTACK_CHANCE;
   }
+  
+  @Override
+  protected boolean isEnemy(RegimentAgent other)
+  {
+    return (other.state == State.DEAD) 
+          ? false
+          : (other instanceof BarbarianRegiment);
+  }
+  
+  @Override
+  protected boolean isAlly(RegimentAgent other)
+  {
+    return (other.state == State.DEAD) 
+          ? false
+          : (other instanceof RomanRegiment);
+  }
 }

@@ -62,6 +62,9 @@ public abstract class RegimentAgent extends Agent
   private V2 left = new V2();
   // ai
   private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(5));
+  protected RegimentAgent nearestAlly, nearestEnemy;
+  protected float nearestAllyDist2, nearestEnemyDist2;
+  protected boolean in_woods;
 
 
   /* METHODS */
@@ -161,6 +164,10 @@ public abstract class RegimentAgent extends Agent
   protected abstract double chanceToHit(RegimentAgent defender);
   
   protected abstract double chanceToBlock(RegimentAgent defender);
+  
+  protected abstract boolean isEnemy(RegimentAgent other);
+  
+  protected abstract boolean isAlly(RegimentAgent other);
   
   
   /* OVERRIDES -- AGENT */
@@ -286,9 +293,47 @@ public abstract class RegimentAgent extends Agent
     }
   }
   
-  
-  
-  
+  private void cachePercepts(Iterable<Tile> percepts)
+  {
+    // reset
+	  nearestAllyDist2 = nearestEnemyDist2 = Float.MAX_VALUE;
+    
+    // check if we're in the woods
+    in_woods = !(tile.forest_amount.isEmpty());
+    
+    // check all tiles in view 
+    for(Tile t : percepts)
+	  {
+      
+      // skip is dead
+      if(t.agent == null || t.agent.state == State.DEAD)
+        continue;
+      
+      RegimentAgent r = t.agent;
+      
+      // cache nearest ally
+		  if(isEnemy(r))
+		  {
+			  float dist2 = r.getCircle().centre.distance2(c.centre);
+			  if(dist2 < nearestEnemyDist2)
+			  {
+				  nearestEnemy = r;
+				  nearestAllyDist2 = dist2;
+			  }
+		  }
+      
+      // cache nearest enemy
+      else if(isAlly(r))
+		  {
+			  float dist2 = r.getCircle().centre.distance2(c.centre);
+			  if(dist2 < nearestAllyDist2)
+			  {
+				  nearestAlly = r;
+				  nearestAllyDist2 = dist2;
+			  }
+		  }
+	  }
+  }
   
   /* COMBAT */
   
