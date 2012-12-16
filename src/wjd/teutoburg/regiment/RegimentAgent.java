@@ -16,6 +16,9 @@
  */
 package wjd.teutoburg.regiment;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
@@ -64,6 +67,8 @@ public abstract class RegimentAgent extends Agent
   protected RegimentAgent nearestAlly, nearestEnemy;
   protected float nearestAllyDist2, nearestEnemyDist2;
   protected boolean in_woods;
+  // corpses
+  private List<Cadaver> dead_pile;
 
 
   /* METHODS */
@@ -86,6 +91,9 @@ public abstract class RegimentAgent extends Agent
     formation = faction.createFormation(this);
     setRadius(formation.reform());
     hitsToTake = 0;
+    
+    // cadavers stored until the scene collects them
+    dead_pile = new LinkedList<Cadaver>();
 
     // initialize status
     state = State.WAITING;
@@ -145,15 +153,32 @@ public abstract class RegimentAgent extends Agent
   // mutators
   public EUpdateResult killSoldiers(int n_killed)
   {
+    // transform dying men into corpses
+    for(int i = 0; i < n_killed; i++)
+      dead_pile.add(new Cadaver(formation.getSoldierPosition(strength-i-1)));
+    
+    // remove the dead
     strength -= n_killed;
+    
+    // destroy the regiment if too many are dead
     if (strength <= 0)
     {
       state = State.DEAD;
       return EUpdateResult.DELETE_ME;
     }
     
-    setRadius(formation.reform());
-    return EUpdateResult.CONTINUE;
+    // reform the regiment if it is still alive
+    else
+    {
+      setRadius(formation.reform());
+      return EUpdateResult.CONTINUE;
+    }
+  }
+  
+  public void bringOutYourDead(Collection<Cadaver> cemetary)
+  {
+    cemetary.addAll(dead_pile);
+    dead_pile.clear();
   }
 
   /* INTERFACE */
@@ -288,6 +313,10 @@ public abstract class RegimentAgent extends Agent
     grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
     if (grid_pos.x != tile.grid_position.x || grid_pos.y != tile.grid_position.y)
     {
+      // tile outside of grid!
+      if(!tile.grid.validGridPos(grid_pos))
+        return;
+      
       Tile new_tile = tile.grid.tiles[(int) grid_pos.y][(int) grid_pos.x];
 
       // try to claim new tile

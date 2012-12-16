@@ -55,6 +55,27 @@ public abstract class Formation implements IVisible
     left = owner.getLeft();
   }
   
+  // accessors
+  
+  public V2 getSoldierPosition(int i)
+  {
+    if(soldiers == null)
+    {
+      reform();
+      reposition();
+    }
+    
+    try
+    {
+      return soldiers[i].getPosition();
+    }
+    catch(NullPointerException e)
+    {
+      return V2.ORIGIN;
+    }
+  }
+  
+  
   // mutators
   public void setDetail(boolean new_detail)
   {
