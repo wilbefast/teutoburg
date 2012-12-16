@@ -39,7 +39,7 @@ public abstract class RegimentAgent extends Agent
     
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
-  private static final double ATTACK_FUMBLE_CHANCE = 0.5;
+  private static final double ATTACK_FUMBLE_CHANCE = 0.8;
   
   /* ATTRIBUTES */
   // model
@@ -262,7 +262,7 @@ public abstract class RegimentAgent extends Agent
       // render the formation depending on the level of detail
       formation.render(canvas);
       
-      canvas.box(perception_box, false);
+      //canvas.box(perception_box, false);
     }
     else
       nearby = false;
@@ -383,7 +383,7 @@ public abstract class RegimentAgent extends Agent
       total_attack += Math.random() 
                       * this.chanceToHit(other) 
                       * (1 - other.chanceToBlock(this))
-                      * ATTACK_FUMBLE_CHANCE;
+                      * (1 - ATTACK_FUMBLE_CHANCE);
     
     // return number of kills
     return (int)total_attack;

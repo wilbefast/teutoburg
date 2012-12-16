@@ -29,7 +29,7 @@ public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-  private static final float SPEED_FACTOR = 0.12f;
+  private static final float SPEED_FACTOR = 0.2f;
   private static final double BLOCK_CHANCE = 0.1;
   private static final double ATTACK_CHANCE = 0.6;
   
