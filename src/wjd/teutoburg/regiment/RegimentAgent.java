@@ -262,7 +262,7 @@ public abstract class RegimentAgent extends Agent
       // render the formation depending on the level of detail
       formation.render(canvas);
       
-      //canvas.box(perception_box, false);
+      canvas.box(perception_box, false);
     }
     else
       nearby = false;
@@ -328,7 +328,7 @@ public abstract class RegimentAgent extends Agent
     for(Tile t : percepts)
 	  {
       
-      // skip is dead
+      // skip if dead
       if(t.agent == null || t.agent.state == State.DEAD)
         continue;
       

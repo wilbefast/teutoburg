@@ -30,7 +30,7 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
-  private static final float SPEED_FACTOR = 0.6f;//0.06f;
+  private static final float SPEED_FACTOR = 0.06f;
   private static final double BLOCK_CHANCE_TURTLE = 0.6;
   private static final double BLOCK_CHANCE_RABBLE = 0.2;
   private static final double ATTACK_CHANCE = 0.5;
@@ -86,7 +86,25 @@ public class RomanRegiment extends RegimentAgent
 		  }
 		  else
 		  {
-			  faceTowards(escape_point);
+			  V2 new_direction = escape_point.clone(), tmp;
+			  int nbCleanNeig = 0;
+			  for(Tile t : percepts)
+			  {
+				  nbCleanNeig++;
+				  if(t == tile)
+					  nbCleanNeig--;
+				  else if(!(t.forest_amount.isEmpty()))
+				  {
+					  tmp = new V2(t.pixel_position, c.centre);
+					  tmp.normalise();
+					  new_direction.add(tmp);
+					  nbCleanNeig--;
+				  }
+			  }
+			  if(nbCleanNeig > 0)
+				  faceTowards(new_direction);
+			  else
+				  faceTowards(escape_point);
 			  if(advance(SPEED_FACTOR*t_delta) == EUpdateResult.DELETE_ME)
 				  return EUpdateResult.DELETE_ME;
 		  }
