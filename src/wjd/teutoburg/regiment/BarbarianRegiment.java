@@ -122,7 +122,6 @@ public class BarbarianRegiment extends RegimentAgent
 			  advance(min);
 			  if(min == distanceFromRoman)
 				  state = State.FIGHTING;
-			  //System.out.println("je suis "+this+" et ma nouvelle tuile c'est : "+tile);
 		  }
 		  else
 		  {
