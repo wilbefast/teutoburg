@@ -62,7 +62,7 @@ public class BarbarianRegiment extends RegimentAgent
 	  for(Tile t : percepts)
 	  {
       if(t.agent == null || t.agent.state == State.DEAD)
-        return;
+        continue;
       
 		  if(t.agent instanceof RomanRegiment)
 		  {

@@ -66,6 +66,9 @@ public class RomanRegiment extends RegimentAgent
 	  
 	  for(Tile t : percepts)
 	  {
+      if(t.agent == null || t.agent.state == State.DEAD)
+        continue;
+      
 		  if(t.agent instanceof RomanRegiment)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);

@@ -301,8 +301,6 @@ public abstract class RegimentAgent extends Agent
     // apply this number of kills AFTER determining each side's result
     a.killSoldiers(bKills);
     b.killSoldiers(aKills);
-    
-    System.out.println("melee: a kills " + aKills + " b kills " + bKills);
   }
   
   protected int rollKillsAgainst(RegimentAgent other)
