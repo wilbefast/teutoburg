@@ -17,7 +17,6 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
@@ -32,15 +31,15 @@ import wjd.util.Timer;
  */
 public abstract class RegimentAgent extends Agent
 {  
-	  public enum State 
-    {
-		    WAITING, CHARGING, FIGHTING, DEAD
-		}
-	  
-  private static final V2 push = new V2();
+  /* NESTING */
+  public enum State 
+  {
+      WAITING, CHARGING, FIGHTING, DEAD
+  }
     
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
+  private static final double ATTACK_FUMBLE_CHANCE = 0.5;
   
   /* ATTRIBUTES */
   // model
@@ -146,7 +145,10 @@ public abstract class RegimentAgent extends Agent
   {
     strength -= n_killed;
     if (strength <= 0)
+    {
+      state = State.DEAD;
       return EUpdateResult.DELETE_ME;
+    }
     
     setRadius(formation.reform());
     return EUpdateResult.CONTINUE;
@@ -156,49 +158,9 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract void ai(int t_delta, Iterable<Tile> percepts);
   
-  protected void attack(RegimentAgent r)
-  {
-	  System.out.print("Je suis "+this+" et j'attaque "+r+" ; ");
-	  int attack_role, attack_value = 0;
-	  // compute attack value
-	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
-	  {
-		  attack_role = (int)(Math.random()*9.0)+1;
-		  attack_role += this.attack_potential;
-		  attack_value += attack_role;
-	  }
-	  System.out.print("jet d'attaque "+attack_value+" ; ");
-
-	  int nb_dead_attackers = r.defense(attack_value, getDirection());
-	  if(nb_dead_attackers != 0)
-	  {
-		  if(killSoldiers(nb_dead_attackers) == EUpdateResult.DELETE_ME)
-			  state = State.DEAD;
-	  }
-  }
+  protected abstract double chanceToHit(RegimentAgent defender);
   
-  protected int defense(int attack_value, V2 attacker_direction)
-  {
-	  int defense_role, defense_value = 0;
-	  
-	  for(int soldier = 1 ; soldier < getStrength() ; soldier++)
-	  {
-		  defense_role = (int)(Math.random()*9.0)+1;
-		  defense_role += this.defense_potential;
-		  defense_value += defense_role;
-	  }
-	  System.out.println("jet de defense "+defense_value);
-	  
-	  int nb_dead_defensers = (attack_value - defense_value)/20;
-	  if(nb_dead_defensers > 0)
-	  {
-		  if(killSoldiers(nb_dead_defensers) == EUpdateResult.DELETE_ME)
-			  state = State.DEAD;
-		  return 0;
-	  }
-	  else 
-		  return -nb_dead_defensers;
-  }
+  protected abstract double chanceToBlock(RegimentAgent defender);
   
   
   /* OVERRIDES -- AGENT */
@@ -322,5 +284,42 @@ public abstract class RegimentAgent extends Agent
           }
       }
     }
+  }
+  
+  
+  
+  
+  
+  /* COMBAT */
+  
+  protected static void melee(RegimentAgent a, RegimentAgent b)
+  {
+    // determine the number of kills
+    int aKills = a.rollKillsAgainst(b),
+        bKills = b.rollKillsAgainst(a);
+    
+    // apply this number of kills AFTER determining each side's result
+    a.killSoldiers(bKills);
+    b.killSoldiers(aKills);
+    
+    System.out.println("melee: a kills " + aKills + " b kills " + bKills);
+  }
+  
+  protected int rollKillsAgainst(RegimentAgent other)
+  {
+    // pause between attacks
+    if(!attackArmed)
+      return 0;
+   
+    // compute attack value
+    double total_attack = 0.0;
+    for(int s = 1; s < strength; s++)
+      total_attack += Math.random() 
+                      * this.chanceToHit(other) 
+                      * (1 - other.chanceToBlock(this))
+                      * ATTACK_FUMBLE_CHANCE;
+    
+    // return number of kills
+    return (int)total_attack;
   }
 }

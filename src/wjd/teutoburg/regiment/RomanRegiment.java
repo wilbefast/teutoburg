@@ -16,7 +16,6 @@
  */
 package wjd.teutoburg.regiment;
 
-import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
@@ -30,7 +29,11 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
-  private static final float SPEED_FACTOR = 0.06f;
+  private static final float SPEED_FACTOR = 0.6f;//0.06f;
+  private static final double BLOCK_CHANCE_TURTLE = 0.6;
+  private static final double BLOCK_CHANCE_RABBLE = 0.2;
+  private static final double ATTACK_CHANCE = 0.5;
+  private static final int FLANK_MIN_ANGLE = 55;
   
   /* ATTRIBUTES */
   
@@ -89,13 +92,10 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  if(state == State.FIGHTING)
 	  {
-		if(nearestBarbarian != null)
-        {
-        if(attackArmed)
-          attack(nearestBarbarian);
-        }
-		else
-		  state = State.WAITING;
+      if(nearestBarbarian != null)
+        melee(this, nearestBarbarian);
+      else
+        state = State.WAITING;
 	  }
 	  else if(state == State.WAITING)
 	  {
@@ -127,12 +127,22 @@ public class RomanRegiment extends RegimentAgent
   }
   
   @Override
-  protected int defense(int attack_value, V2 attacker_direction)
+  protected double chanceToBlock(RegimentAgent attacker)
   {
-	  if(isFormedUp() && V2.angleBetween(getDirection(), attacker_direction) < 135)
-	  {
-		  this.setFormedUp(false);
-	  }
-	  return super.defense(attack_value, attacker_direction);
+    if(isFormedUp())
+    {
+      // deform if flank-attack
+      if(V2.angleBetween(getDirection(), attacker.getDirection()) > FLANK_MIN_ANGLE)
+        setFormedUp(false);
+      else
+        return BLOCK_CHANCE_TURTLE;
+    }
+    return BLOCK_CHANCE_RABBLE;
+  }
+  
+  @Override
+  protected double chanceToHit(RegimentAgent defender)
+  {
+    return ATTACK_CHANCE;
   }
 }

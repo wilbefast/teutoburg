@@ -16,9 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
-import wjd.math.Rect;
 import wjd.math.V2;
-import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.Tile;
 
 /**
@@ -31,6 +29,8 @@ public class BarbarianRegiment extends RegimentAgent
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
   private static final float SPEED_FACTOR = 0.12f;
+  private static final double BLOCK_CHANCE = 0.1;
+  private static final double ATTACK_CHANCE = 0.6;
   
   /* ATTRIBUTES */
   
@@ -61,6 +61,9 @@ public class BarbarianRegiment extends RegimentAgent
 	  
 	  for(Tile t : percepts)
 	  {
+      if(t.agent == null || t.agent.state == State.DEAD)
+        return;
+      
 		  if(t.agent instanceof RomanRegiment)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);
@@ -92,10 +95,7 @@ public class BarbarianRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestRoman != null)
-      	  {
-            if(attackArmed)
-              attack(nearestRoman);
-          }
+        melee(this, nearestRoman);
 		  else
 			  state = State.WAITING;
 	  }
@@ -131,5 +131,15 @@ public class BarbarianRegiment extends RegimentAgent
 	  }
   }
   
+  @Override
+  protected double chanceToBlock(RegimentAgent attacker)
+  {
+    return BLOCK_CHANCE;
+  }
   
+  @Override
+  protected double chanceToHit(RegimentAgent defender)
+  {
+    return ATTACK_CHANCE;
+  }
 }
