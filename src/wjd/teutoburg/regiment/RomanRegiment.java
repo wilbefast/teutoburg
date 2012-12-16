@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
@@ -29,11 +30,11 @@ public class RomanRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
-  private static final float SPEED_FACTOR = 0.6f;//0.06f;
-  private static final double BLOCK_CHANCE_TURTLE = 0.6;
-  private static final double BLOCK_CHANCE_RABBLE = 0.2;
+  private static final float SPEED_FACTOR = 0.1f;
+  private static final double BLOCK_CHANCE_TURTLE = 0.7;
+  private static final double BLOCK_CHANCE_RABBLE = 0.3;
   private static final double ATTACK_CHANCE = 0.5;
-  private static final int FLANK_MIN_ANGLE = 55;
+  private static final int FLANK_MIN_ANGLE = 135;
   
   /* ATTRIBUTES */
   
@@ -44,8 +45,6 @@ public class RomanRegiment extends RegimentAgent
   public RomanRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
-    defense_potential = 10;
-    attack_potential = 10;
   }
 
   // accessors
@@ -55,7 +54,7 @@ public class RomanRegiment extends RegimentAgent
   /* IMPLEMENTS -- REGIMENTAGENT */
 
   @Override
-  protected void ai(int t_delta, Iterable<Tile> percepts)
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
 	  V2 escape_point = getCircle().centre.clone().add(0, -10);
 
@@ -69,10 +68,13 @@ public class RomanRegiment extends RegimentAgent
     
 	  if(state == State.FIGHTING)
 	  {
-      if(nearestEnemy != null)
-        melee(this, nearestEnemy);
-      else
-        state = State.WAITING;
+		  if(nearestEnemy != null)
+			  if(melee(nearestEnemy) == EUpdateResult.DELETE_ME)
+			  {
+				  return EUpdateResult.DELETE_ME;
+			  }
+		  else
+			  state = State.WAITING;
 	  }
     
     
@@ -84,8 +86,31 @@ public class RomanRegiment extends RegimentAgent
 		  }
 		  else
 		  {
-			  faceTowards(escape_point);
-			  advance(SPEED_FACTOR*t_delta);
+			  V2 new_direction = escape_point.clone(), tmp;
+			  int nbPossibleNeigh = 1;
+			  for(Tile t : percepts)
+			  {
+				  if(	t != tile 
+						&& t.pixel_position.y >= tile.pixel_position.y
+						&& t.pixel_position.x != tile.pixel_position.x)
+				  {
+					  nbPossibleNeigh++;
+					  if(!(t.forest_amount.isEmpty()))
+					  {
+						  tmp = new V2(t.pixel_position, c.centre);
+						  tmp.normalise();
+						  tmp.scale(t.forest_amount.balance());
+						  new_direction.add(tmp);
+						  nbPossibleNeigh--;
+					  }
+				  }
+			  }
+			  if(nbPossibleNeigh == 1)
+				  faceTowards(escape_point);
+			  else
+				  faceTowards(new_direction);
+			  if(advance(SPEED_FACTOR*t_delta) == EUpdateResult.DELETE_ME)
+				  return EUpdateResult.DELETE_ME;
 		  }
 	  }
     
@@ -108,6 +133,7 @@ public class RomanRegiment extends RegimentAgent
 			  state = State.WAITING;
 		  }
 	  }
+	  return EUpdateResult.CONTINUE;
   }
   
   @Override
@@ -116,8 +142,10 @@ public class RomanRegiment extends RegimentAgent
     if(isFormedUp())
     {
       // deform if flank-attack
-      if(V2.angleBetween(getDirection(), attacker.getDirection()) > FLANK_MIN_ANGLE)
+      if((V2.angleBetween(getDirection(), attacker.getDirection())*180.0/2.0) < FLANK_MIN_ANGLE)
+      {
         setFormedUp(false);
+      }
       else
         return BLOCK_CHANCE_TURTLE;
     }

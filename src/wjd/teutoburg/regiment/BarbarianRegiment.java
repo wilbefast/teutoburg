@@ -16,6 +16,7 @@
  */
 package wjd.teutoburg.regiment;
 
+import wjd.amb.control.EUpdateResult;
 import wjd.math.V2;
 import wjd.teutoburg.simulation.Tile;
 
@@ -28,7 +29,7 @@ public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-  private static final float SPEED_FACTOR = 0.12f;
+  private static final float SPEED_FACTOR = 0.2f;
   private static final double BLOCK_CHANCE = 0.1;
   private static final double ATTACK_CHANCE = 0.6;
   
@@ -41,8 +42,6 @@ public class BarbarianRegiment extends RegimentAgent
   public BarbarianRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
-    defense_potential = 1;
-    attack_potential = 5;
   }
 
   // accessors
@@ -52,7 +51,7 @@ public class BarbarianRegiment extends RegimentAgent
   /* IMPLEMENTS -- REGIMENTAGENT */
 
   @Override
-  protected void ai(int t_delta, Iterable<Tile> percepts)
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
 	  RomanRegiment nearestRoman = null;
 	  float distanceFromRoman = Float.MAX_VALUE, tmp;
@@ -95,7 +94,7 @@ public class BarbarianRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestRoman != null)
-        melee(this, nearestRoman);
+			  melee(nearestRoman);
 		  else
 			  state = State.WAITING;
 	  }
@@ -119,7 +118,8 @@ public class BarbarianRegiment extends RegimentAgent
 			  // charge : turn in front of roman, then advance
 			  faceTowards(nearestRoman.getCircle().centre);
 			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromRoman));
-			  advance(min);
+			  if(advance(min) == EUpdateResult.DELETE_ME)
+			  	return EUpdateResult.DELETE_ME;
 			  if(min == distanceFromRoman)
 				  state = State.FIGHTING;
 		  }
@@ -128,6 +128,7 @@ public class BarbarianRegiment extends RegimentAgent
 			  state = State.WAITING;
 		  }
 	  }
+	  return EUpdateResult.CONTINUE;
   }
   
   @Override

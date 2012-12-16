@@ -39,18 +39,17 @@ public abstract class RegimentAgent extends Agent
     
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
-  private static final double ATTACK_FUMBLE_CHANCE = 0.5;
+  private static final double ATTACK_FUMBLE_CHANCE = 0.8;
   
   /* ATTRIBUTES */
   // model
   private int strength;
-  protected int attack_potential;
-  protected int defense_potential;
   private Faction faction;
   protected State state;
   // combat
   protected Timer attackRecharge = new Timer(1000);
   protected boolean attackArmed = true;
+  protected int hitsToTake;
   // position
   private final V2 grid_pos = new V2();
   protected Tile tile;
@@ -61,7 +60,7 @@ public abstract class RegimentAgent extends Agent
   private boolean nearby = true;
   private V2 left = new V2();
   // ai
-  private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(5));
+  private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(8));
   protected RegimentAgent nearestAlly, nearestEnemy;
   protected float nearestAllyDist2, nearestEnemyDist2;
   protected boolean in_woods;
@@ -81,12 +80,12 @@ public abstract class RegimentAgent extends Agent
     this.faction = faction;
     this.tile = tile_;
     tile.agent = this;
+    grid_pos.reset(c.centre).scale(Tile.ISIZE).floor();
     
     // calculate unit positions based on the strength of the unit
     formation = faction.createFormation(this);
     setRadius(formation.reform());
-    attack_potential = 5;
-    defense_potential = 5;
+    hitsToTake = 0;
 
     // initialize status
     state = State.WAITING;
@@ -159,7 +158,7 @@ public abstract class RegimentAgent extends Agent
 
   /* INTERFACE */
   
-  protected abstract void ai(int t_delta, Iterable<Tile> percepts);
+  protected abstract EUpdateResult ai(int t_delta, Iterable<Tile> percepts);
   
   protected abstract double chanceToHit(RegimentAgent defender);
   
@@ -201,6 +200,14 @@ public abstract class RegimentAgent extends Agent
   @Override
   public EUpdateResult update(int t_delta)
   {
+	  // hitsToTake
+	  if(hitsToTake > 0)
+	  {
+		  if(killSoldiers(hitsToTake) == EUpdateResult.DELETE_ME)
+			  state = State.DEAD;
+		  hitsToTake = 0;
+	  }
+	  
     // dead
     if(state == State.DEAD)
     {
@@ -221,7 +228,8 @@ public abstract class RegimentAgent extends Agent
     perception_box.centrePos(c.centre);
     Iterable<Tile> percepts = tile.grid.createSubGrid(perception_box);
     cachePercepts(percepts);
-    ai(t_delta, percepts);
+    if(ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
+    	return EUpdateResult.DELETE_ME;
     
     // snap out of collisions
     if(sharing_tile)
@@ -261,6 +269,18 @@ public abstract class RegimentAgent extends Agent
   }
   
   /* SUBROUTINES */
+  
+  @Override
+  public EUpdateResult advance(float distance)
+  {
+	  V2 new_pos = grid_pos.clone();
+	  V2 new_direction = direction.clone();
+	  new_direction.scale(distance);
+      new_pos.add(direction);
+	  if(new_pos.x < 0 || new_pos.y < 0)
+		  return EUpdateResult.DELETE_ME;
+    return super.advance(distance);
+  }
   
   private void tryClaimTile()
   {
@@ -308,7 +328,7 @@ public abstract class RegimentAgent extends Agent
     for(Tile t : percepts)
 	  {
       
-      // skip is dead
+      // skip if dead
       if(t.agent == null || t.agent.state == State.DEAD)
         continue;
       
@@ -340,15 +360,15 @@ public abstract class RegimentAgent extends Agent
   
   /* COMBAT */
   
-  protected static void melee(RegimentAgent a, RegimentAgent b)
+  protected EUpdateResult melee(RegimentAgent ennemy)
   {
     // determine the number of kills
-    int aKills = a.rollKillsAgainst(b),
-        bKills = b.rollKillsAgainst(a);
+    int aKills = rollKillsAgainst(ennemy),
+        bKills = ennemy.rollKillsAgainst(this);
     
     // apply this number of kills AFTER determining each side's result
-    a.killSoldiers(bKills);
-    b.killSoldiers(aKills);
+    ennemy.hitsToTake += aKills;
+    return killSoldiers(bKills);
   }
   
   protected int rollKillsAgainst(RegimentAgent other)
@@ -363,7 +383,7 @@ public abstract class RegimentAgent extends Agent
       total_attack += Math.random() 
                       * this.chanceToHit(other) 
                       * (1 - other.chanceToBlock(this))
-                      * ATTACK_FUMBLE_CHANCE;
+                      * (1 - ATTACK_FUMBLE_CHANCE);
     
     // return number of kills
     return (int)total_attack;
