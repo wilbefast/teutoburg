@@ -56,7 +56,7 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 escape_point = getCircle().centre.clone().add(0, -10);
+	  V2 escape_point = getCircle().centre.clone().add(0, -15);
 
 	  if(nearestEnemy != null 
        && state != State.FIGHTING 
@@ -97,14 +97,12 @@ public class RomanRegiment extends RegimentAgent
 				  {
 					  tmp = new V2(t.pixel_position, c.centre);
 					  tmp.normalise();
+					  tmp.scale(t.forest_amount.balance());
 					  new_direction.add(tmp);
 					  nbCleanNeig--;
 				  }
 			  }
-			  if(nbCleanNeig > 0)
-				  faceTowards(new_direction);
-			  else
-				  faceTowards(escape_point);
+			  faceTowards(new_direction);
 			  if(advance(SPEED_FACTOR*t_delta) == EUpdateResult.DELETE_ME)
 				  return EUpdateResult.DELETE_ME;
 		  }
