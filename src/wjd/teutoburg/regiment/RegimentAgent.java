@@ -37,7 +37,7 @@ public abstract class RegimentAgent extends Agent
   /* NESTING */
   public enum State 
   {
-      WAITING, CHARGING, FIGHTING, DEAD
+      WAITING, CHARGING, FIGHTING, RALLYING, DEAD
   }
     
   /* CONSTANTS */
@@ -196,6 +196,11 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract boolean isAlly(RegimentAgent other);
   
+  protected boolean canSee(RegimentAgent a)
+  {
+	  return true;
+  }
+  
   
   /* OVERRIDES -- AGENT */
   
@@ -298,18 +303,6 @@ public abstract class RegimentAgent extends Agent
   
   /* SUBROUTINES */
   
-  @Override
-  public EUpdateResult advance(float distance)
-  {
-	  V2 new_pos = grid_pos.clone();
-	  V2 new_direction = direction.clone();
-	  new_direction.scale(distance);
-      new_pos.add(direction);
-	  if(new_pos.x < 0 || new_pos.y < 0)
-		  return EUpdateResult.DELETE_ME;
-    return super.advance(distance);
-  }
-  
   private void tryClaimTile()
   {
     // have we moved into a new tile?
@@ -347,7 +340,7 @@ public abstract class RegimentAgent extends Agent
     }
   }
   
-  private void cachePercepts(Iterable<Tile> percepts)
+  protected void cachePercepts(Iterable<Tile> percepts)
   {
     // reset
     nearestAlly = nearestEnemy = null;
@@ -358,10 +351,9 @@ public abstract class RegimentAgent extends Agent
     
     // check all tiles in view 
     for(Tile t : percepts)
-	  {
-      
-      // skip if dead
-      if(t.agent == null || t.agent.state == State.DEAD)
+	{
+      // skip if dead or non visible
+      if(t.agent == null || !canSee(t.agent) || t.agent.state == State.DEAD)
         continue;
       
       RegimentAgent r = t.agent;
