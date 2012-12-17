@@ -37,7 +37,7 @@ public class Soldier implements IVisible
   private static final V2 SHIELD_OFFSET = new V2(SHIELD_SIZE.x * 0.5f, 
                                                 -SHIELD_SIZE.y * 0.5f);
   // weapon
-  private static final V2 WEAPON_SIZE = new V2(2.0f, 18.0f);
+  public static final V2 WEAPON_SIZE = new V2(2.0f, 18.0f);
   private static final V2 WEAPON_OFFSET = new V2(5.0f, 1.0f);
   // body
   private static final V2 BODY_SIZE = new V2(6.0f, 12.0f);
