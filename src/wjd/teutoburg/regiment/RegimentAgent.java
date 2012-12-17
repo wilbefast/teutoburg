@@ -166,9 +166,6 @@ public abstract class RegimentAgent extends Agent
     setRadius(formation.reform());
   }
 
-  
-  
-
   // mutators
   public EUpdateResult killSoldiers(int n_killed)
   {
@@ -269,7 +266,7 @@ public abstract class RegimentAgent extends Agent
       return result;
     
     // timers
-    if(!readiedAttacks.isFull()
+    if(state == State.FIGHTING && !readiedAttacks.isFull()
        && attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
       readiedAttacks.tryDeposit(1);
     
@@ -286,9 +283,8 @@ public abstract class RegimentAgent extends Agent
       Tile t = tile.grid.gridToTile(grid_pos);
       if(t.agent != null)
       {
-        V2 push = t.agent.c.centre.clone().sub(c.centre).scale(0.1f);
-        c.centre.sub(push);
-        positionChange();
+        V2 push = c.centre.clone().sub(t.agent.c.centre).scale(0.001f);
+        speed.add(push);
       }
     }
 
@@ -316,12 +312,13 @@ public abstract class RegimentAgent extends Agent
     else
       nearby = false;
     
+    canvas.setColour(Colour.WHITE);
     if(!readiedAttacks.isEmpty())
     {
-      canvas.setColour(Colour.WHITE);
       canvas.setLineWidth(3.0f);
       canvas.circle(c.centre, c.radius, false);
     }
+    canvas.text(""+(int)readiedAttacks.balance()+"/"+(int)readiedAttacks.getMax() , c.centre);
   }
   
   @Override
@@ -330,7 +327,7 @@ public abstract class RegimentAgent extends Agent
     // fight enemies
     if(isEnemy((RegimentAgent)other))
       melee((RegimentAgent)other);
-    
+      
     
     // snap out of collision
     super.collisionEvent(other, overlap);
@@ -421,6 +418,9 @@ public abstract class RegimentAgent extends Agent
   
   protected EUpdateResult melee(RegimentAgent enemy)
   {
+    // we are now fighting!!!
+    state = State.FIGHTING;
+    
     // determine the number of kills
     int aKills = rollKillsAgainst(enemy),
         bKills = enemy.rollKillsAgainst(this);

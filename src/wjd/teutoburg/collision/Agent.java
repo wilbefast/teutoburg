@@ -40,7 +40,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   // model
   protected final V2 direction = new V2(1.0f, 0.0f);
   protected final V2 front_position;
-  private final V2 speed = new V2(0.0f, 0.0f);
+  protected final V2 speed = new V2(0.0f, 0.0f);
   // view
   protected Rect visibility_box;
   protected boolean visible = true;
@@ -164,9 +164,14 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     c.centre.add(speed);
     speed.scale(0.7f);
     
+
+    
     // apply friction
     if(speed.norm2() < 1)
       speed.scale(0);
+    else
+    // inform subclasses of the move
+    positionChange();
     
     // override if needed
     return EUpdateResult.CONTINUE;
