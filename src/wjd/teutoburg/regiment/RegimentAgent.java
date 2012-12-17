@@ -48,9 +48,10 @@ public abstract class RegimentAgent extends Agent
     
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
-  private static final double ATTACK_FUMBLE_CHANCE = 0.8;
+  private static final double ATTACK_FUMBLE_CHANCE = 0.0;
+  private static final int MAX_NUMBER_OF_KILLS_PER_SOLDIER = 3;
   private static final int MAX_ATTACKS_PER_TURN = 1;
-protected static final int REACH = 1;
+  protected static final int REACH = 1;
   
   /* ATTRIBUTES */
   // model
@@ -59,7 +60,6 @@ protected static final int REACH = 1;
   protected State state;
   // combat
   protected Timer attackRecharge = new Timer(10);
-  protected BoundedValue readiedAttacks;
   protected boolean attackReady;
   protected int hitsToTake;
   private Set<RegimentAgent> combat = new HashSet<RegimentAgent>();
@@ -106,7 +106,8 @@ protected static final int REACH = 1;
     dead_pile = new LinkedList<Cadaver>();
     
     // combat
-    readiedAttacks = new BoundedValue(0, strength);
+    attackReady = false;
+    attackRecharge.setMax((int)(6000.0/strength));
 
     // initialise status
     state = State.WAITING;
@@ -178,7 +179,7 @@ protected static final int REACH = 1;
 	  StringBuilder print_state = new StringBuilder();
 	  print_state.append("State : "+state+"\n");
 	  print_state.append("Strength : "+strength+"\n");
-	  print_state.append("Armed attcks : "+readiedAttacks+"\n");
+	  print_state.append("Armed attacks : "+attackReady+"\n");
 	  print_state.append("Hits to take : "+hitsToTake+"\n");
 	  
 	  return print_state.toString();
@@ -197,7 +198,7 @@ protected static final int REACH = 1;
     
     // remove the dead
     strength -= n_killed;
-    readiedAttacks.setMax(strength);
+    attackRecharge.setMax((int)(6000.0f/strength));
     
     // destroy the regiment if too many are dead
     if (strength == 0)
@@ -284,10 +285,13 @@ protected static final int REACH = 1;
       return result;
     
     // timers
-    if(state == State.FIGHTING && !readiedAttacks.isFull()
-       && attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
-      readiedAttacks.tryDeposit(1);
-   
+    if(state == State.FIGHTING 
+    	&& !attackReady
+    	&& attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
+    {
+      attackReady = true;
+    }
+
     // fight!
     result = combat();
     if (result != EUpdateResult.CONTINUE)
@@ -337,12 +341,12 @@ protected static final int REACH = 1;
       nearby = false;
     
     canvas.setColour(Colour.WHITE);
-    if(!readiedAttacks.isEmpty())
+    if(!attackReady)
     {
       canvas.setLineWidth(3.0f);
       canvas.circle(c.centre, c.radius, false);
     }
-    canvas.text(""+(int)readiedAttacks.balance()+"/"+(int)readiedAttacks.getMax() , c.centre);
+    //canvas.text(state+" ; "+attackReady+" ; "+attackRecharge.balance() , c.centre);
   }
   
   @Override
@@ -353,6 +357,7 @@ protected static final int REACH = 1;
     if(isEnemy(r))
       combat.add(r);
       
+    
     // snap out of collision
     super.collisionEvent(other, overlap);
   }
@@ -493,18 +498,19 @@ protected static final int REACH = 1;
   protected int rollKillsAgainst(RegimentAgent other)
   {
     // pause between attacks
-    int n_attacks = (int)readiedAttacks.tryWithdraw(MAX_ATTACKS_PER_TURN);
-    if(n_attacks == 0)
+    if(!attackReady)
       return 0;
 
     // compute attack value
     double total_attack = 0.0;
-    for(int s = 1; s < strength; s++)
-      total_attack += Math.random() 
-                      * this.chanceToHit(other) 
-                      * (1 - other.chanceToBlock(this));
-                      //* (1 - ATTACK_FUMBLE_CHANCE);
+    total_attack += Math.random()
+    				* MAX_NUMBER_OF_KILLS_PER_SOLDIER
+                    * this.chanceToHit(other) 
+                    * (1 - other.chanceToBlock(this))
+                    * (1 - ATTACK_FUMBLE_CHANCE);
     
+    System.out.println(total_attack);
+    attackReady = false;
     // return number of kills
     return (int)Math.round(total_attack);
   }

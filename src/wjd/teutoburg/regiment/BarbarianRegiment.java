@@ -80,7 +80,7 @@ public class BarbarianRegiment extends RegimentAgent
 	  // else if fighting and has an ennemy, fight
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestEnemy == null)
+		  if(nearestEnemy == null || !nearestEnemy.getCircle().collides(this.c))
 			  state = State.WAITING;
 	  }
 	  else if(state == State.WAITING)
