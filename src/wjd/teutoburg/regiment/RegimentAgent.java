@@ -263,6 +263,7 @@ public abstract class RegimentAgent extends Agent
 	  // hitsToTake
 	  if(hitsToTake > 0)
 	  {
+		  //System.out.println(hitsToTake+" de mes soldats ont été tués");
 		  if(killSoldiers(hitsToTake) == EUpdateResult.DELETE_ME)
 			  state = State.DEAD;
 		  hitsToTake = 0;
@@ -447,6 +448,7 @@ public abstract class RegimentAgent extends Agent
     
     // apply this number of kills AFTER determining each side's result
     enemy.hitsToTake += aKills;
+    //System.out.println(bKills+" de mes soldats sont morts dans mon attaque");
     return killSoldiers(bKills);
   }
   
@@ -464,7 +466,6 @@ public abstract class RegimentAgent extends Agent
                     * (1 - other.chanceToBlock(this))
                     * (1 - ATTACK_FUMBLE_CHANCE);
     
-    System.out.println(total_attack);
     attackReady = false;
     // return number of kills
     return (int)Math.round(total_attack);
