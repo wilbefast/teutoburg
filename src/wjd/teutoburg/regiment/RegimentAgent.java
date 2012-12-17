@@ -54,7 +54,7 @@ public abstract class RegimentAgent extends Agent
   private Faction faction;
   protected State state;
   // combat
-  protected Timer attackRecharge = new Timer(1000);
+  protected Timer attackRecharge = new Timer(100);
   protected BoundedValue readiedAttacks;
   protected int hitsToTake;
   // position
@@ -325,7 +325,7 @@ public abstract class RegimentAgent extends Agent
   }
   
   @Override
-  public void collisionEvent(Collider other)
+  public void collisionEvent(Collider other, float overlap)
   {
     // fight enemies
     if(isEnemy((RegimentAgent)other))
@@ -333,7 +333,7 @@ public abstract class RegimentAgent extends Agent
     
     
     // snap out of collision
-    super.collisionEvent(other);
+    super.collisionEvent(other, overlap);
   }
   
   /* SUBROUTINES */

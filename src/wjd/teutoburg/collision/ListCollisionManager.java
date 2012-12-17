@@ -88,11 +88,12 @@ public class ListCollisionManager implements ICollisionManager
         a.boundaryEvent(boundary);
       
       // check collisions between pairs of objects
+      float overlap;
       for(Collider b : objects)
-        if(a.isColliding(b))
+        if((overlap = a.getOverlap(b)) > 0)
         {
-          a.collisionEvent(b);
-          b.collisionEvent(a);
+          a.collisionEvent(b, overlap);
+          b.collisionEvent(a, overlap);
         }
     }
       

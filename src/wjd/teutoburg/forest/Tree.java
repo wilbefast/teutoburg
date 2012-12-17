@@ -152,7 +152,7 @@ public class Tree extends Collider implements IVisible
   }
 
   @Override
-  public void collisionEvent(Collider a)
+  public void collisionEvent(Collider a, float overlap)
   {
     // do nothing
   }

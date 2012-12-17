@@ -181,13 +181,17 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   }
 
   @Override
-  public void collisionEvent(Collider other)
+  public void collisionEvent(Collider other, float overlap)
   {
+    
+    
+    
+    
     float push_multiplier 
-      = (other.getClass().equals(this.getClass())) ? 0.0001f : 0.00001f;
+      = (other.getClass().equals(this.getClass())) ? 0.0005f : 0.0001f;
     
       V2 push = c.centre.clone().sub(other.getCircle().centre)
-        .scale(other.c.radius * push_multiplier);
+        .scale(overlap * push_multiplier);
       speed.add(push);
   }
 }

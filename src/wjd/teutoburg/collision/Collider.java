@@ -51,6 +51,11 @@ public abstract class Collider
     return (c.collides(other.c));
   }
   
+  public float getOverlap(Collider other)
+  {
+    return(c.getOverlap(other.c));
+  }
+  
   public Circle getCircle()
   {
     return c;
@@ -58,5 +63,5 @@ public abstract class Collider
 
   public abstract void  boundaryEvent(Rect boundary);
 
-  public abstract void  collisionEvent(Collider a);
+  public abstract void  collisionEvent(Collider a, float overlap);
 }
