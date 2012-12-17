@@ -83,7 +83,7 @@ public class RomanRegiment extends RegimentAgent
     
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestEnemy == null)
+		  if(nearestEnemy == null || !nearestEnemy.getCircle().collides(this.c))
 			  state = State.WAITING;
 	  }
 	  else if(state == State.WAITING)
@@ -127,8 +127,7 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  if(nearestEnemy != null)
 		  {
-			  turnTowardsGradually(nearestEnemy.getCircle().centre, getMaxTurn());
-			  if(V2.coline(direction, new V2(c.centre, nearestEnemy.getCircle().centre)))
+			  if(turnTowardsGradually(nearestEnemy.getCircle().centre, getMaxTurn()))
 			  {
 				  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
 				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);

@@ -70,7 +70,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   }
   
 
-  public void turnTowardsGradually(V2 target, float max_turn)
+  public boolean turnTowardsGradually(V2 target, float max_turn)
   {
     // calculate the new angle
     tmp_v2.reset(target).sub(c.centre).normalise();
@@ -78,7 +78,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     // calculate angle between the two
     float angle_between = V2.angleBetween(direction, tmp_v2);
     if(angle_between < 0.01f) // about 0.6 degrees
-      return;
+      return true;
 
     // circular interpolation
     if(V2.det(direction, tmp_v2) > 0)
@@ -86,6 +86,12 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     else
       direction.addAngle(-Math.min(max_turn, angle_between));
     directionChange();
+    
+    angle_between = V2.angleBetween(direction, tmp_v2);
+    if(angle_between < 0.01f) // about 0.6 degrees
+      return true;
+    else
+    	return false;
   }
   
   public void setDirection(V2 new_direction)
@@ -160,21 +166,22 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   @Override
   public EUpdateResult update(int t_delta)
   {
-    // apply speed
-    c.centre.add(speed);
-    speed.scale(0.7f);
-    
+	  if(speed.norm2() < 1)
+		  speed.xy(0,0);
+	  else
+	  {
+		  // apply speed
+		  c.centre.add(speed);
+		  // inform subclasses of the move
+		  positionChange();
+		  // apply friction
+		  speed.scale(0.7f);
+		  if(speed.norm2() < 1)
+			  speed.xy(0,0);
+	  }
 
-    
-    // apply friction
-    if(speed.norm2() < 1)
-      speed.scale(0);
-    else
-    // inform subclasses of the move
-    positionChange();
-    
-    // override if needed
-    return EUpdateResult.CONTINUE;
+	  // override if needed
+	  return EUpdateResult.CONTINUE;
   }
   
   /* IMPLEMENTS -- COLLIDERS */

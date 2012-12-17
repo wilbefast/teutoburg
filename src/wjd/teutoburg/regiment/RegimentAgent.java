@@ -47,7 +47,7 @@ public abstract class RegimentAgent extends Agent
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   private static final double ATTACK_FUMBLE_CHANCE = 0.8;
   private static final int MAX_ATTACKS_PER_TURN = 1;
-protected static final int REACH = 1;
+  protected static final int REACH = 1;
   
   /* ATTRIBUTES */
   // model
@@ -320,7 +320,7 @@ protected static final int REACH = 1;
       // render the formation depending on the level of detail
       formation.render(canvas);
       
-      //canvas.text(toString(), c.centre);
+      canvas.text(toString(), c.centre);
       //canvas.box(perception_box, false);
     }
     else
