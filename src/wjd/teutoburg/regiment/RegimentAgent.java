@@ -52,6 +52,7 @@ public abstract class RegimentAgent extends Agent
   private static final int MAX_NUMBER_OF_KILLS_PER_SOLDIER = 3;
   private static final int MAX_ATTACKS_PER_TURN = 1;
   protected static final int REACH = 1;
+  protected static final float MAX_TIME_BETWEEN_ATTACKS = 1000.0f;
   
   /* ATTRIBUTES */
   // model
@@ -62,10 +63,10 @@ public abstract class RegimentAgent extends Agent
   protected Timer attackRecharge = new Timer(10);
   protected boolean attackReady;
   protected int hitsToTake;
-  private Set<RegimentAgent> combat = new HashSet<RegimentAgent>();
+  protected Set<RegimentAgent> combat = new HashSet<RegimentAgent>();
   // position
   private final V2 grid_pos = new V2();
-  protected Tile tile;
+  public Tile tile;
   private boolean sharing_tile = false;
   // organisation
   private Formation formation;
@@ -107,7 +108,7 @@ public abstract class RegimentAgent extends Agent
     
     // combat
     attackReady = false;
-    attackRecharge.setMax((int)(6000.0/strength));
+    attackRecharge.setMax((int)(MAX_TIME_BETWEEN_ATTACKS/strength));
 
     // initialise status
     state = State.WAITING;
@@ -198,7 +199,7 @@ public abstract class RegimentAgent extends Agent
     
     // remove the dead
     strength -= n_killed;
-    attackRecharge.setMax((int)(6000.0f/strength));
+    attackRecharge.setMax((int)(MAX_TIME_BETWEEN_ATTACKS/strength));
     
     // destroy the regiment if too many are dead
     if (strength == 0)
@@ -272,55 +273,50 @@ public abstract class RegimentAgent extends Agent
 			  state = State.DEAD;
 		  hitsToTake = 0;
 	  }
-	  
-    // dead
-    if(state == State.DEAD)
-    {
-      tile.setRegiment(null);
-      return EUpdateResult.DELETE_ME;
-    }
-    
-    // default
-    EUpdateResult result = super.update(t_delta);
-    if (result != EUpdateResult.CONTINUE)
-      return result;
-    
-    // timers
-    if(state == State.FIGHTING 
-    	&& !attackReady
-    	&& attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
-    {
-      attackReady = true;
-    }
 
-    // fight!
-    result = combat();
-    if (result != EUpdateResult.CONTINUE)
-      return result;
-    
-    // choose action
-    perception_box.centrePos(c.centre);
-    Iterable<Tile> percepts = tile.grid.createSubGrid(perception_box);
-    cachePercepts(percepts);
-    if(ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
-    	return EUpdateResult.DELETE_ME;
-    
-    // snap out of collisions
-    if(sharing_tile)
-    {      
-      Tile t = tile.grid.gridToTile(grid_pos);
-      if(t.agent != null)
-      {
-        V2 push = c.centre.clone().sub(t.agent.c.centre).scale(0.001f);
-        speed.add(push);
-      }
-    }
+	  // dead
+	  if(state == State.DEAD)
+	  {
+		  return EUpdateResult.DELETE_ME;
+	  }
 
-    // set level of detail
-    formation.setDetail(visible && nearby);
-    
-    // all clear!
-    return EUpdateResult.CONTINUE;
+	  // default
+	  EUpdateResult result = super.update(t_delta);
+	  if (result != EUpdateResult.CONTINUE)
+		  return result;
+
+	  // timers
+	  if(state == State.FIGHTING 
+			  && !attackReady
+			  && attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
+	  {
+		  attackReady = true;
+	  }
+
+	  // choose action
+	  perception_box.centrePos(c.centre);
+	  Iterable<Tile> percepts = tile.grid.createSubGrid(perception_box);
+	  cachePercepts(percepts);
+	  setHitableEnemies();
+	  if(ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
+		  return EUpdateResult.DELETE_ME;
+
+	  // snap out of collisions
+	  if(sharing_tile)
+	  {      
+		  Tile t = tile.grid.gridToTile(grid_pos);
+		  if(t.agent != null)
+		  {
+			  V2 push = c.centre.clone().sub(t.agent.c.centre).scale(0.001f);
+			  speed.add(push);
+		  }
+	  }
+
+	  // set level of detail
+	  formation.setDetail(visible && nearby);
+
+	  // all clear!
+	  return EUpdateResult.CONTINUE;
   }
 
   @Override
@@ -365,7 +361,7 @@ public abstract class RegimentAgent extends Agent
   
   /* SUBROUTINES */
   
-  private EUpdateResult combat()
+  private void setHitableEnemies()
   {
     // add new enemies to combat
     Iterable<Tile> neighbours = tile.grid.getNeighbours(tile, true);
@@ -381,23 +377,6 @@ public abstract class RegimentAgent extends Agent
 			if(!it.next().getCircle().collides(c))
         it.remove();
     
-    
-    //! FIXME SKIP IF NO ATTACK IS READY!
-    if(attackReady)
-    {
-      // pick a random enemy to attack
-      int attack_i = (int)(Math.random() * combat.size()), i = 0;
-      for(RegimentAgent r : combat)
-      {
-        if(i == attack_i)
-          if(melee(r) == EUpdateResult.DELETE_ME)
-            return EUpdateResult.DELETE_ME;
-        i++;
-      }
-    }
-
-    // continue
-    return EUpdateResult.CONTINUE;
   }
   
   private void tryClaimTile()

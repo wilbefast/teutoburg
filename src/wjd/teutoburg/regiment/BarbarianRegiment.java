@@ -73,15 +73,33 @@ public class BarbarianRegiment extends RegimentAgent
 			  }
 		  }
 	  }
-	  // stay hidden behind trees while romans are not near enough
-	  // if no romans are visible, stay and wait
-	  // else if not charging or fighting, charge !!!
-	  // else if charging, charge
-	  // else if fighting and has an ennemy, fight
+	  
+	  if(!combat.isEmpty())
+	  {
+		  state = State.FIGHTING;
+	  }
+	  
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestEnemy == null || !nearestEnemy.getCircle().collides(this.c))
+		  if(!combat.isEmpty())
+		  {
+			  if(attackReady)
+			  {
+				  // pick a random enemy to attack
+				  int attack_i = (int)(Math.random() * combat.size()), i = 0;
+				  for(RegimentAgent r : combat)
+				  {
+					  if(i == attack_i)
+						  if(melee(r) == EUpdateResult.DELETE_ME)
+							  return EUpdateResult.DELETE_ME;
+					  i++;
+				  }
+			  }
+		  }
+		  else
+		  {
 			  state = State.WAITING;
+		  }
 	  }
 	  else if(state == State.WAITING)
 	  {
