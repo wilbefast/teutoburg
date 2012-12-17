@@ -56,12 +56,22 @@ public class Soldier implements IVisible
   private Faction faction;
   
   /* METHODS */
+  
   // constructors
   protected Soldier(V2 _position, V2 _direction, Faction faction)
   {
     this.faction = faction;
     reposition(_position, _direction);
   }
+  
+  // accessors
+  
+  V2 getPosition()
+  {
+    return position;
+  }
+  
+  // mutators
   
   public final void reposition(V2 _position, V2 _direction)
   {

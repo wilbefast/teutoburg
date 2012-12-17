@@ -33,6 +33,7 @@ import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.collision.ICollisionManager;
 import wjd.teutoburg.collision.ListCollisionManager;
 import wjd.teutoburg.forest.Copse;
+import wjd.teutoburg.regiment.Cadaver;
 import wjd.teutoburg.regiment.Faction;
 import wjd.teutoburg.regiment.RegimentAgent;
 
@@ -62,8 +63,9 @@ public class SimulationScene extends AScene
   
   // objects
 	private TileGrid grid;
-	private List<Agent> agents;
+	private List<RegimentAgent> agents;
 	private List<Copse> copses;
+  private List<Cadaver> cadavers;
   private ICollisionManager collisionManager;
 
 	/* METHODS */
@@ -95,12 +97,16 @@ public class SimulationScene extends AScene
 		generateForest();
 
 		// deploy soldiers
-		agents = new LinkedList<Agent>();
+		agents = new LinkedList<RegimentAgent>();
 		deployRomans();
 		deployBarbarians();
+    
+    // corpses
+    cadavers = new LinkedList<Cadaver>();
 
 		// view
 		camera = new StrategyCamera(map);
+    camera.setPosition(roman_deploy.getCentre());
 	}
 
 	// mutators
@@ -201,12 +207,20 @@ public class SimulationScene extends AScene
 	public EUpdateResult update(int t_delta)
 	{
 		// update all the agents
-    Iterator<Agent> i = agents.iterator();
+    Iterator<RegimentAgent> i = agents.iterator();
     while(i.hasNext())
     {
-      Agent a = i.next();
+      RegimentAgent a = i.next();
+      
+      // creates corpses ?
+      a.bringOutYourDead(cadavers);
+      
+      // destroy the regiment ?
 			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
         i.remove();
+      
+      // keep within the map
+      a.getCircle().centre.snapWithin(map);
     }
     
     // generate collision and boundary events
@@ -229,6 +243,11 @@ public class SimulationScene extends AScene
 		canvas.setColour(Palette.GRASS);
 		canvas.box(map, true);
 
+    // draw all the cadavers
+    for(Cadaver c : cadavers)
+      c.render(canvas);
+
+    
 		// draw all the trees
 		for(Copse c : copses)
 			c.render(canvas);
@@ -236,10 +255,6 @@ public class SimulationScene extends AScene
 		// draw all the agents
 		for(Agent a : agents)
 			a.render(canvas);
-
-		for(Tile t : grid)
-			t.render(canvas);
-
 
 		canvas.setColour(Colour.RED);
 		canvas.box(roman_deploy, false);
