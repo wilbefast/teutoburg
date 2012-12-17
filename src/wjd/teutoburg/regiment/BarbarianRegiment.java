@@ -17,7 +17,9 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.math.M;
 import wjd.math.V2;
+import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
 
 /**
@@ -76,7 +78,9 @@ public class BarbarianRegiment extends RegimentAgent
 	  // else if not charging or fighting, charge !!!
 	  // else if charging, charge
 	  // else if fighting and has an ennemy, fight
-	  if(nearestEnemy != null && state != State.FIGHTING && c.collides(nearestEnemy.getCircle()))
+	  if(	nearestEnemy != null 
+			&& state != State.FIGHTING 
+			&& nearestEnemyDist2 <= M.sqr(getCircle().radius + nearestEnemy.getCircle().radius + REACH))
 	  {
 		  state = State.FIGHTING;
 	  }
@@ -104,9 +108,12 @@ public class BarbarianRegiment extends RegimentAgent
 	  {
 		  if(nearestEnemy != null)
 		  {
+			  V2 goal = nearestEnemy.getCircle().centre.clone();
+			  goal.add((float)Math.random()*10-5, (float)Math.random()*10-5);
 			  // charge : turn in front of roman, then advance
-			  faceTowards(nearestEnemy.getCircle().centre);
-			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(nearestEnemyDist2));
+			  faceTowards(goal);
+			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
+			  float min = Math.min(SPEED_FACTOR*t_delta, nearestEnemyDist-c.radius-REACH-nearestEnemy.getCircle().radius);
 			  if(advance(min) == EUpdateResult.DELETE_ME)
 			  	return EUpdateResult.DELETE_ME;
 		  }

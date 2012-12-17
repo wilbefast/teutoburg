@@ -17,6 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
+import wjd.math.M;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
@@ -81,7 +82,7 @@ public class RomanRegiment extends RegimentAgent
 
 	  if(nearestEnemy != null 
        && state != State.FIGHTING 
-       && c.collides(nearestEnemy.getCircle()))
+       && nearestEnemyDist2 <= M.sqr(getCircle().radius + nearestEnemy.getCircle().radius + REACH))
 	  {
 		  state = State.FIGHTING;
 	  }
@@ -144,10 +145,8 @@ public class RomanRegiment extends RegimentAgent
 			  if(V2.coline(direction, new V2(c.centre, nearestEnemy.getCircle().centre)))
 			  {
 				  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
+				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist-c.radius-REACH-nearestEnemy.getCircle().radius);
 				  advance(min);
-				  if(min == nearestEnemyDist)
-					  state = State.FIGHTING;
 			  }
 		  }
 		  else
