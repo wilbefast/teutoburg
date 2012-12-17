@@ -53,26 +53,15 @@ public class BarbarianRegiment extends RegimentAgent
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  RomanRegiment nearestRoman = null;
-	  float distanceFromRoman = Float.MAX_VALUE, tmp;
 	  BarbarianRegiment nearestChargingBarbarian = null;
-	  float distanceFromBarbarian = Float.MAX_VALUE;
+	  float distanceFromBarbarian = Float.MAX_VALUE, tmp;
 	  
 	  for(Tile t : percepts)
 	  {
-      if(t.agent == null || t.agent.state == State.DEAD)
-        continue;
-      
-		  if(t.agent instanceof RomanRegiment)
-		  {
-			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if(tmp < distanceFromRoman)
-			  {
-				  nearestRoman = (RomanRegiment)t.agent;
-				  distanceFromRoman = tmp;
-			  }
-		  }
-		  else if(t.agent instanceof BarbarianRegiment && t.agent != this)
+		  if(t.agent == null || t.agent.state == State.DEAD)
+			  continue;
+
+		  if(t.agent instanceof BarbarianRegiment && t.agent != this)
 		  {
 			  tmp = t.agent.getCircle().centre.distance2(c.centre);
 			  if((t.agent.state == State.CHARGING || t.agent.state == State.FIGHTING) && tmp < distanceFromBarbarian)
@@ -87,20 +76,20 @@ public class BarbarianRegiment extends RegimentAgent
 	  // else if not charging or fighting, charge !!!
 	  // else if charging, charge
 	  // else if fighting and has an ennemy, fight
-	  if(nearestRoman != null && state != State.FIGHTING && c.collides(nearestRoman.getCircle()))
+	  if(nearestEnemy != null && state != State.FIGHTING && c.collides(nearestEnemy.getCircle()))
 	  {
 		  state = State.FIGHTING;
 	  }
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestRoman != null)
-			  melee(nearestRoman);
+		  if(nearestEnemy != null)
+			  melee(nearestEnemy);
 		  else
 			  state = State.WAITING;
 	  }
 	  else if(state == State.WAITING)
 	  {
-		  if(nearestRoman != null)// && distanceFromRoman <= getPerceptionRadius())
+		  if(nearestEnemy != null)// TODO : wait for a good moment
 		  {
 			  state = State.CHARGING;
 		  }
@@ -113,15 +102,13 @@ public class BarbarianRegiment extends RegimentAgent
 	  }
 	  else if(state == State.CHARGING)
 	  {
-		  if(nearestRoman != null)
+		  if(nearestEnemy != null)
 		  {
 			  // charge : turn in front of roman, then advance
-			  faceTowards(nearestRoman.getCircle().centre);
-			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(distanceFromRoman));
+			  faceTowards(nearestEnemy.getCircle().centre);
+			  float min = Math.min(SPEED_FACTOR*t_delta, (float)Math.sqrt(nearestEnemyDist2));
 			  if(advance(min) == EUpdateResult.DELETE_ME)
 			  	return EUpdateResult.DELETE_ME;
-			  if(min == distanceFromRoman)
-				  state = State.FIGHTING;
 		  }
 		  else
 		  {

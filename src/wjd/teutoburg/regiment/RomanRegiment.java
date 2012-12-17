@@ -40,7 +40,7 @@ public class RomanRegiment extends RegimentAgent
   // movement
   private static final float SPEED_FACTOR = 0.1f;
   private static final float MAX_TURN_TURTLE 
-                        = 10.0f * (float)Math.PI / 180.0f / 1000.0f, 
+                        = 20.0f * (float)Math.PI / 180.0f / 1000.0f, 
                           // 10 degrees per second
                             MAX_TURN_RABBLE
                         = 90.0f * (float)Math.PI / 180.0f / 1000.0f; 
@@ -62,6 +62,15 @@ public class RomanRegiment extends RegimentAgent
   // mutators
   
   /* IMPLEMENTS -- REGIMENTAGENT */
+  
+  @Override
+  protected boolean canSee(RegimentAgent a)
+  {
+	  if(state == State.WAITING && !a.tile.forest_amount.isEmpty())
+		  return false;
+	  else
+		  return true;
+  }
 
   
   // artificial intelligence
@@ -131,14 +140,15 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  if(nearestEnemy != null)
 		  {
-			  faceTowards(nearestEnemy.getCircle().centre);
-        
-        float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-          
-			  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
-			  advance(min);
-			  if(min == nearestEnemyDist)
-				  state = State.FIGHTING;
+			  turnTowardsGradually(nearestEnemy.getCircle().centre, getMaxTurn());
+			  if(V2.coline(direction, new V2(c.centre, nearestEnemy.getCircle().centre)))
+			  {
+				  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
+				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
+				  advance(min);
+				  if(min == nearestEnemyDist)
+					  state = State.FIGHTING;
+			  }
 		  }
 		  else
 		  {
