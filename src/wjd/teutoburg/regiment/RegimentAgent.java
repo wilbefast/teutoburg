@@ -25,6 +25,7 @@ import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
+import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.Tile;
 import wjd.util.BoundedValue;
 import wjd.util.Timer;
@@ -314,6 +315,25 @@ public abstract class RegimentAgent extends Agent
     }
     else
       nearby = false;
+    
+    if(!readiedAttacks.isEmpty())
+    {
+      canvas.setColour(Colour.WHITE);
+      canvas.setLineWidth(3.0f);
+      canvas.circle(c.centre, c.radius, false);
+    }
+  }
+  
+  @Override
+  public void collisionEvent(Collider other)
+  {
+    // fight enemies
+    if(isEnemy((RegimentAgent)other))
+      melee((RegimentAgent)other);
+    
+    
+    // snap out of collision
+    super.collisionEvent(other);
   }
   
   /* SUBROUTINES */
@@ -422,8 +442,8 @@ public abstract class RegimentAgent extends Agent
     for(int s = 1; s < strength; s++)
       total_attack += Math.random() 
                       * this.chanceToHit(other) 
-                      * (1 - other.chanceToBlock(this))
-                      * (1 - ATTACK_FUMBLE_CHANCE);
+                      * (1 - other.chanceToBlock(this));
+                      //* (1 - ATTACK_FUMBLE_CHANCE);
     
     // return number of kills
     return (int)total_attack;

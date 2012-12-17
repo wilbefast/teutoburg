@@ -90,10 +90,12 @@ public class RomanRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestEnemy != null)
-			  if(melee(nearestEnemy) == EUpdateResult.DELETE_ME)
+      {
+			  /*if(melee(nearestEnemy) == EUpdateResult.DELETE_ME)
 			  {
 				  return EUpdateResult.DELETE_ME;
-			  }
+			  }*/
+      }
 		  else
 			  state = State.WAITING;
 	  }

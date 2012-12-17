@@ -83,7 +83,7 @@ public class BarbarianRegiment extends RegimentAgent
 	  if(state == State.FIGHTING)
 	  {
 		  if(nearestEnemy != null)
-			  melee(nearestEnemy);
+			  ;//melee(nearestEnemy);
 		  else
 			  state = State.WAITING;
 	  }
