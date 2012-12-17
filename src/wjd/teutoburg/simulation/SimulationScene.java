@@ -106,6 +106,7 @@ public class SimulationScene extends AScene
 
 		// view
 		camera = new StrategyCamera(map);
+    camera.setPosition(roman_deploy.getCentre());
 	}
 
 	// mutators
