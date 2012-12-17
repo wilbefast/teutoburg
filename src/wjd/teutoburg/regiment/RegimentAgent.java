@@ -47,6 +47,7 @@ public abstract class RegimentAgent extends Agent
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   private static final double ATTACK_FUMBLE_CHANCE = 0.8;
   private static final int MAX_ATTACKS_PER_TURN = 1;
+protected static final int REACH = 1;
   
   /* ATTRIBUTES */
   // model
@@ -165,6 +166,19 @@ public abstract class RegimentAgent extends Agent
     // ... and reform!
     setRadius(formation.reform());
   }
+  
+  @Override
+  public String toString()
+  {
+	  StringBuilder print_state = new StringBuilder();
+	  print_state.append("State : "+state+"\n");
+	  print_state.append("Strength : "+strength+"\n");
+	  print_state.append("Attack armed : "+attackArmed+"\n");
+	  print_state.append("Hits to take : "+hitsToTake+"\n");
+	  
+	  return print_state.toString();
+  }
+  
 
   // mutators
   public EUpdateResult killSoldiers(int n_killed)
@@ -212,7 +226,12 @@ public abstract class RegimentAgent extends Agent
   protected abstract boolean isEnemy(RegimentAgent other);
   
   protected abstract boolean isAlly(RegimentAgent other);
-
+  
+  protected boolean canSee(RegimentAgent a)
+  {
+	  return true;
+  }
+  
   
   /* OVERRIDES -- AGENT */
   
@@ -307,6 +326,7 @@ public abstract class RegimentAgent extends Agent
       // render the formation depending on the level of detail
       formation.render(canvas);
       
+      //canvas.text(toString(), c.centre);
       //canvas.box(perception_box, false);
     }
     else
@@ -390,18 +410,18 @@ public abstract class RegimentAgent extends Agent
       
       RegimentAgent r = t.agent;
       
-      // cache nearest ally
+      // cache nearest enemy
 		  if(isEnemy(r))
 		  {
 			  float dist2 = r.getCircle().centre.distance2(c.centre);
 			  if(dist2 < nearestEnemyDist2)
 			  {
 				  nearestEnemy = r;
-				  nearestAllyDist2 = dist2;
+				  nearestEnemyDist2 = dist2;
 			  }
 		  }
       
-      // cache nearest enemy
+      // cache nearest ally
       else if(isAlly(r))
 		  {
 			  float dist2 = r.getCircle().centre.distance2(c.centre);
