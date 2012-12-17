@@ -453,7 +453,7 @@ protected static final int REACH = 1;
 
     // compute attack value
     double total_attack = 0.0;
-    for(int s = 1; s < strength; s++)
+    for(int s = 1; s < n_attacks; s++)
       total_attack += Math.random() 
                       * this.chanceToHit(other) 
                       * (1 - other.chanceToBlock(this));
