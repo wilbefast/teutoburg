@@ -20,11 +20,13 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.simulation.Tile;
+import wjd.util.BoundedValue;
 import wjd.util.Timer;
 
 /**
@@ -43,6 +45,7 @@ public abstract class RegimentAgent extends Agent
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   private static final double ATTACK_FUMBLE_CHANCE = 0.8;
+  private static final int MAX_ATTACKS_PER_TURN = 1;
   
   /* ATTRIBUTES */
   // model
@@ -51,7 +54,7 @@ public abstract class RegimentAgent extends Agent
   protected State state;
   // combat
   protected Timer attackRecharge = new Timer(1000);
-  protected boolean attackArmed = true;
+  protected BoundedValue readiedAttacks;
   protected int hitsToTake;
   // position
   private final V2 grid_pos = new V2();
@@ -94,8 +97,11 @@ public abstract class RegimentAgent extends Agent
     
     // cadavers stored until the scene collects them
     dead_pile = new LinkedList<Cadaver>();
+    
+    // combat
+    readiedAttacks = new BoundedValue(0, strength);
 
-    // initialize status
+    // initialise status
     state = State.WAITING;
   }
 
@@ -126,6 +132,16 @@ public abstract class RegimentAgent extends Agent
     return (perception_box.w * 0.5f);
   }
   
+  
+  // accessors -- protected
+  
+  protected boolean canSee(RegimentAgent a)
+  {
+    // override if needed!
+	  return true;
+  }
+  
+
   // accessors -- public 
   
   public boolean isFormedUp()
@@ -148,6 +164,8 @@ public abstract class RegimentAgent extends Agent
     // ... and reform!
     setRadius(formation.reform());
   }
+
+  
   
 
   // mutators
@@ -162,6 +180,7 @@ public abstract class RegimentAgent extends Agent
     
     // remove the dead
     strength -= n_killed;
+    readiedAttacks.setMax(strength);
     
     // destroy the regiment if too many are dead
     if (strength == 0)
@@ -195,12 +214,7 @@ public abstract class RegimentAgent extends Agent
   protected abstract boolean isEnemy(RegimentAgent other);
   
   protected abstract boolean isAlly(RegimentAgent other);
-  
-  protected boolean canSee(RegimentAgent a)
-  {
-	  return true;
-  }
-  
+
   
   /* OVERRIDES -- AGENT */
   
@@ -254,8 +268,9 @@ public abstract class RegimentAgent extends Agent
       return result;
     
     // timers
-    if(!attackArmed && attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
-      attackArmed = true;
+    if(!readiedAttacks.isFull()
+       && attackRecharge.update(t_delta) == EUpdateResult.FINISHED)
+      readiedAttacks.tryDeposit(1);
     
     // choose action
     perception_box.centrePos(c.centre);
@@ -384,23 +399,24 @@ public abstract class RegimentAgent extends Agent
   
   /* COMBAT */
   
-  protected EUpdateResult melee(RegimentAgent ennemy)
+  protected EUpdateResult melee(RegimentAgent enemy)
   {
     // determine the number of kills
-    int aKills = rollKillsAgainst(ennemy),
-        bKills = ennemy.rollKillsAgainst(this);
+    int aKills = rollKillsAgainst(enemy),
+        bKills = enemy.rollKillsAgainst(this);
     
     // apply this number of kills AFTER determining each side's result
-    ennemy.hitsToTake += aKills;
+    enemy.hitsToTake += aKills;
     return killSoldiers(bKills);
   }
   
   protected int rollKillsAgainst(RegimentAgent other)
   {
     // pause between attacks
-    if(!attackArmed)
+    int n_attacks = (int)readiedAttacks.tryWithdraw(MAX_ATTACKS_PER_TURN);
+    if(n_attacks == 0)
       return 0;
-   
+
     // compute attack value
     double total_attack = 0.0;
     for(int s = 1; s < strength; s++)
