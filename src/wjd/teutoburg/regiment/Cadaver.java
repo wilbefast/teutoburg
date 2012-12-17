@@ -34,6 +34,8 @@ public class Cadaver implements IVisible
   // shield
   private static final V2 SHIELD_SIZE = new V2(8.0f, 14.0f);
   private static final float SHIELD_POSITION_VAR = 5.0f;
+  // weapon
+  private static final float WEAPON_LENGTH = 18.0f;
   
   
   /* ATTRIBUTES */
@@ -43,7 +45,9 @@ public class Cadaver implements IVisible
   private float blood_amount;
   private final Faction faction;
   private final Rect body = new Rect(BODY_SIZE);
-  private final V2 head_pos = new V2();
+  private final V2 head_pos = new V2(), 
+                  weapon_top = new V2(), 
+                  weapon_bottom = new V2();
   private final Rect shield = new Rect(SHIELD_SIZE);
   
   /* METHODS */
@@ -69,6 +73,13 @@ public class Cadaver implements IVisible
     // turn shield 90 degrees?
     if(Math.random() < 0.5)
       shield.turn90();
+    
+    // randomise weapon
+    double weapon_angle = (Math.random() * Math.PI * 2);
+    weapon_top.xy((float)Math.cos(weapon_angle), 
+                  (float)Math.sin(weapon_angle)).scale(WEAPON_LENGTH*0.5f);
+    weapon_bottom.reset(weapon_top).opp().add(pos);
+    weapon_top.add(pos);
     
     // randomise shield
     shield.centrePos(body.getCentre()).shift(
@@ -104,7 +115,11 @@ public class Cadaver implements IVisible
       canvas.setColour(Palette.GRASS_SHADOW);
       canvas.box(body, true);
     body.y -= 2.0f;
-   
+      
+    // weapon
+    canvas.setLineWidth(2.0f);
+    canvas.setColour(faction.colour_weapon);
+    canvas.line(weapon_top, weapon_bottom);
     
     // body
     canvas.setColour(faction.colour_tunic_dead);
@@ -113,10 +128,6 @@ public class Cadaver implements IVisible
     // head
     canvas.setColour(faction.colour_face_dead);
     canvas.circle(head_pos, HEAD_RADIUS, true);
-    
-    // weapon
-    //canvas.setColour(faction.colour_weapon);
-    //canvas.line(weapon_start, weapon_end);
     
     // shield
     canvas.setColour(faction.colour_shield);
