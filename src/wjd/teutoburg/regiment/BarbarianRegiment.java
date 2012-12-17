@@ -31,7 +31,7 @@ public class BarbarianRegiment extends RegimentAgent
 {
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-  private static final float SPEED_FACTOR = 0.2f;
+  private static final float SPEED_FACTOR = 0.6f;
   private static final double BLOCK_CHANCE = 0.1;
   private static final double ATTACK_CHANCE = 0.6;
   
@@ -54,67 +54,37 @@ public class BarbarianRegiment extends RegimentAgent
 
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
-  {
-	  BarbarianRegiment nearestChargingBarbarian = null;
-	  float distanceFromBarbarian = Float.MAX_VALUE, tmp;
-	  
-	  for(Tile t : percepts)
-	  {
-		  if(t.agent == null || t.agent.state == State.DEAD)
-			  continue;
-
-		  if(t.agent instanceof BarbarianRegiment && t.agent != this)
-		  {
-			  tmp = t.agent.getCircle().centre.distance2(c.centre);
-			  if((t.agent.state == State.CHARGING || t.agent.state == State.FIGHTING) && tmp < distanceFromBarbarian)
-			  {
-				  nearestChargingBarbarian = (BarbarianRegiment)t.agent;
-				  distanceFromBarbarian = tmp;
-			  }
-		  }
-	  }
-	  
-	  if(!combat.isEmpty())
+  {  
+	  if(state != State.FIGHTING && !combat.isEmpty())
 	  {
 		  state = State.FIGHTING;
 	  }
-	  
 	  if(state == State.FIGHTING)
 	  {
 		  if(!combat.isEmpty())
 		  {
-			  if(attackReady)
-			  {
-				  // pick a random enemy to attack
-				  int attack_i = (int)(Math.random() * combat.size()), i = 0;
-				  for(RegimentAgent r : combat)
-				  {
-					  if(i == attack_i)
-						  if(melee(r) == EUpdateResult.DELETE_ME)
-							  return EUpdateResult.DELETE_ME;
-					  i++;
-				  }
-			  }
+			  if(randomAttack() == EUpdateResult.DELETE_ME)
+					return EUpdateResult.DELETE_ME;
 		  }
 		  else
 		  {
 			  state = State.WAITING;
 		  }
 	  }
-	  else if(state == State.WAITING)
+	  if(state == State.WAITING)
 	  {
 		  if(nearestEnemy != null)// TODO : wait for a good moment
 		  {
 			  state = State.CHARGING;
 		  }
-		  else if(nearestChargingBarbarian != null)
+		  else if(nearestActivAlly != null)
 		  {
-			  faceTowards(nearestChargingBarbarian.getCircle().centre);
-			  float min = Math.min(SPEED_FACTOR*t_delta, ((float)Math.sqrt(distanceFromBarbarian)-2*c.radius));
+			  faceTowards(nearestActivAlly.getCircle().centre);
+			  float min = Math.min(SPEED_FACTOR*t_delta, ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
 			  advance(min);
 		  }
 	  }
-	  else if(state == State.CHARGING)
+	  if(state == State.CHARGING)
 	  {
 		  if(nearestEnemy != null)
 		  {

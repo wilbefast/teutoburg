@@ -77,6 +77,8 @@ public abstract class RegimentAgent extends Agent
   private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(8));
   protected RegimentAgent nearestAlly, nearestEnemy;
   protected float nearestAllyDist2, nearestEnemyDist2;
+  protected RegimentAgent nearestActivAlly;
+  protected float nearestActivAllyDist2;
   protected boolean in_woods;
   // corpses
   private List<Cadaver> dead_pile;
@@ -331,7 +333,7 @@ public abstract class RegimentAgent extends Agent
       // render the formation depending on the level of detail
       formation.render(canvas);
       
-      //canvas.text(toString(), c.centre);
+      canvas.text(""+state, c.centre);
       //canvas.box(perception_box, false);
     }
     else
@@ -351,7 +353,7 @@ public abstract class RegimentAgent extends Agent
   {
     // fight enemies
     RegimentAgent r = (RegimentAgent)other;
-    if(isEnemy(r))
+    if(isEnemy(r) && r.state != State.DEAD)
       combat.add(r);
       
     
@@ -367,15 +369,19 @@ public abstract class RegimentAgent extends Agent
     Iterable<Tile> neighbours = tile.grid.getNeighbours(tile, true);
     for(Tile t : neighbours)
     {
-      if(t.agent != null && isEnemy(t.agent) && t.agent.getCircle().collides(c))
+      if(t.agent != null && isEnemy(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
         combat.add(t.agent);
     }
     
+    RegimentAgent r;
     // remove old enemies from combat if they're no longer in contact
     Iterator<RegimentAgent> it = combat.iterator();
     while(it.hasNext())
-			if(!it.next().getCircle().collides(c))
+    {
+    	r = it.next();
+			if(!r.getCircle().collides(c) || r.state == State.DEAD)
         it.remove();
+    }
     
   }
   
@@ -421,6 +427,9 @@ public abstract class RegimentAgent extends Agent
     // reset
     nearestAlly = nearestEnemy = null;
 	  nearestAllyDist2 = nearestEnemyDist2 = Float.MAX_VALUE;
+	  nearestActivAlly = null;
+	  nearestActivAllyDist2 = Float.MAX_VALUE;
+	  
     
     // check if we're in the woods
     in_woods = !(tile.forest_amount.isEmpty());
@@ -454,6 +463,11 @@ public abstract class RegimentAgent extends Agent
 				  nearestAlly = r;
 				  nearestAllyDist2 = dist2;
 			  }
+			  if(r.state != State.WAITING && dist2 < nearestActivAllyDist2)
+			  {
+				  nearestActivAlly = r;
+				  nearestActivAllyDist2 = dist2;
+			  }
 		  }
 	  }
   }
@@ -461,11 +475,7 @@ public abstract class RegimentAgent extends Agent
   /* COMBAT */
   
   protected EUpdateResult melee(RegimentAgent enemy)
-  {
-    // we are now fighting!
-    this.state = State.FIGHTING;
-    enemy.state = State.FIGHTING;
-    
+  { 
     // determine the number of kills
     int aKills = rollKillsAgainst(enemy),
         bKills = enemy.rollKillsAgainst(this);
@@ -493,5 +503,22 @@ public abstract class RegimentAgent extends Agent
     attackReady = false;
     // return number of kills
     return (int)Math.round(total_attack);
+  }
+  
+  protected EUpdateResult randomAttack()
+  {
+	  if(attackReady)
+	  {
+		  // pick a random enemy to attack
+		  int attack_i = (int)(Math.random() * combat.size()), i = 0;
+		  for(RegimentAgent r : combat)
+		  {
+			  if(i == attack_i)
+				  if(melee(r) == EUpdateResult.DELETE_ME)
+					  return EUpdateResult.DELETE_ME;
+			  i++;
+		  }
+	  }
+	  return EUpdateResult.CONTINUE;
   }
 }

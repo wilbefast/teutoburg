@@ -39,7 +39,7 @@ public class RomanRegiment extends RegimentAgent
   private static final int FLANK_MIN_ANGLE = 135;
   
   // movement
-  private static final float SPEED_FACTOR = 0.6f;
+  private static final float SPEED_FACTOR = 0.3f;
   private static final float MAX_TURN_TURTLE 
                         = 20.0f * (float)Math.PI / 180.0f, 
                           // 40 degrees per second
@@ -81,38 +81,27 @@ public class RomanRegiment extends RegimentAgent
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
     
     
-	  if(!combat.isEmpty())
+	  if(state != State.FIGHTING && !combat.isEmpty())
 	  {
 		  state = State.FIGHTING;
 	  }
-	  
 	  if(state == State.FIGHTING)
 	  {
 		  if(!combat.isEmpty())
 		  {
-			  if(attackReady)
-			  {
-				  // pick a random enemy to attack
-				  int attack_i = (int)(Math.random() * combat.size()), i = 0;
-				  for(RegimentAgent r : combat)
-				  {
-					  if(i == attack_i)
-						  if(melee(r) == EUpdateResult.DELETE_ME)
-							  return EUpdateResult.DELETE_ME;
-					  i++;
-				  }
-			  }
+			 if(randomAttack() == EUpdateResult.DELETE_ME)
+				return EUpdateResult.DELETE_ME;
 		  }
 		  else
 		  {
 			  state = State.WAITING;
 		  }
 	  }
-	  else if(state == State.WAITING)
+	  if(state == State.WAITING)
 	  {
 		  if(nearestEnemy != null)
 		  {
-			  state = State.CHARGING;
+			  state = State.CHARGING; // TODO : rally
 		  }
 		  else
 		  {
@@ -143,9 +132,7 @@ public class RomanRegiment extends RegimentAgent
 				  return EUpdateResult.DELETE_ME;
 		  }
 	  }
-    
-    
-	  else if(state == State.CHARGING)
+	  if(state == State.CHARGING)
 	  {
 		  if(nearestEnemy != null)
 		  {
