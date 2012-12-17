@@ -38,7 +38,7 @@ public class RomanRegiment extends RegimentAgent
   private static final int FLANK_MIN_ANGLE = 135;
   
   // movement
-  private static final float SPEED_FACTOR = 0.1f;
+  private static final float SPEED_FACTOR = 0.6f;
   private static final float MAX_TURN_TURTLE 
                         = 10.0f * (float)Math.PI / 180.0f / 1000.0f, 
                           // 10 degrees per second
@@ -156,7 +156,8 @@ public class RomanRegiment extends RegimentAgent
     if(isFormedUp())
     {
       // deform if flank-attack
-      if((V2.angleBetween(getDirection(), attacker.getDirection())*180.0/2.0) < FLANK_MIN_ANGLE)
+      if((V2.angleBetween(getDirection(), attacker.getDirection())*180.0/2.0) 
+            < FLANK_MIN_ANGLE)
       {
         setFormedUp(false);
       }

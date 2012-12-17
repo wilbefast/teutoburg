@@ -226,7 +226,7 @@ public abstract class Formation implements IVisible
     
     /* ATTRIBUTES */
     private int n_layers, incomplete_layer;
-    private final long seed; 
+    private long seed; 
     private final Random randomiser;
     
     /* METHODS */

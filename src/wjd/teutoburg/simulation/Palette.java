@@ -48,6 +48,6 @@ public class Palette
   public static final Colour BARBARIAN_SHIELD = new Colour(0, 0, 255);
   public static final Colour BARBARIAN_WEAPON = new Colour(25, 50, 100);
   // combat
-  public static final Colour BLOOD = GRASS.clone().avg(Colour.BLUE).avg(Colour.RED);
+  public static final Colour BLOOD = GRASS.clone().avg(Colour.RED);
   
 }
