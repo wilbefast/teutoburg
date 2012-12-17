@@ -153,15 +153,18 @@ public abstract class RegimentAgent extends Agent
   // mutators
   public EUpdateResult killSoldiers(int n_killed)
   {
+    if(n_killed > strength)
+      n_killed = strength;
+    
     // transform dying men into corpses
     for(int i = 0; i < n_killed; i++)
-      dead_pile.add(new Cadaver(formation.getSoldierPosition(strength-i-1)));
+      dead_pile.add(new Cadaver(formation.getSoldierPosition(strength-i-1), faction));
     
     // remove the dead
     strength -= n_killed;
     
     // destroy the regiment if too many are dead
-    if (strength <= 0)
+    if (strength == 0)
     {
       state = State.DEAD;
       return EUpdateResult.DELETE_ME;

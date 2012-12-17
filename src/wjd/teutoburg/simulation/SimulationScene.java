@@ -211,14 +211,12 @@ public class SimulationScene extends AScene
     {
       RegimentAgent a = i.next();
       
+      // creates corpses ?
+      a.bringOutYourDead(cadavers);
+      
       // destroy the regiment ?
 			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
         i.remove();
-      
-      // creates corpses ?
-      else
-        a.bringOutYourDead(cadavers);
-        
     }
     
     // generate collision and boundary events

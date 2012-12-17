@@ -62,7 +62,7 @@ public abstract class Formation implements IVisible
     if(soldiers == null)
     {
       reform();
-      reposition();
+      repositionSoldiers();
     }
     
     try
