@@ -307,7 +307,7 @@ public abstract class RegimentAgent extends Agent
 	  if(sharing_tile)
 	  {      
 		  Tile t = tile.grid.gridToTile(grid_pos);
-		  if(t.agent != null)
+		  if(t!= null && t.agent != null)
 		  {
 			  V2 push = c.centre.clone().sub(t.agent.c.centre).scale(0.001f);
 			  speed.add(push);
