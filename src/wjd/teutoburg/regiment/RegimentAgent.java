@@ -17,8 +17,11 @@
 package wjd.teutoburg.regiment;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
@@ -59,6 +62,7 @@ public abstract class RegimentAgent extends Agent
   protected Timer attackRecharge = new Timer(10);
   protected boolean attackReady;
   protected int hitsToTake;
+  private Set<RegimentAgent> combat = new HashSet<RegimentAgent>();
   // position
   private final V2 grid_pos = new V2();
   protected Tile tile;
@@ -194,7 +198,7 @@ public abstract class RegimentAgent extends Agent
     
     // remove the dead
     strength -= n_killed;
-    attackRecharge.setMax(strength);
+    attackRecharge.setMax((int)(6000.0f/strength));
     
     // destroy the regiment if too many are dead
     if (strength == 0)
@@ -288,6 +292,11 @@ public abstract class RegimentAgent extends Agent
     {
       attackReady = true;
     }
+
+    // fight!
+    result = combat();
+    if (result != EUpdateResult.CONTINUE)
+      return result;
     
     // choose action
     perception_box.centrePos(c.centre);
@@ -345,8 +354,9 @@ public abstract class RegimentAgent extends Agent
   public void collisionEvent(Collider other, float overlap)
   {
     // fight enemies
-    if(isEnemy((RegimentAgent)other))
-      melee((RegimentAgent)other);
+    RegimentAgent r = (RegimentAgent)other;
+    if(isEnemy(r))
+      combat.add(r);
       
     
     // snap out of collision
@@ -354,6 +364,41 @@ public abstract class RegimentAgent extends Agent
   }
   
   /* SUBROUTINES */
+  
+  private EUpdateResult combat()
+  {
+    // add new enemies to combat
+    Iterable<Tile> neighbours = tile.grid.getNeighbours(tile, true);
+    for(Tile t : neighbours)
+    {
+      if(t.agent != null && isEnemy(t.agent) && t.agent.getCircle().collides(c))
+        combat.add(t.agent);
+    }
+    
+    // remove old enemies from combat if they're no longer in contact
+    Iterator<RegimentAgent> it = combat.iterator();
+    while(it.hasNext())
+			if(!it.next().getCircle().collides(c))
+        it.remove();
+    
+    
+    //! FIXME SKIP IF NO ATTACK IS READY!
+    if(attackReady)
+    {
+      // pick a random enemy to attack
+      int attack_i = (int)(Math.random() * combat.size()), i = 0;
+      for(RegimentAgent r : combat)
+      {
+        if(i == attack_i)
+          if(melee(r) == EUpdateResult.DELETE_ME)
+            return EUpdateResult.DELETE_ME;
+        i++;
+      }
+    }
+
+    // continue
+    return EUpdateResult.CONTINUE;
+  }
   
   private void tryClaimTile()
   {
@@ -438,8 +483,8 @@ public abstract class RegimentAgent extends Agent
   
   protected EUpdateResult melee(RegimentAgent enemy)
   {
-    // we are now fighting!!!
-    state = State.FIGHTING;
+    // we are now fighting!
+    this.state = State.FIGHTING;
     enemy.state = State.FIGHTING;
     
     // determine the number of kills
