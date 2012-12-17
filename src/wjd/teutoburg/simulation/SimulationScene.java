@@ -217,6 +217,9 @@ public class SimulationScene extends AScene
       // destroy the regiment ?
 			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
         i.remove();
+      
+      // keep within the map
+      a.getCircle().centre.snapWithin(map);
     }
     
     // generate collision and boundary events

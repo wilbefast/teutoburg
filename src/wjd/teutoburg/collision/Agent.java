@@ -40,6 +40,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   // model
   protected final V2 direction = new V2(1.0f, 0.0f);
   protected final V2 front_position;
+  private final V2 speed = new V2(0.0f, 0.0f);
   // view
   protected Rect visibility_box;
   protected boolean visible = true;
@@ -78,8 +79,6 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     float angle_between = V2.angleBetween(direction, tmp_v2);
     if(angle_between < 0.01f) // about 0.6 degrees
       return;
-
-
 
     // circular interpolation
     if(V2.det(direction, tmp_v2) > 0)
@@ -133,7 +132,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   }
   
   protected void positionChange()
-  {
+  {     
     // override if need be
   }
   
@@ -161,6 +160,14 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   @Override
   public EUpdateResult update(int t_delta)
   {
+    // apply speed
+    c.centre.add(speed);
+    speed.scale(0.7f);
+    
+    // apply friction
+    if(speed.norm2() < 1)
+      speed.scale(0);
+    
     // override if needed
     return EUpdateResult.CONTINUE;
   }
@@ -178,9 +185,8 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   {
     if(other.getClass().equals(this.getClass()))
     {
-      V2 push = other.getCircle().centre.clone().sub(c.centre).scale(0.03f);
-      c.centre.sub(push);
-      positionChange();
+      V2 push = other.getCircle().centre.clone().sub(c.centre).scale(0.01f);
+      speed.sub(push);
     }
   }
 }
