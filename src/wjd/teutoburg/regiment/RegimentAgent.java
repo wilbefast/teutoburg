@@ -55,7 +55,7 @@ protected static final int REACH = 1;
   private Faction faction;
   protected State state;
   // combat
-  protected Timer attackRecharge = new Timer(100);
+  protected Timer attackRecharge = new Timer(10);
   protected BoundedValue readiedAttacks;
   protected int hitsToTake;
   // position
@@ -434,6 +434,7 @@ protected static final int REACH = 1;
   {
     // we are now fighting!!!
     state = State.FIGHTING;
+    enemy.state = State.FIGHTING;
     
     // determine the number of kills
     int aKills = rollKillsAgainst(enemy),
@@ -453,13 +454,13 @@ protected static final int REACH = 1;
 
     // compute attack value
     double total_attack = 0.0;
-    for(int s = 1; s < n_attacks; s++)
+    for(int s = 1; s < strength; s++)
       total_attack += Math.random() 
                       * this.chanceToHit(other) 
                       * (1 - other.chanceToBlock(this));
                       //* (1 - ATTACK_FUMBLE_CHANCE);
     
     // return number of kills
-    return (int)total_attack;
+    return (int)Math.round(total_attack);
   }
 }
