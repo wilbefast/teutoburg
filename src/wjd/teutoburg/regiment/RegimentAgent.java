@@ -173,7 +173,7 @@ protected static final int REACH = 1;
 	  StringBuilder print_state = new StringBuilder();
 	  print_state.append("State : "+state+"\n");
 	  print_state.append("Strength : "+strength+"\n");
-	  print_state.append("Attack armed : "+attackArmed+"\n");
+	  print_state.append("Armed attcks : "+readiedAttacks+"\n");
 	  print_state.append("Hits to take : "+hitsToTake+"\n");
 	  
 	  return print_state.toString();
@@ -226,12 +226,6 @@ protected static final int REACH = 1;
   protected abstract boolean isEnemy(RegimentAgent other);
   
   protected abstract boolean isAlly(RegimentAgent other);
-  
-  protected boolean canSee(RegimentAgent a)
-  {
-	  return true;
-  }
-  
   
   /* OVERRIDES -- AGENT */
   

@@ -130,7 +130,7 @@ public class Cadaver implements IVisible
     canvas.circle(head_pos, HEAD_RADIUS, true);
     
     // shield
-    canvas.setColour(faction.colour_shield);
+    canvas.setColour(faction.colour_shield_dead);
     canvas.box(shield, true);
 
   }

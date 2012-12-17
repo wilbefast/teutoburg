@@ -31,7 +31,7 @@ public abstract class Faction
   /* ATTRIBUTES */
   public final Colour colour_shield, colour_tunic, colour_face, colour_weapon, 
                       colour_imposter, colour_tunic_dead, colour_face_dead,
-                      colour_imposter_dead;
+                      colour_imposter_dead, colour_shield_dead;
   
   /* METHODS */
   
@@ -44,9 +44,10 @@ public abstract class Faction
     colour_weapon = weapon;
     colour_imposter = body.clone().avg(shield);
     
-    colour_tunic_dead = colour_tunic.clone().avg(Colour.RED).avg(colour_tunic);
+    colour_tunic_dead = colour_tunic.clone().avg(Colour.RED).avg(colour_tunic).avg(Colour.WHITE);
     colour_face_dead = colour_face.clone().avg(Colour.WHITE);
     colour_imposter_dead = (colour_tunic_dead.clone().avg(colour_shield)).avg(Palette.BLOOD);
+    colour_shield_dead = colour_shield.clone().avg(Colour.WHITE);
   }
   
   /* INTERFACE */
