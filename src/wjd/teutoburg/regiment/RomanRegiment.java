@@ -79,29 +79,13 @@ public class RomanRegiment extends RegimentAgent
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
-
-	  if(nearestEnemy != null 
-       && state != State.FIGHTING 
-       && nearestEnemyDist2 <= M.sqr(getCircle().radius + nearestEnemy.getCircle().radius + REACH))
-	  {
-		  state = State.FIGHTING;
-	  }
     
     
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestEnemy != null)
-      {
-			  /*if(melee(nearestEnemy) == EUpdateResult.DELETE_ME)
-			  {
-				  return EUpdateResult.DELETE_ME;
-			  }*/
-      }
-		  else
+		  if(nearestEnemy == null)
 			  state = State.WAITING;
 	  }
-    
-    
 	  else if(state == State.WAITING)
 	  {
 		  if(nearestEnemy != null)
@@ -147,7 +131,7 @@ public class RomanRegiment extends RegimentAgent
 			  if(V2.coline(direction, new V2(c.centre, nearestEnemy.getCircle().centre)))
 			  {
 				  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist-c.radius-REACH-nearestEnemy.getCircle().radius);
+				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
 				  advance(min);
 			  }
 		  }

@@ -78,17 +78,9 @@ public class BarbarianRegiment extends RegimentAgent
 	  // else if not charging or fighting, charge !!!
 	  // else if charging, charge
 	  // else if fighting and has an ennemy, fight
-	  if(	nearestEnemy != null 
-			&& state != State.FIGHTING 
-			&& nearestEnemyDist2 <= M.sqr(getCircle().radius + nearestEnemy.getCircle().radius + REACH))
-	  {
-		  state = State.FIGHTING;
-	  }
 	  if(state == State.FIGHTING)
 	  {
-		  if(nearestEnemy != null)
-			  ;//melee(nearestEnemy);
-		  else
+		  if(nearestEnemy == null)
 			  state = State.WAITING;
 	  }
 	  else if(state == State.WAITING)
@@ -109,11 +101,11 @@ public class BarbarianRegiment extends RegimentAgent
 		  if(nearestEnemy != null)
 		  {
 			  V2 goal = nearestEnemy.getCircle().centre.clone();
-			  goal.add((float)Math.random()*10-5, (float)Math.random()*10-5);
+			  //goal.add((float)Math.random()*10-5, (float)Math.random()*10-5);
 			  // charge : turn in front of roman, then advance
 			  faceTowards(goal);
 			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-			  float min = Math.min(SPEED_FACTOR*t_delta, nearestEnemyDist-c.radius-REACH-nearestEnemy.getCircle().radius);
+			  float min = Math.min(SPEED_FACTOR*t_delta, nearestEnemyDist);
 			  if(advance(min) == EUpdateResult.DELETE_ME)
 			  	return EUpdateResult.DELETE_ME;
 		  }
