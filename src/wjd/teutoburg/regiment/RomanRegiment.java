@@ -56,12 +56,6 @@ public class RomanRegiment extends RegimentAgent
   
   // movement
   private static final float SPEED_FACTOR = 0.3f;
-  private static final float MAX_TURN_TURTLE 
-                        = 10.0f * (float)Math.PI / 180.0f, 
-                          // 20 degrees per millisecond
-                            MAX_TURN_RABBLE
-                        = 50.0f * (float)Math.PI / 180.0f; 
-                          // 90 degrees per millisecond
   
   /* ATTRIBUTES */
   protected Timer defendingAgainstNobody = new Timer(10000);

@@ -46,6 +46,12 @@ public abstract class RegimentAgent extends Agent
   private static final int MAX_KILLS_PER_SOLDIER = 3;
   protected static final int REACH = 1;
   protected static final float ATTACK_INTERVAL = 1000.0f;
+  protected static final float MAX_TURN_TURTLE 
+                        = 10.0f * (float)Math.PI / 180.0f, 
+                          // 20 degrees per millisecond
+                            MAX_TURN_RABBLE
+                        = 50.0f * (float)Math.PI / 180.0f; 
+                          // 90 degrees per millisecond
   
   /* VARIABLES */
   private final V2 temp = new V2();

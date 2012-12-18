@@ -78,7 +78,8 @@ public class BarbarianRegiment extends RegimentAgent
       || heardHorn != null)
     {
       in_hiding = false;
-      if(nearestActivAlly == null && heardHorn == null)
+      if(nearestActivAlly == null 
+         || (heardHorn == null && n_active_allies < n_visible_allies/2))
         soundTheHorn();
       state = State.CHARGING;
     }
@@ -117,7 +118,10 @@ public class BarbarianRegiment extends RegimentAgent
       // charge towards whatever the ally is facing
       temp.reset(nearestActivAlly.getDirection())
           .scale((float)Math.sqrt(nearestActivAllyDist2))
-          .sub(c.centre);
+          .sub(c.centre).opp();
+      turnTowardsGradually(temp, MAX_TURN_RABBLE);
+      
+      // advance
       advance(SPEED_FACTOR * t_delta);
     }
     else
