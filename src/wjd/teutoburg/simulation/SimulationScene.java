@@ -53,6 +53,10 @@ public class SimulationScene extends AScene
 	// barbarians
 	private static final float BARB_DEPLOY_FRAC = 0.45f;
 	private static final int BARBARIAN_N_REGIMENTS = 20;
+	// drawing
+	private static final int NB_SOUND_WAVES = 3;
+	private static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
+	private static final int SECONDS_UNTIL_HORN_FADING = 5;
 
 	/* ATTRIBUTES */
   
@@ -270,11 +274,22 @@ public class SimulationScene extends AScene
 		// draw all the agents
 		for(Agent a : agents)
 			a.render(canvas);
-		
-		/*for(Map.Entry<Long, Tile> horn : hornsSounded.entrySet())
+
+		// draw all the horns sounded
+		Colour grey = Colour.BLACK.clone();
+		V2 tileCentre = new V2();
+		for(Map.Entry<Long, Tile> horn : hornsSounded.entrySet())
 		{
-			canvas.setColour(Colour.BLACK)
-		}*/
+			long currentTime = System.currentTimeMillis();
+			grey.a = Math.max(	0.0f, 
+									1.0f - ((currentTime-horn.getKey())/(SECONDS_UNTIL_HORN_FADING*100.0f))*0.1f);
+			canvas.setColour(grey);
+			
+			for(int i = 0 ; i < NB_SOUND_WAVES ; i++)
+				canvas.circle(	tileCentre.reset(horn.getValue().pixel_position).add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f), 
+								MAX_SOUND_RADIUS-(i*MAX_SOUND_RADIUS/NB_SOUND_WAVES), 
+								false);
+		}
 
 		/*canvas.setColour(Colour.RED);
 		canvas.box(roman_deploy, false);

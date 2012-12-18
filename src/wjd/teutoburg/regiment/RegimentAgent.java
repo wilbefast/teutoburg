@@ -29,10 +29,8 @@ import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.collision.Collider;
-import wjd.teutoburg.regiment.RomanRegiment.State;
 import wjd.teutoburg.simulation.Tile;
 import wjd.teutoburg.simulation.TileGrid;
-import wjd.util.BoundedValue;
 import wjd.util.Timer;
 
 /**
@@ -79,6 +77,7 @@ public abstract class RegimentAgent extends Agent
   protected static final int REACH = 1;
   protected static final float MAX_TIME_BETWEEN_ATTACKS = 1000.0f;
   protected static final float SPEED_FACTOR = 0.5f;
+  protected static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
   
   /* ATTRIBUTES */
   // model
@@ -110,7 +109,7 @@ public abstract class RegimentAgent extends Agent
   // corpses
   private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
   //communication
-  private final Rect sound_box = new Rect(Tile.SIZE.clone().scale(20));
+  private final Rect sound_box = new Rect(MAX_SOUND_RADIUS*2, MAX_SOUND_RADIUS*2);
   protected boolean hornHeard;
   protected V2 hornDirection;
   protected Faction hornFaction;

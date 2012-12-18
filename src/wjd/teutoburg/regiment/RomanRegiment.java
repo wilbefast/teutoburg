@@ -277,7 +277,7 @@ public class RomanRegiment extends RegimentAgent
   protected void formGiganticTurtle(int t_delta, Iterable<Tile> percepts)
   {
 	  // TODO : setFormedUp(false) when relaying ?
-	  V2 new_direction = direction.clone(), tmp;
+	  V2 new_direction = c.centre.clone(), tmp;
 	  for(Tile t : percepts)
 	  {
 		  if(t != tile)
