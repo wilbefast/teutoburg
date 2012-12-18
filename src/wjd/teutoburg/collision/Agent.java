@@ -194,10 +194,6 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   @Override
   public void collisionEvent(Collider other, float overlap)
   {
-    
-    
-    
-    
     float push_multiplier 
       = (other.getClass().equals(this.getClass())) ? 0.0005f : 0.0001f;
     

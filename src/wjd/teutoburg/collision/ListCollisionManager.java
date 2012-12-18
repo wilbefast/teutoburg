@@ -90,7 +90,7 @@ public class ListCollisionManager implements ICollisionManager
       // check collisions between pairs of objects
       float overlap;
       for(Collider b : objects)
-        if((overlap = a.getOverlap(b)) > 0)
+        if(a != b && (overlap = a.getOverlap(b)) > 0)
         {
           a.collisionEvent(b, overlap);
           b.collisionEvent(a, overlap);

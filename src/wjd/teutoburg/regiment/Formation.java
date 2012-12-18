@@ -276,8 +276,8 @@ public abstract class Formation implements IVisible
                               (float)M.signedRand(0.3, randomiser)*angle_step,
                        
                 // noisier on the outside
-                radius_noise_factor = (n_layers == 0) ? 0 : (n_layers+1 - l) 
-                																							/ n_layers,
+                radius_noise_factor = 1,/*(n_layers == 0) ? 0 : (n_layers+1 - l) 
+                																							/ n_layers, */
                               
                 radius_noise = l  * LAYER_RADIUS 
               								+ (radius_noise_factor *
@@ -285,7 +285,7 @@ public abstract class Formation implements IVisible
           
           soldier_position.xy((float)Math.cos(angle_noise), 
                               (float)Math.sin(angle_noise))
-                          .scale(radius_noise)
+                          .scale(Math.min(radius_noise, l  * LAYER_RADIUS))
                           .add(c.centre);
 
           // calculate absolute position and move there

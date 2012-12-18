@@ -46,10 +46,6 @@ public class BarbarianRegiment extends RegimentAgent
   private static final int AMBUSH_MIN_ALLIES = 100;
   private static final int AMBUSH_MAX_THREAT = 100; 
   
-  /* VARIABLES */
-  
-  private static final V2 temp1 = new V2(), temp2 = new V2();
-  
   /* ATTRIBUTES */
   private boolean in_hiding = true;
   
@@ -199,5 +195,10 @@ public class BarbarianRegiment extends RegimentAgent
   protected float getSpeedFactor()
   {
     return SPEED_FACTOR;
+  }
+  
+  protected State getInitialState()
+  {
+  	return State.WAITING;
   }
 }

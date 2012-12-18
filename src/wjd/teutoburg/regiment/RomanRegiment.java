@@ -40,9 +40,6 @@ public class RomanRegiment extends RegimentAgent
 			super(v, k);
 		}
 	}
-  
-  /* CLASS VARIABLES */
-  private static final V2 temp1 = new V2(), temp2 = new V2();
 		
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 7*7;
@@ -56,6 +53,7 @@ public class RomanRegiment extends RegimentAgent
   // movement
   private static final float SPEED_FACTOR_IN_TURTLE = 0.2f;
   private static final float SPEED_FACTOR_IN_RABBLE = 0.5f;
+  
   /* ATTRIBUTES */
   protected Timer defendingAgainstNobody = new Timer(10000);
   protected Timer rallyingWithNobody = new Timer(2000);
@@ -329,6 +327,11 @@ public class RomanRegiment extends RegimentAgent
 	  else
 		 return SPEED_FACTOR_IN_RABBLE;
   }
+  
+  protected State getInitialState()
+  {
+  	return RomanState.MARCHING;
+  }
     
   /* OVERRIDES */
       
@@ -356,11 +359,6 @@ public class RomanRegiment extends RegimentAgent
   
   /* SUBROUTINES */
 
-  private float getMaxTurn()
-  {
-    return ((isFormedUp()) ? MAX_TURN_TURTLE : MAX_TURN_RABBLE); 
-  }
-  
   private boolean isProtected()
   {
 	  if(alliesFormedAround.size() >= 2)

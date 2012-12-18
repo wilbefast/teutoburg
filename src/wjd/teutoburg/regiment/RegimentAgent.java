@@ -54,7 +54,7 @@ public abstract class RegimentAgent extends Agent
                           // 90 degrees per millisecond
   
   /* VARIABLES */
-  private final V2 temp = new V2();
+  protected final V2 temp1 = new V2(), temp2 = new V2();
   
   /* ATTRIBUTES */
   // model
@@ -167,6 +167,11 @@ public abstract class RegimentAgent extends Agent
 	  return true;
   }
   
+  protected float getMaxTurn()
+  {
+    return ((isFormedUp()) ? MAX_TURN_TURTLE : MAX_TURN_RABBLE); 
+  }
+  
 
   // accessors -- public 
   
@@ -213,17 +218,64 @@ public abstract class RegimentAgent extends Agent
     // transform dying men into corpses
     for(int i = 0; i < n_killed; i++)
     { 
-      formation.getSoldierPosition(i, temp);
-      dead_pile.add(new Cadaver(temp, faction));
+      formation.getSoldierPosition(i, temp1);
+      dead_pile.add(new Cadaver(temp1, faction));
     }
     
-    // remove the dead
-    strength -= n_killed;
+    // reset size
+    return setStrength(strength - n_killed);
+  }
+  
+  public void requistion(RegimentAgent other)
+  {
+  	// are there too many to form a single regiment?
+  	int total_strength = strength + other.strength;
+  	System.out.print("before: " + total_strength);
+  	
+  	// reform 2 units
+  	if(total_strength > initial_strength)
+  	{
+  		int first_half = total_strength / 2, 
+  				second_half = total_strength - first_half;
+    	setStrength(first_half);
+    	other.setStrength(second_half);
+    	other.state = getInitialState();
+  	}
+  	else
+  	{
+	  	// requisition all soldiers from the other
+	  	setStrength(total_strength);
+	  	other.setStrength(0);
+	  	other.state = State.DEAD;
+	  	
+	  	// move in between the two
+		  temp1.reset(other.c.centre).sub(c.centre).scale(0.001f);
+		  speed.add(temp1);
+  	}
+  	
+  	state = getInitialState();
+  	
+  	total_strength = strength + other.strength;
+  	System.out.println("after: " + total_strength);
+  }
+  
+  
+  public EUpdateResult setStrength(int new_strength)
+  {
+  	// cap strength
+  	if(new_strength < 0)
+  		new_strength = 0;
+  	if(new_strength > initial_strength)
+  		new_strength = initial_strength;
+  	
+    // reset to new size
+    strength = new_strength;
     attackRecharge.setMax((int)(ATTACK_INTERVAL / strength));
     
     // destroy the regiment if too many are dead
     if (strength == 0)
     {
+    	setRadius(0);
       state = State.DEAD;
       return EUpdateResult.DELETE_ME;
     }
@@ -254,6 +306,8 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract float getSpeedFactor();
   
+  protected abstract State getInitialState();
+  
   /* AI */
   protected EUpdateResult fighting()
   {
@@ -278,7 +332,7 @@ public abstract class RegimentAgent extends Agent
   {
 	  if(nearestEnemy != null)
 	  {
-		  if(faceTowards(nearestEnemy.getCircle().centre))
+		  if(turnTowardsGradually(nearestEnemy.getCircle().centre, getMaxTurn()))
 		  {
 			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
 			  float min = Math.min(getSpeedFactor() * t_delta, nearestEnemyDist);
@@ -294,19 +348,29 @@ public abstract class RegimentAgent extends Agent
 
   protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
   {
-	  for(Tile t : percepts)
+  	// turn away from enemies
+	  if(n_visible_enemies >= 0) for(Tile t : percepts)
 	  {
 		  if(t != tile)
 		  {
+		  	// specifically: turn away from barycentre of perceived enemies
 			  if(t.agent != null && this.isEnemy(t.agent) && t.agent.state != State.DEAD)
 			  {
-				  V2 temp1 = c.centre.clone().scale(2.0f).sub(t.agent.getCircle().centre);
-				  faceTowards(temp1);
+				  temp1.reset(c.centre).scale(2.0f).sub(t.agent.getCircle().centre);
+				  turnTowardsGradually(temp1, getMaxTurn());
 			  }
 		  }
-
 	  }
 	  
+	  // otherwise turn towards nearest ally
+	  else if(nearestAlly != null)
+	  {
+		  temp1.reset(nearestAlly.getCircle().centre);
+		  faceTowards(temp1);
+		  //turnTowardsGradually(temp1, getMaxTurn());
+	  }
+	  
+	  // advance as quickly as possible
 	  advance(getSpeedFactor() * t_delta);
 
 	  return EUpdateResult.CONTINUE;
@@ -347,33 +411,8 @@ public abstract class RegimentAgent extends Agent
 	  return EUpdateResult.CONTINUE;
   }
   
-  /* OVERRIDES -- AGENT */
-  
-  @Override
-  protected void directionChange()
-  {
-    // default
-    super.directionChange();
-    left.reset(direction).left();
-    
-    // we need to recache the soldiers' positions if in view close to us
-    if (visible)
-      formation.reposition();
-  }
-  
-  @Override
-  protected void positionChange()
-  {
-    // default
-    super.positionChange();
-    
-    // change tile
-    tryClaimTile();
-    
-    // we need to recache the soldiers' positions if in view close to us
-    if (visible)
-      formation.reposition();
-  }
+
+  /* IMPLEMENTS -- IDYNAMIC */
   
   @Override
   public EUpdateResult update(int t_delta)
@@ -438,6 +477,8 @@ public abstract class RegimentAgent extends Agent
 	  return EUpdateResult.CONTINUE;
   }
 
+  /* IMPLEMENTS -- IVISIBLE */
+  
   @Override
   public void render(ICanvas canvas)
   {
@@ -454,14 +495,53 @@ public abstract class RegimentAgent extends Agent
       nearby = false;
   }
   
+  /* OVERRIDES -- AGENT */
+  
+  @Override
+  protected void directionChange()
+  {
+    // default
+    super.directionChange();
+    left.reset(direction).left();
+    
+    // we need to recache the soldiers' positions if in view close to us
+    if (visible)
+      formation.reposition();
+  }
+  
+  @Override
+  protected void positionChange()
+  {
+    // default
+    super.positionChange();
+    
+    // change tile
+    tryClaimTile();
+    
+    // we need to recache the soldiers' positions if in view close to us
+    if (visible)
+      formation.reposition();
+  }
+  
   @Override
   public void collisionEvent(Collider other, float overlap)
-  {
+  {	
+    RegimentAgent other_r = (RegimentAgent)other;
+    
     // fight enemies
-    RegimentAgent r = (RegimentAgent)other;
-    if(isEnemy(r) && r.state != State.DEAD)
-      combat.add(r);
+    if(isEnemy(other_r) && other_r.state != State.DEAD)
+      combat.add(other_r);
       
+    // reform with allies
+    else if(n_visible_enemies == 0 && isAlly(other_r) 
+    		&& (state == State.FLEEING))
+    {
+    	// swallow up other regiment or be swallowed by it
+    	if(this.strength > other_r.strength)
+    		this.requistion(other_r);
+    	else
+    		other_r.requistion(this);
+    }
     
     // snap out of collision
     super.collisionEvent(other, overlap);
@@ -583,7 +663,10 @@ public abstract class RegimentAgent extends Agent
     		  nearestAllyDist2 = dist2;
     	  }
     	  // nearest active allies
-    	  if(r.state != State.WAITING && r.state != State.DEAD && r.state != State.FLEEING && dist2 < nearestActivAllyDist2)
+    	  if(r.state != State.WAITING 
+    	  		&& r.state != State.DEAD 
+    	  		&& r.state != State.FLEEING 
+    	  		&& dist2 < nearestActivAllyDist2)
     	  {
     		  nearestActivAlly = r;
     		  nearestActivAllyDist2 = dist2;
@@ -645,7 +728,7 @@ public abstract class RegimentAgent extends Agent
 		  {
 			  if(i == attack_i)
 			  {
-				  faceTowards(r.getCircle().centre);
+				  turnTowardsGradually(r.getCircle().centre, getMaxTurn());
 				  if(melee(r) == EUpdateResult.DELETE_ME)
 					  return EUpdateResult.DELETE_ME;
 			  }
