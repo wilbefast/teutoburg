@@ -80,13 +80,20 @@ public abstract class RegimentAgent extends Agent
   // ai
   private final int PERCEPTION_RADIUS = (int)Tile.SIZE.x * 10;
   private final Rect perception_box = new Rect(PERCEPTION_RADIUS, PERCEPTION_RADIUS);
-  protected RegimentAgent nearestAlly, nearestEnemy;
-  protected float nearestAllyDist2, nearestEnemyDist2;
-  protected RegimentAgent nearestActivAlly;
+
+  protected float nearestAllyDist2, 
+								nearestEnemyDist2;
+  protected RegimentAgent nearestAlly, 
+													nearestEnemy,
+													nearestActivAlly, 
+													nearestFleeingAlly;
   protected float nearestActivAllyDist2;
   protected boolean in_woods;
-  protected int n_visible_enemies, n_visible_allies, 
-                n_active_enemies, n_active_allies, perceived_threat;
+  protected int n_visible_enemies, 
+								n_visible_allies, 
+                n_active_enemies, 
+                n_active_allies, 
+                perceived_threat;
   // corpses
   private List<Cadaver> dead_pile;
   //communication
@@ -570,21 +577,30 @@ public abstract class RegimentAgent extends Agent
     	  n_visible_enemies += r.strength;
       }
 
-      // cache nearest ally
+      // cache allies
       else if(isAlly(r))
       {
+      	// nearest allies
     	  float dist2 = r.getCircle().centre.distance2(c.centre);
     	  if(dist2 < nearestAllyDist2)
     	  {
     		  nearestAlly = r;
     		  nearestAllyDist2 = dist2;
     	  }
+    	  // nearest active allies
     	  if(r.state != State.WAITING && r.state != State.DEAD && r.state != State.FLEEING && dist2 < nearestActivAllyDist2)
     	  {
     		  nearestActivAlly = r;
     		  nearestActivAllyDist2 = dist2;
     		  n_active_allies += r.strength;
     	  }
+    	  
+    	  // nearest fleeing allies
+    	  if(r.state == State.FLEEING)
+    	  {
+    	  	nearestFleeingAlly = r;
+    	  }
+    	  
     	  n_visible_allies += r.strength;
       }
     }

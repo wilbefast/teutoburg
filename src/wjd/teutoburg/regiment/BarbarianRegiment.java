@@ -52,7 +52,6 @@ public class BarbarianRegiment extends RegimentAgent
   
   /* ATTRIBUTES */
   private boolean in_hiding = true;
-	private RegimentAgent nearestFleeingAlly;
   
   /* METHODS */
 
@@ -80,7 +79,7 @@ public class BarbarianRegiment extends RegimentAgent
 		  {
 			  faceTowards(nearestEnemy.getCircle().centre);
 			  
-			  if(n_visible_enemies > n_visible_allies / 3)// / 2 && n_visible_enemies < n_visible_allies)
+			  if(n_visible_enemies > n_visible_allies / 2)// && n_visible_enemies < n_visible_allies)
 			  {
 				  soundTheHorn();
 				  in_hiding = false;
@@ -161,16 +160,7 @@ public class BarbarianRegiment extends RegimentAgent
 
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
-  {
-  	// TODO put in cachePercepts
-  	for(Tile t : percepts)
-  	{
-  		if(t.agent != null && isAlly(t.agent) && t.agent.state == State.FLEEING)
-  			nearestFleeingAlly = t.agent;
-  	}
-  	
-  	
-  	
+  {  	
 	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
 		  return EUpdateResult.DELETE_ME;
 
