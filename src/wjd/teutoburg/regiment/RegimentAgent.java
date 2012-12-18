@@ -226,11 +226,10 @@ public abstract class RegimentAgent extends Agent
     return setStrength(strength - n_killed);
   }
   
-  public void requistion(RegimentAgent other)
+  public boolean requistion(RegimentAgent other)
   {
   	// are there too many to form a single regiment?
   	int total_strength = strength + other.strength;
-  	System.out.print("before: " + total_strength);
   	
   	// reform 2 units
   	if(total_strength > initial_strength)
@@ -239,7 +238,9 @@ public abstract class RegimentAgent extends Agent
   				second_half = total_strength - first_half;
     	setStrength(first_half);
     	other.setStrength(second_half);
-    	other.state = getInitialState();
+    	
+    	// other regiment still exists
+    	return true;
   	}
   	else
   	{
@@ -251,12 +252,10 @@ public abstract class RegimentAgent extends Agent
 	  	// move in between the two
 		  temp1.reset(other.c.centre).sub(c.centre).scale(0.001f);
 		  speed.add(temp1);
+		  
+		  // other regiment disbanded
+		  return false;
   	}
-  	
-  	state = getInitialState();
-  	
-  	total_strength = strength + other.strength;
-  	System.out.println("after: " + total_strength);
   }
   
   
@@ -349,7 +348,7 @@ public abstract class RegimentAgent extends Agent
   protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
   {
   	// turn away from enemies
-	  if(n_visible_enemies >= 0) for(Tile t : percepts)
+	  if(n_visible_enemies > 0) for(Tile t : percepts)
 	  {
 		  if(t != tile)
 		  {
@@ -365,9 +364,9 @@ public abstract class RegimentAgent extends Agent
 	  // otherwise turn towards nearest ally
 	  else if(nearestAlly != null)
 	  {
-		  temp1.reset(nearestAlly.getCircle().centre);
-		  faceTowards(temp1);
-		  //turnTowardsGradually(temp1, getMaxTurn());
+		  temp1.reset(nearestAlly.getCircle().centre).sub(c.centre);
+		  if(V2.det(direction, temp1) > 0)
+		  	turnTowardsGradually(temp1.add(c.centre), getMaxTurn());
 	  }
 	  
 	  // advance as quickly as possible
@@ -490,6 +489,8 @@ public abstract class RegimentAgent extends Agent
      
       // render the formation depending on the level of detail
       formation.render(canvas);
+      
+      canvas.text(state.toString(), c.centre);
     }
     else
       nearby = false;
@@ -534,13 +535,18 @@ public abstract class RegimentAgent extends Agent
       
     // reform with allies
     else if(n_visible_enemies == 0 && isAlly(other_r) 
-    		&& (state == State.FLEEING))
+    		&& other_r.state == State.FLEEING && strength > other_r.strength)
     {
-    	// swallow up other regiment or be swallowed by it
-    	if(this.strength > other_r.strength)
-    		this.requistion(other_r);
-    	else
-    		other_r.requistion(this);
+    	requistion(other_r);
+    	direction.reset(other_r.direction).opp();
+    	state = State.CHARGING;
+    	
+    	
+    	if(other_r.state != State.DEAD)
+    	{
+    		other_r.direction.opp();
+    		other_r.state = State.CHARGING;
+    	}
     }
     
     // snap out of collision
