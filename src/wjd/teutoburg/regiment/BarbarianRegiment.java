@@ -44,8 +44,9 @@ public class BarbarianRegiment extends RegimentAgent
 	private static final double BLOCK_CHANCE = 0.1;
 	private static final double ATTACK_CHANCE = 0.6;
   
-  private static final int AMBUSH_MIN_THREAT = 3; 
-  private static final int AMBUSH_MAX_THREAT = 3; 
+  private static final int AMBUSH_MIN_THREAT = -100; 
+  private static final int AMBUSH_MIN_ALLIES = 100;
+  private static final int AMBUSH_MAX_THREAT = 100; 
   
   /* VARIABLES */
   
@@ -64,6 +65,21 @@ public class BarbarianRegiment extends RegimentAgent
   }
   
   /* OVERRIDES -- REGIMENTAGENT */
+  
+  @Override
+  protected EUpdateResult waiting(int t_delta)
+  {
+    
+    if(nearestActivAlly != null)
+    {
+      faceTowards(nearestActivAlly.getCircle().centre);
+      float min = Math.min(SPEED_FACTOR * t_delta, 
+                          ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
+      advance(min);
+    }
+    
+    return EUpdateResult.CONTINUE;
+  }
   
   @Override
   protected EUpdateResult charging(int t_delta)
@@ -97,7 +113,9 @@ public class BarbarianRegiment extends RegimentAgent
   {
     // spring the trap when enough enemies are inside it
     
-    if((perceived_threat > AMBUSH_MIN_THREAT && perceived_threat < AMBUSH_MAX_THREAT)
+    if((perceived_threat >= AMBUSH_MIN_THREAT 
+        && perceived_threat <= AMBUSH_MAX_THREAT
+        && n_visible_allies >= AMBUSH_MIN_ALLIES)
     || heardHorn != null)
     {
       if(nearestEnemy != null && nearestActivAlly == null 
@@ -105,13 +123,13 @@ public class BarbarianRegiment extends RegimentAgent
         soundTheHorn();
       state = State.CHARGING;
     }
-    else if(nearestActivAlly != null)
+    /*else if(nearestActivAlly != null)
     {
       faceTowards(nearestActivAlly.getCircle().centre);
       float min = Math.min(SPEED_FACTOR * t_delta, 
                           ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
       advance(min);
-    }
+    }*/
     
     return EUpdateResult.CONTINUE;
   }
