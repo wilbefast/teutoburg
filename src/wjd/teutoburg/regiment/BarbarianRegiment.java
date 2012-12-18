@@ -30,7 +30,7 @@ public class BarbarianRegiment extends RegimentAgent
 	/* NESTING */
 	public static class BarbarianState extends State
 	{
-		//public static final State RALLYING = new State(7,"rallying");
+		public static final State HIDING = new State(7, "hiding");
 		
 		protected BarbarianState(int v, String k) 
     {
@@ -44,6 +44,9 @@ public class BarbarianRegiment extends RegimentAgent
 	private static final double BLOCK_CHANCE = 0.1;
 	private static final double ATTACK_CHANCE = 0.6;
   
+  private static final int AMBUSH_MIN_THREAT = 3; 
+  private static final int AMBUSH_MAX_THREAT = 3; 
+  
   /* VARIABLES */
   
   private static final V2 temp = new V2();
@@ -55,45 +58,12 @@ public class BarbarianRegiment extends RegimentAgent
   public BarbarianRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
-  }
-
-  // accessors
-
-  // mutators
-  
-  /* IMPLEMENTS -- REGIMENTAGENT */
-
-  @Override
-  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
-  {
-	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
-		  return EUpdateResult.DELETE_ME;
-	  
-    //! BARBARIAN AI GOES HERE
-
-	  return EUpdateResult.CONTINUE;
-  }
-  
-  @Override
-  protected EUpdateResult waiting(int t_delta)
-  {
-    if(nearestEnemy != null || heardHorn != null)
-    {
-      // TODO : wait for the *opportune* moment... ^_^
-      if(nearestEnemy != null && nearestActivAlly != null)
-        soundTheHorn();
-      state = State.CHARGING;
-    }
-    else if(nearestActivAlly != null)
-    {
-      faceTowards(nearestActivAlly.getCircle().centre);
-      float min = Math.min(SPEED_FACTOR * t_delta, 
-                          ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
-      advance(min);
-    }
     
-    return EUpdateResult.CONTINUE;
+    // initialise status
+    state = BarbarianState.HIDING;
   }
+  
+  /* OVERRIDES -- REGIMENTAGENT */
   
   @Override
   protected EUpdateResult charging(int t_delta)
@@ -122,6 +92,46 @@ public class BarbarianRegiment extends RegimentAgent
     return EUpdateResult.CONTINUE;
   }
   
+  /* AI */
+  private EUpdateResult hiding(int t_delta, Iterable<Tile> percepts)
+  {
+    // spring the trap when enough enemies are inside it
+    
+    if((perceived_threat > AMBUSH_MIN_THREAT && perceived_threat < AMBUSH_MAX_THREAT)
+    || heardHorn != null)
+    {
+      if(nearestEnemy != null && nearestActivAlly == null 
+         && heardHorn != null && soundedHorn != null)
+        soundTheHorn();
+      state = State.CHARGING;
+    }
+    else if(nearestActivAlly != null)
+    {
+      faceTowards(nearestActivAlly.getCircle().centre);
+      float min = Math.min(SPEED_FACTOR * t_delta, 
+                          ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
+      advance(min);
+    }
+    
+    return EUpdateResult.CONTINUE;
+  }
+  
+  /* IMPLEMENTS -- REGIMENTAGENT */
+
+  @Override
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
+  {
+	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
+		  return EUpdateResult.DELETE_ME;
+    
+    if(state == BarbarianState.HIDING)
+	  {
+		  if(hiding(t_delta, percepts) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
+	  }
+
+	  return EUpdateResult.CONTINUE;
+  }
   /*
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {  
