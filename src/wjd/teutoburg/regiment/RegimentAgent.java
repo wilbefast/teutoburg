@@ -78,7 +78,8 @@ public abstract class RegimentAgent extends Agent
   protected RegimentAgent nearestActivAlly;
   protected float nearestActivAllyDist2;
   protected boolean in_woods;
-  protected int n_visible_enemies, n_visible_allies, perceived_threat;
+  protected int n_visible_enemies, n_visible_allies, 
+                n_active_enemies, n_active_allies, perceived_threat;
   // corpses
   private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
   //communication
@@ -501,7 +502,7 @@ public abstract class RegimentAgent extends Agent
 	  nearestAllyDist2 = nearestEnemyDist2 = Float.MAX_VALUE;
 	  nearestActivAlly = null;
 	  nearestActivAllyDist2 = Float.MAX_VALUE;
-	  n_visible_enemies = n_visible_allies = 0;
+	  n_visible_enemies = n_visible_allies = n_active_enemies = n_active_allies = 0;
     
     // check if we're in the woods
     in_woods = !(tile.forest_amount.isEmpty());
@@ -524,6 +525,7 @@ public abstract class RegimentAgent extends Agent
 			  {
 				  nearestEnemy = r;
 				  nearestEnemyDist2 = dist2;
+          n_active_enemies += r.strength;
 			  }
         n_visible_enemies += r.strength;
 		  }
@@ -541,6 +543,7 @@ public abstract class RegimentAgent extends Agent
 			  {
 				  nearestActivAlly = r;
 				  nearestActivAllyDist2 = dist2;
+          n_active_allies += r.strength;
 			  }
         n_visible_allies += r.strength;
 		  }
