@@ -100,7 +100,7 @@ public abstract class Formation implements IVisible
   /* INTERFACE */
   public abstract void repositionSoldiers();
   public abstract float reform();
-  public abstract void renderImposter(ICanvas canvas);
+  public abstract void renderImposter(ICanvas canvas, boolean fill);
 
   
   /* IMPLEMENTS -- IVISIBLE */
@@ -109,9 +109,15 @@ public abstract class Formation implements IVisible
   {
     if(detail)
     {
+    	// draw outline
+    	canvas.setLineWidth(3.0f);
+      canvas.setColour(owner.getFaction().colour_shield);
+      renderImposter(canvas, false);
+    	
       // draw soldiers if available
       for(Soldier s : soldiers)
         s.render(canvas);
+
     }
     else
     {
@@ -119,7 +125,7 @@ public abstract class Formation implements IVisible
       
       // draw an imposter if not
       canvas.setColour(owner.getFaction().colour_shield);
-      renderImposter(canvas);
+      renderImposter(canvas, true);
       canvas.setColour(owner.getFaction().colour_tunic);
       canvas.triangle(arrow_left, arrow_top, arrow_right, true);
     }
@@ -200,9 +206,9 @@ public abstract class Formation implements IVisible
     }
     
     @Override
-    public void renderImposter(ICanvas canvas)
+    public void renderImposter(ICanvas canvas, boolean fill)
     {
-      canvas.angleBox(c.centre, direction, owner.getCircle().radius, true);
+      canvas.angleBox(c.centre, direction, owner.getCircle().radius, fill);
     }
   }
 
@@ -212,7 +218,7 @@ public abstract class Formation implements IVisible
     
     private static final float FULL_CIRCLE  = (float)(2 * Math.PI);
     private static final float LAYER_RADIUS = 26.0f;
-    private static final float RADIUS_VAR = LAYER_RADIUS * 0.4f;
+    private static final float RADIUS_VAR = 0.9f * LAYER_RADIUS; // fraction
 
     
     /* ATTRIBUTES */
@@ -264,9 +270,17 @@ public abstract class Formation implements IVisible
         for(int s = 0; s < ((l < n_layers) ? layer_size : incomplete_layer); s++)
         {
           // calculate absolute position and move there
+        	
+        	
           float angle_noise = angle + 
                               (float)M.signedRand(0.3, randomiser)*angle_step,
-                radius_noise = l * (LAYER_RADIUS + 
+                       
+                // noisier on the outside
+                radius_noise_factor = (n_layers == 0) ? 0 : (n_layers+1 - l) 
+                																							/ n_layers,
+                              
+                radius_noise = l  * LAYER_RADIUS 
+              								+ (radius_noise_factor *
                               (float)M.signedRand(RADIUS_VAR, randomiser));
           
           soldier_position.xy((float)Math.cos(angle_noise), 
@@ -290,9 +304,9 @@ public abstract class Formation implements IVisible
     }
     
     @Override
-    public void renderImposter(ICanvas canvas)
+    public void renderImposter(ICanvas canvas, boolean fill)
     {
-      canvas.circle(c.centre, owner.getCircle().radius, true);
+      canvas.circle(c.centre, owner.getCircle().radius, fill);
     }
   }
 }

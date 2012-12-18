@@ -449,11 +449,6 @@ public abstract class RegimentAgent extends Agent
      
       // render the formation depending on the level of detail
       formation.render(canvas);
-      
-      // render the state
-      canvas.setColour(Colour.BLACK);
-      //canvas.text((perceived_threat)+""/*state.toString()*/, c.centre);
-      //canvas.text(state.toString(), c.centre);
     }
     else
       nearby = false;
