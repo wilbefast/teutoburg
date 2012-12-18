@@ -45,7 +45,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   protected Rect visibility_box;
   protected boolean visible = true;
   // brain
-  protected Map<String, String> belief = new HashMap<String, String>();
+  protected Map<String, Object> belief = new HashMap<String, Object>();
 
   /* METHODS */
   
@@ -106,10 +106,11 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     directionChange();
   }
   
-  public void faceTowards(V2 target)
+  public boolean faceTowards(V2 target)
   {
     direction.reset(target).sub(c.centre).normalise();
     directionChange();
+    return true;
   }
   
   protected void directionChange()
@@ -122,7 +123,7 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
   //----------------------------------------------------------------------------
   // POSITION
   //----------------------------------------------------------------------------
-  public EUpdateResult advance(float distance)
+  public void advance(float distance)
   {
     // move various spatial components
     direction.scale(distance);
@@ -133,8 +134,6 @@ public abstract class Agent extends Collider implements IVisible, IDynamic
     
     // inform subclasses of the move
     positionChange();
-    
-    return EUpdateResult.CONTINUE;
   }
   
   protected void positionChange()

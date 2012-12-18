@@ -19,6 +19,9 @@ package wjd.teutoburg.simulation;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
@@ -61,12 +64,13 @@ public class SimulationScene extends AScene
   
 	private StrategyCamera camera;
   
-  // objects
+	// objects
 	private TileGrid grid;
 	private List<RegimentAgent> agents;
 	private List<Copse> copses;
-  private List<Cadaver> cadavers;
-  private ICollisionManager collisionManager;
+	private List<Cadaver> cadavers;
+	private ICollisionManager collisionManager;
+	private TreeMap<Long,Tile> hornsSounded;
 
 	/* METHODS */
 
@@ -100,9 +104,12 @@ public class SimulationScene extends AScene
 		agents = new LinkedList<RegimentAgent>();
 		deployRomans();
 		deployBarbarians();
-    
-    // corpses
-    cadavers = new LinkedList<Cadaver>();
+
+		// corpses
+		cadavers = new LinkedList<Cadaver>();
+
+		// horns sounded
+		hornsSounded = new TreeMap<Long, Tile>();
 
 		// view
 		camera = new StrategyCamera(map);
@@ -215,6 +222,12 @@ public class SimulationScene extends AScene
       // creates corpses ?
       a.bringOutYourDead(cadavers);
       
+      if(a.hasSoundedTheHorn)
+      {
+    	  hornsSounded.put(System.currentTimeMillis(), a.tile);
+    	  a.hasSoundedTheHorn = false;
+      }
+      
       // destroy the regiment ?
 			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
 			{
@@ -246,11 +259,10 @@ public class SimulationScene extends AScene
 		canvas.setColour(Palette.GRASS);
 		canvas.box(map, true);
 
-    // draw all the cadavers
-    for(Cadaver c : cadavers)
-      c.render(canvas);
+		// draw all the cadavers
+		for(Cadaver c : cadavers)
+			c.render(canvas);
 
-    
 		// draw all the trees
 		for(Copse c : copses)
 			c.render(canvas);
@@ -258,12 +270,17 @@ public class SimulationScene extends AScene
 		// draw all the agents
 		for(Agent a : agents)
 			a.render(canvas);
+		
+		/*for(Map.Entry<Long, Tile> horn : hornsSounded.entrySet())
+		{
+			canvas.setColour(Colour.BLACK)
+		}*/
 
-		canvas.setColour(Colour.RED);
+		/*canvas.setColour(Colour.RED);
 		canvas.box(roman_deploy, false);
 		canvas.setColour(Colour.BLUE);
 		canvas.box(barb_deploy_E, false);
-		canvas.box(barb_deploy_W, false);
+		canvas.box(barb_deploy_W, false);*/
 
 		// render GUI elements
 		canvas.setCameraActive(false);

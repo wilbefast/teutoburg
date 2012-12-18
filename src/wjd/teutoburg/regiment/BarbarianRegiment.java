@@ -29,12 +29,20 @@ import wjd.teutoburg.simulation.Tile;
  */
 public class BarbarianRegiment extends RegimentAgent
 {
-  /* CONSTANTS */
-  private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
-  private static final float SPEED_FACTOR = 0.6f;
-  private static final double BLOCK_CHANCE = 0.1;
-  private static final double ATTACK_CHANCE = 0.6;
-  
+	/* NESTING */
+	public static class State extends RegimentAgent.State
+	{
+		//public static final State RALLYING = new State(7,"rallying");
+		
+		protected State(int v, String k) {super(v, k);}
+	}
+	
+	/* CONSTANTS */
+	private static final int REGIMENT_SIZE = 63; // = 1 + 2 + 4 + ... + 16 + 32
+	private static final float SPEED_FACTOR = 0.6f;
+	private static final double BLOCK_CHANCE = 0.1;
+	private static final double ATTACK_CHANCE = 0.6;
+
   /* ATTRIBUTES */
   
   /* METHODS */
@@ -94,8 +102,7 @@ public class BarbarianRegiment extends RegimentAgent
 			  faceTowards(goal);
 			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
 			  float min = Math.min(SPEED_FACTOR*t_delta, nearestEnemyDist);
-			  if(advance(min) == EUpdateResult.DELETE_ME)
-			  	return EUpdateResult.DELETE_ME;
+			  advance(min);
 		  }
 		  else
 		  {

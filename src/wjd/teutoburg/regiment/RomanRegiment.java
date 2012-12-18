@@ -21,6 +21,7 @@ import wjd.math.M;
 import wjd.math.V2;
 import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
+import wjd.util.Timer;
 
 /**
  *
@@ -29,6 +30,15 @@ import wjd.teutoburg.simulation.Tile;
  */
 public class RomanRegiment extends RegimentAgent
 {
+	public static class State extends RegimentAgent.State
+	{
+		public static final State RALLYING = new State(5,"rallying");
+		public static final State ESCAPING = new State(6,"escaping");
+		public static final State DEFENDING = new State(7,"defending");
+		
+		protected State(int v, String k) {super(v, k);}
+	}
+		
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
   
@@ -41,13 +51,15 @@ public class RomanRegiment extends RegimentAgent
   // movement
   private static final float SPEED_FACTOR = 0.3f;
   private static final float MAX_TURN_TURTLE 
-                        = 20.0f * (float)Math.PI / 180.0f, 
-                          // 40 degrees per second
+                        = 10.0f * (float)Math.PI / 180.0f, 
+                          // 20 degrees per millisecond
                             MAX_TURN_RABBLE
-                        = 90.0f * (float)Math.PI / 180.0f; 
-                          // 90 degrees per second
+                        = 50.0f * (float)Math.PI / 180.0f; 
+                          // 90 degrees per millisecond
   
   /* ATTRIBUTES */
+  protected Timer defendingAgainstNobody = new Timer(5000);
+  protected Timer rallyingWithNobody = new Timer(5000);
   
   /* METHODS */
 
@@ -56,6 +68,8 @@ public class RomanRegiment extends RegimentAgent
   public RomanRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
+ // initialise status
+    state = State.ESCAPING;
   }
 
   // accessors
@@ -67,86 +81,145 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected boolean canSee(RegimentAgent a)
   {
-	  if(state == State.WAITING && !a.tile.forest_amount.isEmpty())
+	  if(!hornHeard && !a.tile.forest_amount.isEmpty())
 		  return false;
 	  else
 		  return true;
   }
 
   
+  
   // artificial intelligence
+  protected EUpdateResult escaping(int t_delta, Iterable<Tile> percepts)
+  {
+	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
+	  
+	  if(nearestEnemy != null && !hornHeard)
+	  {
+		  soundTheHorn();
+	  }
+	  else if(hornHeard)
+	  {
+		  state = State.RALLYING;
+	  }
+	  else
+	  {
+		  V2 new_direction = escape_direction.clone(), tmp;
+		  int nbPossibleNeigh = 1;
+		  for(Tile t : percepts)
+		  {
+			  if(	t != tile 
+					&& t.pixel_position.y >= tile.pixel_position.y
+					&& t.pixel_position.x != tile.pixel_position.x)
+			  {
+				  nbPossibleNeigh++;
+				  if(!(t.forest_amount.isEmpty()))
+				  {
+					  tmp = new V2(t.pixel_position, c.centre);
+					  tmp.normalise();
+					  tmp.scale(t.forest_amount.balance());
+					  new_direction.add(tmp);
+					  nbPossibleNeigh--;
+				  }
+			  }
+		  }
+		  if(nbPossibleNeigh == 1)
+			  turnTowardsGradually(escape_direction, getMaxTurn());
+		  else
+			  turnTowardsGradually(new_direction, getMaxTurn());
+		  advance(SPEED_FACTOR*t_delta);
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  protected EUpdateResult rallying(int t_delta, Iterable<Tile> percepts)
+  {
+	  if(nearestAlly != null) // I see an ally
+	  {
+		  rallyingWithNobody.fill();
+		  if(isProtected())
+		  {
+			  state = State.DEFENDING;
+		  }
+		  else // I'm not protected : flanckable
+		  {
+			  formGiganticTurtle(t_delta, percepts);
+		  }
+	  }
+	  else // I can't see any ally
+	  {
+		  if(rallyingWithNobody.update(t_delta) == EUpdateResult.FINISHED)
+		  {
+			  state = State.ESCAPING;
+		  }
+		  else
+		  {
+			  if(hornFaction == getFaction())
+			  {
+				  // I'm going to rally the horn-bearer
+				  V2 prev_centre = c.centre.clone();
+				  faceTowards(hornDirection);
+				  advance(SPEED_FACTOR*t_delta);
+				  V2 way = c.centre.clone();
+				  way.sub(prev_centre);
+				  hornDirection.add(way);  
+			  }
+			  else // the horn was sounded by an ennemi
+			  {
+				  // I'm alone and ennemies are attacking
+				  state = State.ESCAPING;
+			  }
+		  }
+	  }
+
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  protected EUpdateResult defending(int t_delta)
+  {
+	  if(!isProtected()) // I'm not protected
+	  {
+		  state = State.RALLYING;
+	  }
+	  else // I'm protected
+	  {
+		  if(nearestEnemy != null) // I see an enemy
+		  {
+			  defendingAgainstNobody.fill();
+			  faceTowards(nearestEnemy.getCircle().centre);
+		  }
+		  else // I can't see an enemy
+		  {
+			  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
+			  {
+				  state = State.ESCAPING;
+				  hornHeard = false;
+			  }
+		  }
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
+
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
-    
-    
-	  if(state != State.FIGHTING && !combat.isEmpty())
+	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
+		  return EUpdateResult.DELETE_ME;
+	  
+	  if(state == State.ESCAPING)
 	  {
-		  state = State.FIGHTING;
+		  if(escaping(t_delta, percepts) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
 	  }
-	  if(state == State.FIGHTING)
+	  if(state == State.RALLYING)
 	  {
-		  if(!combat.isEmpty())
-		  {
-			 if(randomAttack() == EUpdateResult.DELETE_ME)
-				return EUpdateResult.DELETE_ME;
-		  }
-		  else
-		  {
-			  state = State.WAITING;
-		  }
+		  if(rallying(t_delta, percepts) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
 	  }
-	  if(state == State.WAITING)
+	  if(state == State.DEFENDING)
 	  {
-		  if(nearestEnemy != null)
-		  {
-			  state = State.CHARGING; // TODO : rally
-		  }
-		  else
-		  {
-			  V2 new_direction = escape_direction.clone(), tmp;
-			  int nbPossibleNeigh = 1;
-			  for(Tile t : percepts)
-			  {
-				  if(	t != tile 
-						&& t.pixel_position.y >= tile.pixel_position.y
-						&& t.pixel_position.x != tile.pixel_position.x)
-				  {
-					  nbPossibleNeigh++;
-					  if(!(t.forest_amount.isEmpty()))
-					  {
-						  tmp = new V2(t.pixel_position, c.centre);
-						  tmp.normalise();
-						  tmp.scale(t.forest_amount.balance());
-						  new_direction.add(tmp);
-						  nbPossibleNeigh--;
-					  }
-				  }
-			  }
-			  if(nbPossibleNeigh == 1)
-				  turnTowardsGradually(escape_direction, getMaxTurn());
-			  else
-				  turnTowardsGradually(new_direction, getMaxTurn());
-			  if(advance(SPEED_FACTOR*t_delta) == EUpdateResult.DELETE_ME)
-				  return EUpdateResult.DELETE_ME;
-		  }
-	  }
-	  if(state == State.CHARGING)
-	  {
-		  if(nearestEnemy != null)
-		  {
-			  if(turnTowardsGradually(nearestEnemy.getCircle().centre, getMaxTurn()))
-			  {
-				  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-				  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
-				  advance(min);
-			  }
-		  }
-		  else
-		  {
-			  state = State.WAITING;
-		  }
+		  if(defending(t_delta) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
 	  }
 	  return EUpdateResult.CONTINUE;
   }
@@ -192,11 +265,69 @@ public class RomanRegiment extends RegimentAgent
           : (other instanceof RomanRegiment);
   }
   
+  protected boolean isProtected()
+  {
+	  if(alliesFormedAround.size() >= 3)
+	  {
+		  return true;
+	  }
+	  return false;
+  }
+  
+  protected void formGiganticTurtle(int t_delta, Iterable<Tile> percepts)
+  {
+	  // TODO : setFormedUp(false) when relaying ?
+	  V2 new_direction = direction.clone(), tmp;
+	  for(Tile t : percepts)
+	  {
+		  if(t != tile)
+		  {
+			  if(t.agent != null && this.isAlly(t.agent))
+			  {
+				  tmp = new V2(c.centre, t.agent.getCircle().centre);
+				  tmp.norm(tmp.norm()/Tile.SIZE.norm());
+				  new_direction.add(tmp);
+			  }
+			  if(!(t.forest_amount.isEmpty()))
+			  {
+				  tmp = new V2(t.grid_position, c.centre);
+				  tmp.normalise();
+				  tmp.scale(t.forest_amount.balance());
+				  new_direction.add(tmp);
+			  }
+		  }
+		  
+	  }
+	  faceTowards(new_direction);
+	  advance(SPEED_FACTOR*t_delta);
+  }
+  
+  @Override
+  protected EUpdateResult fighting()
+  {
+	  if(!combat.isEmpty())
+	  {
+		 if(randomAttack() == EUpdateResult.DELETE_ME)
+			return EUpdateResult.DELETE_ME;
+	  }
+	  else
+	  {
+		  state = State.DEFENDING;
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
+  
   
   /* SUBROUTINES */
 
   private float getMaxTurn()
   {
     return ((isFormedUp()) ? MAX_TURN_TURTLE : MAX_TURN_RABBLE); 
+  }
+  
+  @Override
+  public boolean faceTowards(V2 target)
+  {
+	  return turnTowardsGradually(target, getMaxTurn());
   }
 }

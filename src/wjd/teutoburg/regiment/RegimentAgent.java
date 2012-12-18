@@ -29,7 +29,9 @@ import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.collision.Collider;
+import wjd.teutoburg.regiment.RomanRegiment.State;
 import wjd.teutoburg.simulation.Tile;
+import wjd.teutoburg.simulation.TileGrid;
 import wjd.util.BoundedValue;
 import wjd.util.Timer;
 
@@ -41,11 +43,34 @@ import wjd.util.Timer;
 public abstract class RegimentAgent extends Agent
 {  
   /* NESTING */
-  public enum State 
-  {
-      WAITING, CHARGING, FIGHTING, RALLYING, DEAD
-  }
-    
+	public static class State implements Comparable<State>
+	{
+		public static final State WAITING = new State(1,"waiting");
+		public static final State CHARGING = new State(2,"charging");
+		public static final State FIGHTING = new State(3,"fighting");
+		public static final State DEAD = new State(4,"dead");
+		
+		protected State(int v, String k) {VALUE = v; KEY = k;}		  
+		public final int VALUE;
+		public final String KEY;
+		
+		public int compareTo(State s)
+		{
+			if(VALUE < s.VALUE)
+				return -1;
+			else if(VALUE == s.VALUE)
+				return 0;
+			else
+				return 1;
+		}
+		
+		@Override
+		public String toString()
+		{
+			return KEY;
+		}
+	}
+
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   private static final double ATTACK_FUMBLE_CHANCE = 0.0;
@@ -53,6 +78,7 @@ public abstract class RegimentAgent extends Agent
   private static final int MAX_ATTACKS_PER_TURN = 1;
   protected static final int REACH = 1;
   protected static final float MAX_TIME_BETWEEN_ATTACKS = 1000.0f;
+  protected static final float SPEED_FACTOR = 0.5f;
   
   /* ATTRIBUTES */
   // model
@@ -64,6 +90,7 @@ public abstract class RegimentAgent extends Agent
   protected boolean attackReady;
   protected int hitsToTake;
   protected Set<RegimentAgent> combat = new HashSet<RegimentAgent>();
+  protected Set<RegimentAgent> alliesFormedAround = new HashSet<RegimentAgent>();
   // position
   private final V2 grid_pos = new V2();
   public Tile tile;
@@ -81,7 +108,13 @@ public abstract class RegimentAgent extends Agent
   protected float nearestActivAllyDist2;
   protected boolean in_woods;
   // corpses
-  private List<Cadaver> dead_pile;
+  private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
+  //communication
+  private final Rect sound_box = new Rect(Tile.SIZE.clone().scale(20));
+  protected boolean hornHeard;
+  protected V2 hornDirection;
+  protected Faction hornFaction;
+  public boolean hasSoundedTheHorn;
 
 
   /* METHODS */
@@ -114,6 +147,11 @@ public abstract class RegimentAgent extends Agent
 
     // initialise status
     state = State.WAITING;
+
+    //communication
+    hornHeard = false;
+    hornDirection = new V2();
+    hasSoundedTheHorn = false;
   }
 
   // accessors -- package
@@ -226,8 +264,6 @@ public abstract class RegimentAgent extends Agent
 
   /* INTERFACE */
   
-  protected abstract EUpdateResult ai(int t_delta, Iterable<Tile> percepts);
-  
   protected abstract double chanceToHit(RegimentAgent defender);
   
   protected abstract double chanceToBlock(RegimentAgent defender);
@@ -235,6 +271,68 @@ public abstract class RegimentAgent extends Agent
   protected abstract boolean isEnemy(RegimentAgent other);
   
   protected abstract boolean isAlly(RegimentAgent other);
+  
+  /* AI */
+  protected EUpdateResult fighting()
+  {
+	  if(!combat.isEmpty())
+	  {
+		 if(randomAttack() == EUpdateResult.DELETE_ME)
+			return EUpdateResult.DELETE_ME;
+	  }
+	  else
+	  {
+		  state = State.WAITING;
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  protected EUpdateResult waiting()
+  {
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  protected EUpdateResult charging(int t_delta)
+  {
+	  if(nearestEnemy != null)
+	  {
+		  if(faceTowards(nearestEnemy.getCircle().centre))
+		  {
+			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
+			  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
+			  advance(min);
+		  }
+	  }
+	  else
+	  {
+		  state = State.WAITING;
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
+  {
+	  if(!combat.isEmpty())
+	  {
+		  state = State.FIGHTING;
+	  }
+	  if(state == State.FIGHTING)
+	  {
+		  if(fighting() == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
+	  }
+	  if(state == State.WAITING)
+	  {
+		  if(waiting() == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
+	  }
+	  if(state == State.CHARGING)
+	  {
+		  if(charging(t_delta) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
   
   /* OVERRIDES -- AGENT */
   
@@ -334,6 +432,7 @@ public abstract class RegimentAgent extends Agent
       formation.render(canvas);
       
       canvas.text(""+state, c.centre);
+      canvas.setColour(Colour.BLACK);
       //canvas.box(perception_box, false);
     }
     else
@@ -371,6 +470,8 @@ public abstract class RegimentAgent extends Agent
     {
       if(t.agent != null && isEnemy(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
         combat.add(t.agent);
+      if(t.agent != null && isAlly(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
+          alliesFormedAround.add(t.agent);
     }
     
     RegimentAgent r;
@@ -379,10 +480,17 @@ public abstract class RegimentAgent extends Agent
     while(it.hasNext())
     {
     	r = it.next();
-			if(!r.getCircle().collides(c) || r.state == State.DEAD)
-        it.remove();
+		if(!r.getCircle().collides(c) || r.state == State.DEAD)
+			it.remove();
     }
     
+    it = alliesFormedAround.iterator();
+    while(it.hasNext())
+    {
+    	r = it.next();
+		if(!r.getCircle().collides(c) || r.state == State.DEAD)
+			it.remove();
+    }
   }
   
   private void tryClaimTile()
@@ -520,5 +628,25 @@ public abstract class RegimentAgent extends Agent
 		  }
 	  }
 	  return EUpdateResult.CONTINUE;
+  }
+
+  protected void soundTheHorn()
+  {
+	  hasSoundedTheHorn = true;
+	  sound_box.centrePos(c.centre);
+	  TileGrid tilesWhereSounding = tile.grid.createSubGrid(sound_box);
+	  // check all tiles in sound radius 
+	  for(Tile t : tilesWhereSounding)
+	  {
+		  if(t.agent != null)
+		  {
+			  t.agent.hornHeard = true;
+			  t.agent.hornFaction = getFaction();
+			  if(t.agent == this)
+				  hornDirection.xy(0, 0);
+			  else
+				  t.agent.hornDirection.reset(t.agent.c.centre).sub(c.centre);
+		  }
+	  }
   }
 }
