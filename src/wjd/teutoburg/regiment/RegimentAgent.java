@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import wjd.amb.control.EUpdateResult;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
@@ -141,7 +140,7 @@ public abstract class RegimentAgent extends Agent
     return left;
   }
   
-  Faction getFaction()
+  public Faction getFaction()
   {
     return faction;
   }
@@ -602,10 +601,10 @@ public abstract class RegimentAgent extends Agent
 
   protected void soundTheHorn()
   {
-	  System.out.println("sound the horn");
 	  hasSoundedTheHorn = true;
 	  sound_box.centrePos(c.centre);
 	  TileGrid tilesWhereSounding = tile.grid.createSubGrid(sound_box);
+    
 	  // check all tiles in sound radius 
 	  for(Tile t : tilesWhereSounding)
 	  {

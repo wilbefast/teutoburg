@@ -20,8 +20,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
@@ -55,8 +53,6 @@ public class SimulationScene extends AScene
 	private static final int BARBARIAN_N_REGIMENTS = 20;
 	// drawing
 	private static final int NB_SOUND_WAVES = 3;
-	private static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
-	private static final int SECONDS_UNTIL_HORN_FADING = 5;
 
 	/* ATTRIBUTES */
   
@@ -73,8 +69,9 @@ public class SimulationScene extends AScene
 	private List<RegimentAgent> agents;
 	private List<Copse> copses;
 	private List<Cadaver> cadavers;
+  private List<HornBlast> hornsSounded;
 	private ICollisionManager collisionManager;
-	private TreeMap<Long,Tile> hornsSounded;
+
 
 	/* METHODS */
 
@@ -99,7 +96,7 @@ public class SimulationScene extends AScene
 		grid = new TileGrid(size.clone().scale(Tile.ISIZE).ceil());
 		grid.clear();
     collisionManager = new ListCollisionManager(map);
-
+    
 		// generate forest
 		copses = new LinkedList<Copse>();
 		generateForest();
@@ -113,7 +110,7 @@ public class SimulationScene extends AScene
 		cadavers = new LinkedList<Cadaver>();
 
 		// horns sounded
-		hornsSounded = new TreeMap<Long, Tile>();
+		hornsSounded = new LinkedList<HornBlast>();
 
 		// view
 		camera = new StrategyCamera(map);
@@ -218,32 +215,37 @@ public class SimulationScene extends AScene
 	public EUpdateResult update(int t_delta)
 	{
 		// update all the agents
-    Iterator<RegimentAgent> i = agents.iterator();
-    while(i.hasNext())
+    Iterator<RegimentAgent> raI = agents.iterator();
+    while(raI.hasNext())
     {
-      RegimentAgent a = i.next();
+      RegimentAgent ra = raI.next();
       
       // creates corpses ?
-      a.bringOutYourDead(cadavers);
+      ra.bringOutYourDead(cadavers);
       
-      if(a.hasSoundedTheHorn)
+      // create a horn-blast ?
+      if(ra.hasSoundedTheHorn)
       {
-    	  long cur = System.currentTimeMillis();
-    	  System.out.println("add hornsSounded millis "+cur);
-    	  hornsSounded.put(cur, a.tile);
-    	  a.hasSoundedTheHorn = false;
+    	  hornsSounded.add(new HornBlast(ra.getCircle().centre.clone(), ra.getFaction()));
+    	  ra.hasSoundedTheHorn = false;
       }
       
       // destroy the regiment ?
-			if(a.update(t_delta) == EUpdateResult.DELETE_ME)
+			if(ra.update(t_delta) == EUpdateResult.DELETE_ME)
 			{
-				a.tile.setRegiment(null);
-				i.remove();
+				ra.tile.setRegiment(null);
+				raI.remove();
 			}
       
       // keep within the map
-      a.getCircle().centre.snapWithin(map);
+      ra.getCircle().centre.snapWithin(map);
     }
+    
+    // countdown horn-blast duration
+    Iterator<HornBlast> hbI = hornsSounded.iterator();
+    while(hbI.hasNext())
+      if(hbI.next().update(t_delta) == EUpdateResult.DELETE_ME)
+        hbI.remove();
     
     // generate collision and boundary events
     collisionManager.generateCollisions();
@@ -278,29 +280,8 @@ public class SimulationScene extends AScene
 			a.render(canvas);
 
 		// draw all the horns sounded
-		//System.out.println("horns drawing");
-		Colour grey = Colour.BLACK.clone();
-		V2 tileCentre = new V2();
-		long currentTime = System.currentTimeMillis();
-		for(Map.Entry<Long, Tile> horn : hornsSounded.entrySet())
-		{
-			tileCentre.reset(horn.getValue().pixel_position).add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f);
-			grey.a = Math.max(	0.1f, 
-								1.0f - ((currentTime-horn.getKey())/(SECONDS_UNTIL_HORN_FADING*100.0f))*0.1f);
-			canvas.setColour(grey);
-			//System.out.println("horn grey = "+grey);
-			
-			for(int i = 0 ; i < NB_SOUND_WAVES ; i++)
-				canvas.circle(	tileCentre, 
-								MAX_SOUND_RADIUS-(i*MAX_SOUND_RADIUS/NB_SOUND_WAVES), 
-								false);
-		}
-
-		/*canvas.setColour(Colour.RED);
-		canvas.box(roman_deploy, false);
-		canvas.setColour(Colour.BLUE);
-		canvas.box(barb_deploy_E, false);
-		canvas.box(barb_deploy_W, false);*/
+		for(HornBlast hb : hornsSounded)
+      hb.render(canvas);
 
 		// render GUI elements
 		canvas.setCameraActive(false);
