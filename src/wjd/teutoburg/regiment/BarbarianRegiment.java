@@ -30,8 +30,6 @@ public class BarbarianRegiment extends RegimentAgent
 	/* NESTING */
 	public static class BarbarianState extends State
 	{
-		public static final State HIDING = new State(7, "hiding");
-		
 		protected BarbarianState(int v, String k) 
     {
       super(v, k);
@@ -61,7 +59,7 @@ public class BarbarianRegiment extends RegimentAgent
     super(position, REGIMENT_SIZE, t, faction);
     
     // initialise status
-    state = BarbarianState.HIDING;
+    state = BarbarianState.WAITING;
   }
   
   /* OVERRIDES -- REGIMENTAGENT */
@@ -69,14 +67,24 @@ public class BarbarianRegiment extends RegimentAgent
   @Override
   protected EUpdateResult waiting(int t_delta)
   {
+    // spring the trap when enough enemies are inside it
     
-    if(nearestActivAlly != null)
+    if((perceived_threat >= AMBUSH_MIN_THREAT 
+        && perceived_threat <= AMBUSH_MAX_THREAT
+        && n_visible_allies >= AMBUSH_MIN_ALLIES)
+    || heardHorn != null)
+    {
+      if(nearestEnemy != null && nearestActivAlly == null)
+        soundTheHorn();
+      state = State.CHARGING;
+    }
+    /*else if(nearestActivAlly != null)
     {
       faceTowards(nearestActivAlly.getCircle().centre);
       float min = Math.min(SPEED_FACTOR * t_delta, 
                           ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
       advance(min);
-    }
+    }*/
     
     return EUpdateResult.CONTINUE;
   }
@@ -107,32 +115,7 @@ public class BarbarianRegiment extends RegimentAgent
     
     return EUpdateResult.CONTINUE;
   }
-  
-  /* AI */
-  private EUpdateResult hiding(int t_delta, Iterable<Tile> percepts)
-  {
-    // spring the trap when enough enemies are inside it
-    
-    if((perceived_threat >= AMBUSH_MIN_THREAT 
-        && perceived_threat <= AMBUSH_MAX_THREAT
-        && n_visible_allies >= AMBUSH_MIN_ALLIES)
-    || heardHorn != null)
-    {
-      if(nearestEnemy != null && nearestActivAlly == null 
-         && heardHorn != null && soundedHorn != null)
-        soundTheHorn();
-      state = State.CHARGING;
-    }
-    /*else if(nearestActivAlly != null)
-    {
-      faceTowards(nearestActivAlly.getCircle().centre);
-      float min = Math.min(SPEED_FACTOR * t_delta, 
-                          ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
-      advance(min);
-    }*/
-    
-    return EUpdateResult.CONTINUE;
-  }
+
   
   /* IMPLEMENTS -- REGIMENTAGENT */
 
@@ -141,12 +124,6 @@ public class BarbarianRegiment extends RegimentAgent
   {
 	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
 		  return EUpdateResult.DELETE_ME;
-    
-    if(state == BarbarianState.HIDING)
-	  {
-		  if(hiding(t_delta, percepts) == EUpdateResult.DELETE_ME)
-			  return EUpdateResult.DELETE_ME;
-	  }
 
 	  return EUpdateResult.CONTINUE;
   }
