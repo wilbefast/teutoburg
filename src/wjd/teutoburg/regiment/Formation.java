@@ -19,6 +19,7 @@ package wjd.teutoburg.regiment;
 import java.util.Random;
 import wjd.amb.view.ICanvas;
 import wjd.amb.view.IVisible;
+import wjd.math.Circle;
 import wjd.math.M;
 import wjd.math.V2;
 
@@ -36,8 +37,8 @@ public abstract class Formation implements IVisible
   // model
   protected final RegimentAgent owner;
   protected Soldier[] soldiers = null;
-  protected float radius;
-  protected final V2 position, direction, left;
+  protected final Circle c;
+  protected final V2 direction, left;
   // view
   private boolean detail = true;
   private final V2 arrow_left = new V2(), 
@@ -51,28 +52,18 @@ public abstract class Formation implements IVisible
   {
     this.owner = owner;
     direction = owner.getDirection();
-    position = owner.getCircle().centre;
+    c = owner.getCircle();
     left = owner.getLeft();
   }
   
   // accessors
   
-  public V2 getSoldierPosition(int i)
+  public void getSoldierPosition(int i, V2 result)
   {
-    if(soldiers == null)
-    {
-      reform();
-      repositionSoldiers();
-    }
-    
-    try
-    {
-      return soldiers[i].getPosition();
-    }
-    catch(NullPointerException e)
-    {
-      return V2.ORIGIN;
-    }
+    if(soldiers == null || soldiers[i] == null)
+      c.randomPoint(result);
+    else
+      result.reset(soldiers[i].getPosition());
   }
   
   
@@ -95,11 +86,11 @@ public abstract class Formation implements IVisible
   public void reposition()
   {
     // the arrow shows us which way the regiment is facing from afar
-    arrow_top.reset(direction).scale(radius * 0.7f).add(position);
-    arrow_left.reset(left).scale(radius * 0.5f).add(position)
-      .add(-direction.x * radius * 0.3f, -direction.y * radius * 0.3f);
-    arrow_right.reset(left).scale(radius*0.5f).opp().add(position)
-      .add(-direction.x * radius * 0.3f, -direction.y * 0.3f*radius);
+    arrow_top.reset(direction).scale(c.radius * 0.7f).add(c.centre);
+    arrow_left.reset(left).scale(c.radius * 0.5f).add(c.centre)
+      .add(-direction.x * c.radius * 0.3f, -direction.y * c.radius * 0.3f);
+    arrow_right.reset(left).scale(c.radius*0.5f).opp().add(c.centre)
+      .add(-direction.x * c.radius * 0.3f, -direction.y * 0.3f*c.radius);
     
     // also refresh the soldiers if at the required detail level
     if(detail)
@@ -179,7 +170,7 @@ public abstract class Formation implements IVisible
       reposition();
       
       // change the overall radius of the unit
-      return (radius = n_files * SPACING * 0.5f);
+      return (n_files * SPACING * 0.5f);
     }
 
     @Override
@@ -197,7 +188,7 @@ public abstract class Formation implements IVisible
           f_offset.reset(left).scale((f * SPACING) - files_middle);
 
           // calculate absolute position and move there
-          soldier_position.reset(position).add(r_offset).add(f_offset);
+          soldier_position.reset(c.centre).add(r_offset).add(f_offset);
           if(soldiers[soldier_i] == null)
             soldiers[soldier_i] 
               = owner.getFaction().createSoldier(soldier_position, direction);
@@ -211,7 +202,7 @@ public abstract class Formation implements IVisible
     @Override
     public void renderImposter(ICanvas canvas)
     {
-      canvas.angleBox(position, direction, owner.getCircle().radius, true);
+      canvas.angleBox(c.centre, direction, owner.getCircle().radius, true);
     }
   }
 
@@ -255,7 +246,7 @@ public abstract class Formation implements IVisible
       reposition();
       
       // change the overall radius of the unit
-      return (radius = n_layers * LAYER_RADIUS);
+      return (n_layers * LAYER_RADIUS);
     }
 
     @Override
@@ -281,7 +272,7 @@ public abstract class Formation implements IVisible
           soldier_position.xy((float)Math.cos(angle_noise), 
                               (float)Math.sin(angle_noise))
                           .scale(radius_noise)
-                          .add(position);
+                          .add(c.centre);
 
           // calculate absolute position and move there
           if(soldiers[soldier_i] == null)
@@ -301,7 +292,7 @@ public abstract class Formation implements IVisible
     @Override
     public void renderImposter(ICanvas canvas)
     {
-      canvas.circle(position, owner.getCircle().radius, true);
+      canvas.circle(c.centre, owner.getCircle().radius, true);
     }
   }
 }

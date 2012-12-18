@@ -21,7 +21,7 @@ package wjd.teutoburg.regiment;
  * @author wdyce
  * @since Dec 18, 2012
  */
-class State implements Comparable<State>
+public class State implements Comparable<State>
 {
   /* CONSTANTS */
   static final State

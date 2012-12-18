@@ -31,7 +31,6 @@ import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.collision.Collider;
 import wjd.teutoburg.simulation.HornBlast;
 import wjd.teutoburg.simulation.Tile;
-import wjd.teutoburg.simulation.TileGrid;
 import wjd.util.Timer;
 
 /**
@@ -48,6 +47,9 @@ public abstract class RegimentAgent extends Agent
   protected static final int REACH = 1;
   protected static final float ATTACK_INTERVAL = 1000.0f;
   protected static final float SPEED_FACTOR = 0.5f;
+  
+  /* VARIABLES */
+  private final V2 temp = new V2();
   
   /* ATTRIBUTES */
   // model
@@ -176,10 +178,10 @@ public abstract class RegimentAgent extends Agent
   public String toString()
   {
 	  StringBuilder print_state = new StringBuilder();
-	  print_state.append("State : "+state+"\n");
-	  print_state.append("Strength : "+strength+"\n");
-	  print_state.append("Armed attacks : "+attackReady+"\n");
-	  print_state.append("Hits to take : "+hitsToTake+"\n");
+	  print_state.append("State : ").append(state).append("\n");
+	  print_state.append("Strength : ").append(strength).append("\n");
+	  print_state.append("Armed attacks : ").append(attackReady).append("\n");
+	  print_state.append("Hits to take : ").append(hitsToTake).append("\n");
 	  
 	  return print_state.toString();
   }
@@ -193,11 +195,14 @@ public abstract class RegimentAgent extends Agent
     
     // transform dying men into corpses
     for(int i = 0; i < n_killed; i++)
-      dead_pile.add(new Cadaver(formation.getSoldierPosition(strength-i-1), faction));
+    { 
+      formation.getSoldierPosition(i, temp);
+      dead_pile.add(new Cadaver(temp, faction));
+    }
     
     // remove the dead
     strength -= n_killed;
-    attackRecharge.setMax((int)(ATTACK_INTERVAL/strength));
+    attackRecharge.setMax((int)(ATTACK_INTERVAL / strength));
     
     // destroy the regiment if too many are dead
     if (strength == 0)
@@ -397,7 +402,7 @@ public abstract class RegimentAgent extends Agent
       
       // render the state
       canvas.setColour(Colour.BLACK);
-      canvas.text(""+state, c.centre);
+      canvas.text(state.toString(), c.centre);
     }
     else
       nearby = false;
