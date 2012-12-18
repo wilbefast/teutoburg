@@ -279,7 +279,7 @@ public abstract class RegimentAgent extends Agent
 
   protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 new_direction = c.centre.clone(), temp1 = new V2(), temp2 = new V2();
+	  V2 new_direction = direction, temp1 = new V2(), temp2 = new V2();
 	  for(Tile t : percepts)
 	  {
 		  if(t != tile)
@@ -444,7 +444,8 @@ public abstract class RegimentAgent extends Agent
       
       // render the state
       canvas.setColour(Colour.BLACK);
-      canvas.text((perceived_threat)+""/*state.toString()*/, c.centre);
+      //canvas.text((perceived_threat)+""/*state.toString()*/, c.centre);
+      canvas.text(state.toString(), c.centre);
     }
     else
       nearby = false;

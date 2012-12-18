@@ -130,6 +130,10 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  state = RomanState.RALLYING;
 	  }
+	  else if(!isFormedUp() && tile.forest_amount.balance() < 0.2)
+	  {
+		  setFormedUp(true);
+	  }
 	  else
 	  {
 		  V2 new_direction = escape_direction.clone(), tmp;
