@@ -47,7 +47,7 @@ public class SimulationScene extends AScene
 	private static final float ROMAN_DEPLOY_FRAC = 0.1f;
 	private static final int ROMAN_N_REGIMENTS = 15;
 	// barbarians
-	private static final float BARB_DEPLOY_FRAC = 0.45f;
+	private static final float BARB_DEPLOY_FRAC = 0.42f;
 	private static final int BARBARIAN_N_REGIMENTS = 20;
   // shared
   private static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
