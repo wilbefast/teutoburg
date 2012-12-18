@@ -28,8 +28,7 @@ import wjd.util.Timer;
  */
 public class RomanRegiment extends RegimentAgent
 {
-  
-  /* NESTING */
+	/* NESTING */
 	public static class RomanState extends State
 	{
 		public static final RomanState RALLYING = new RomanState(5, "rallying");
@@ -37,9 +36,9 @@ public class RomanRegiment extends RegimentAgent
 		public static final RomanState DEFENDING = new RomanState(7, "defending");
 		
 		protected RomanState(int v, String k) 
-    {
-      super(v, k);
-    }
+		{
+			super(v, k);
+		}
 	}
   
   /* CLASS VARIABLES */
@@ -55,8 +54,8 @@ public class RomanRegiment extends RegimentAgent
   private static final int FLANK_MIN_ANGLE = 135;
   
   // movement
-  private static final float SPEED_FACTOR = 0.3f;
-  
+  private static final float SPEED_FACTOR_IN_TURTLE = 0.2f;
+  private static final float SPEED_FACTOR_IN_RABBLE = 0.5f;
   /* ATTRIBUTES */
   protected Timer defendingAgainstNobody = new Timer(10000);
   protected Timer rallyingWithNobody = new Timer(2000);
@@ -104,6 +103,15 @@ public class RomanRegiment extends RegimentAgent
 	  return EUpdateResult.CONTINUE;
   }
   
+
+  @Override
+  protected EUpdateResult waiting(int t_delta)
+  {
+	  if(state == State.WAITING)
+		  state = RomanState.MARCHING;
+	  return EUpdateResult.CONTINUE;
+  }
+  
   protected EUpdateResult marching(int t_delta, Iterable<Tile> percepts)
   {
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
@@ -115,6 +123,10 @@ public class RomanRegiment extends RegimentAgent
 	  else if(heardHorn != null)
 	  {
 		  state = RomanState.RALLYING;
+	  }
+	  else if(!isFormedUp() && tile.forest_amount.balance() < 0.2)
+	  {
+		  setFormedUp(true);
 	  }
 	  else
 	  {
@@ -141,7 +153,7 @@ public class RomanRegiment extends RegimentAgent
 			  faceTowards(escape_direction);
 		  else
 			  faceTowards(new_direction);
-		  advance(SPEED_FACTOR * t_delta);
+		  advance(getSpeedFactor() * t_delta);
 	  }
 	  return EUpdateResult.CONTINUE;
   }
@@ -178,7 +190,7 @@ public class RomanRegiment extends RegimentAgent
 			  {
 				  // I'm going to rally the horn-bearer
 				  faceTowards(temp1.reset(heardHorn.position).sub(c.centre));
-				  advance(SPEED_FACTOR * t_delta); 
+				  advance(getSpeedFactor() * t_delta); 
 			  }
 			  else // the horn was sounded by an enemy
 			  {
@@ -305,7 +317,10 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected float getSpeedFactor()
   {
-    return SPEED_FACTOR;
+	  if(isFormedUp())
+		  return SPEED_FACTOR_IN_TURTLE;
+	  else
+		 return SPEED_FACTOR_IN_RABBLE;
   }
     
   /* OVERRIDES */
@@ -328,9 +343,10 @@ public class RomanRegiment extends RegimentAgent
   
   private boolean isProtected()
   {
-	  if(alliesFormedAround.size() >= 3 
-    || (nearestAlly != null && alliesFormedAround.size() > 0
-        && nearestAlly.state == RomanState.DEFENDING))
+	  if(	alliesFormedAround.size() >= 3)
+			//|| (nearestAlly != null 
+			//	&& alliesFormedAround.size() > 0
+			//	&& nearestAlly.state == RomanState.DEFENDING))
 	  {		  
 		  return true;
 	  }
@@ -352,14 +368,14 @@ public class RomanRegiment extends RegimentAgent
 			  }
 			  if(!(t.forest_amount.isEmpty()))
 			  {
-          t.getCentrePosition(temp1);
-          temp2.reset(c.centre);
-          new_direction.add(temp2.sub(temp1).normalise().scale(t.forest_amount.balance()));
+				  t.getCentrePosition(temp1);
+				  temp2.reset(c.centre);
+				  new_direction.add(temp2.sub(temp1).normalise().scale(t.forest_amount.balance()));
 			  }
 		  }
-		  
+
 	  }
 	  faceTowards(new_direction);
-	  advance(SPEED_FACTOR * t_delta);
+	  advance(getSpeedFactor() * t_delta);
   }
 }

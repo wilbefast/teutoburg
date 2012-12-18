@@ -59,6 +59,7 @@ public abstract class RegimentAgent extends Agent
   /* ATTRIBUTES */
   // model
   private int strength;
+  private int initial_strength;
   private Faction faction;
   protected State state;
   // combat
@@ -87,7 +88,7 @@ public abstract class RegimentAgent extends Agent
   protected int n_visible_enemies, n_visible_allies, 
                 n_active_enemies, n_active_allies, perceived_threat;
   // corpses
-  private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
+  private List<Cadaver> dead_pile;
   //communication
   protected HornBlast queuedHorn, soundedHorn, heardHorn;
   /* METHODS */
@@ -101,6 +102,7 @@ public abstract class RegimentAgent extends Agent
     
     // save parameters
     this.strength = start_strength;
+    this.initial_strength = start_strength;
     this.faction = faction;
     this.tile = tile_;
     tile.agent = this;
@@ -282,12 +284,50 @@ public abstract class RegimentAgent extends Agent
 	  }
 	  return EUpdateResult.CONTINUE;
   }
+
+  protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
+  {
+	  V2 new_direction = direction, temp1 = new V2(), temp2 = new V2();
+	  for(Tile t : percepts)
+	  {
+		  if(t != tile)
+		  {
+			  if(t.agent != null && this.isEnemy(t.agent) && t.agent.state != State.DEAD)
+			  {
+				  temp1 = t.agent.getCircle().centre;
+				  temp2.reset(c.centre);
+				  temp2.sub(temp1);
+				  temp2.norm(1.0f/temp2.norm());
+				  new_direction.add(temp2);
+			  }
+		  }
+
+	  }
+	  faceTowards(new_direction);
+	  advance(getSpeedFactor() * t_delta);
+
+	  return EUpdateResult.CONTINUE;
+  }
   
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  if(!combat.isEmpty())
+	  if(strength < initial_strength/4)
+	  {
+		  state = State.FLEEING;
+	  }
+	  else if(!combat.isEmpty())
 	  {
 		  state = State.FIGHTING;
+	  }
+	  if(state == State.FLEEING)
+	  {
+		  if(nearestEnemy == null)
+		  {
+			  state = State.WAITING;
+		  }
+		  else if(fleeing(t_delta, percepts) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
+		  
 	  }
 	  if(state == State.FIGHTING)
 	  {
@@ -412,6 +452,7 @@ public abstract class RegimentAgent extends Agent
       
       // render the state
       canvas.setColour(Colour.BLACK);
+      //canvas.text((perceived_threat)+""/*state.toString()*/, c.centre);
       canvas.text(state.toString(), c.centre);
     }
     else
@@ -441,7 +482,7 @@ public abstract class RegimentAgent extends Agent
     {
       if(t.agent != null && isEnemy(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
         combat.add(t.agent);
-      if(t.agent != null && isAlly(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
+      if(t.agent != null && t.agent != this && isAlly(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
           alliesFormedAround.add(t.agent);
     }
     
@@ -599,8 +640,11 @@ public abstract class RegimentAgent extends Agent
 		  for(RegimentAgent r : combat)
 		  {
 			  if(i == attack_i)
+			  {
+				  faceTowards(r.getCircle().centre);
 				  if(melee(r) == EUpdateResult.DELETE_ME)
 					  return EUpdateResult.DELETE_ME;
+			  }
 			  i++;
 		  }
 	  }
