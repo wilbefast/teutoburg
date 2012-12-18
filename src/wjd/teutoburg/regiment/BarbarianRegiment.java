@@ -71,25 +71,31 @@ public class BarbarianRegiment extends RegimentAgent
   protected EUpdateResult waiting(int t_delta)
   {
     // spring the trap when enough enemies are inside it
-    
     if((in_hiding 
         && perceived_threat >= AMBUSH_MIN_THREAT 
         && perceived_threat <= AMBUSH_MAX_THREAT
         && n_visible_allies >= AMBUSH_MIN_ALLIES)
-    || heardHorn != null
-    || (!in_hiding
-       && nearestEnemy != null))
+      || heardHorn != null)
     {
-      if(nearestEnemy != null && nearestActivAlly == null)
+      in_hiding = false;
+      if(nearestActivAlly == null && heardHorn == null)
         soundTheHorn();
       state = State.CHARGING;
     }
+      
+    // otherwise attack enemies on sight 
+    else if(nearestEnemy != null)
+    {
+      state = State.CHARGING;
+    }
+    
+    // otherwise go where allies are facing
     else if(nearestActivAlly != null)
     {
-      faceTowards(nearestActivAlly.getCircle().centre);
-      float min = Math.min(SPEED_FACTOR * t_delta, 
-                          ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
-      advance(min);
+      temp.reset(nearestActivAlly.getDirection())
+          .scale((float)Math.sqrt(nearestActivAllyDist2))
+          .sub(c.centre);
+      advance(SPEED_FACTOR * t_delta);
     }
     
     return EUpdateResult.CONTINUE;
