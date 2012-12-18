@@ -28,6 +28,8 @@ import wjd.util.Timer;
  */
 public class RomanRegiment extends RegimentAgent
 {
+  
+  /* NESTING */
 	public static class RomanState extends State
 	{
 		public static final RomanState RALLYING = new RomanState(5, "rallying");
@@ -39,6 +41,9 @@ public class RomanRegiment extends RegimentAgent
       super(v, k);
     }
 	}
+  
+  /* CLASS VARIABLES */
+  private static final V2 temp1 = new V2(), temp2 = new V2();
 		
   /* CONSTANTS */
   private static final int REGIMENT_SIZE = 6*6;
@@ -140,9 +145,9 @@ public class RomanRegiment extends RegimentAgent
 			  }
 		  }
 		  if(nbPossibleNeigh == 1)
-			  turnTowardsGradually(escape_direction, getMaxTurn());
+			  faceTowards(escape_direction);
 		  else
-			  turnTowardsGradually(new_direction, getMaxTurn());
+			  faceTowards(new_direction);
 		  advance(SPEED_FACTOR*t_delta);
 	  }
 	  return EUpdateResult.CONTINUE;
@@ -164,7 +169,7 @@ public class RomanRegiment extends RegimentAgent
 			  }
 			  else
 			  {
-				  formGiganticTurtle(t_delta, percepts);
+				  formMetaTurtle(t_delta, percepts);
 			  }
 		  }
 	  }
@@ -213,7 +218,8 @@ public class RomanRegiment extends RegimentAgent
 		  
 		  if(tileToFace != null)
 		  {
-			  faceTowards(tileToFace.pixel_position.clone().add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f));
+        tileToFace.getCentrePosition(temp1);
+			  faceTowards(temp1);
 		  }
 		  else if(nearestEnemy != null) // I see an enemy
 		  {
@@ -309,35 +315,30 @@ public class RomanRegiment extends RegimentAgent
 	  return false;
   }
   
-  protected void formGiganticTurtle(int t_delta, Iterable<Tile> percepts)
+  protected void formMetaTurtle(int t_delta, Iterable<Tile> percepts)
   {
 	  // TODO : setFormedUp(false) when relaying ?
-	  V2 new_direction = c.centre.clone(), tmp = new V2(), tileCentre = new V2();
+	  V2 new_direction = c.centre.clone();
 	  for(Tile t : percepts)
 	  {
 		  if(t != tile)
 		  {
 			  if(t.agent != null && this.isAlly(t.agent))
 			  {
-				  tmp.reset(t.agent.getCircle().centre);
-				  tmp.sub(c.centre);
-				  tmp.norm(tmp.norm()/Tile.SIZE.norm());
-				  new_direction.add(tmp);
+				  temp1.reset(t.agent.getCircle().centre).sub(c.centre);
+				  new_direction.add(temp1.norm(temp1.norm() / Tile.DIAGONAL));
 			  }
 			  if(!(t.forest_amount.isEmpty()))
 			  {
-				  tileCentre.reset(t.pixel_position).add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f);
-				  tmp.reset(c.centre);
-				  tmp.sub(tileCentre);
-				  tmp.normalise();
-				  tmp.scale(t.forest_amount.balance());
-				  new_direction.add(tmp);
+          t.getCentrePosition(temp1);
+          temp2.reset(c.centre);
+          new_direction.add(temp2.sub(temp1).normalise().scale(t.forest_amount.balance()));
 			  }
 		  }
 		  
 	  }
 	  faceTowards(new_direction);
-	  advance(SPEED_FACTOR*t_delta);
+	  advance(SPEED_FACTOR * t_delta);
   }
   
   

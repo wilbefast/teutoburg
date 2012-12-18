@@ -37,6 +37,7 @@ public class Tile implements IVisible, IDynamic
   public static final V2 SIZE = new V2(128, 128);
   public static final V2 HSIZE = SIZE.clone().scale(0.5f);
   public static final V2 ISIZE = SIZE.clone().inv();
+  public static final float DIAGONAL = SIZE.norm();
 
   /* ATTRIBUTES */
   public final TileGrid grid;
@@ -67,7 +68,12 @@ public class Tile implements IVisible, IDynamic
     }
     else
       return false;
-    
+  }
+  
+  // accessors
+  public void getCentrePosition(V2 result)
+  {
+    result.reset(pixel_position).add(HSIZE);
   }
 
   /* OVERRIDES -- IDYNAMIC */
