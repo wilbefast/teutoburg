@@ -54,7 +54,8 @@ public class RomanRegiment extends RegimentAgent
   private static final int FLANK_MIN_ANGLE = 135;
   
   // movement
-  private static final float SPEED_FACTOR = 0.3f;
+  private static final float SPEED_FACTOR_IN_TURTLE = 0.2f;
+  private static final float SPEED_FACTOR_IN_RABBLE = 0.5f;
   private static final float MAX_TURN_TURTLE 
                         = 10.0f * (float)Math.PI / 180.0f, 
                           // 20 degrees per millisecond
@@ -159,7 +160,7 @@ public class RomanRegiment extends RegimentAgent
 			  faceTowards(escape_direction);
 		  else
 			  faceTowards(new_direction);
-		  advance(SPEED_FACTOR * t_delta);
+		  advance(getSpeedFactor() * t_delta);
 	  }
 	  return EUpdateResult.CONTINUE;
   }
@@ -196,7 +197,7 @@ public class RomanRegiment extends RegimentAgent
 			  {
 				  // I'm going to rally the horn-bearer
 				  faceTowards(temp1.reset(heardHorn.position).sub(c.centre));
-				  advance(SPEED_FACTOR * t_delta); 
+				  advance(getSpeedFactor() * t_delta); 
 			  }
 			  else // the horn was sounded by an enemy
 			  {
@@ -323,7 +324,10 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected float getSpeedFactor()
   {
-    return SPEED_FACTOR;
+	  if(isFormedUp())
+		  return SPEED_FACTOR_IN_TURTLE;
+	  else
+		 return SPEED_FACTOR_IN_RABBLE;
   }
     
   /* OVERRIDES */
@@ -378,6 +382,6 @@ public class RomanRegiment extends RegimentAgent
 
 	  }
 	  faceTowards(new_direction);
-	  advance(SPEED_FACTOR * t_delta);
+	  advance(getSpeedFactor() * t_delta);
   }
 }
