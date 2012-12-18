@@ -116,7 +116,7 @@ public class RomanRegiment extends RegimentAgent
 	  
 	  if(nearestEnemy != null && heardHorn == null && soundedHorn == null)
 	  {
-		  //soundTheHorn();
+		  soundTheHorn();
 	  }
 	  else if(heardHorn != null)
 	  {
