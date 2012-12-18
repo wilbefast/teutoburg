@@ -23,11 +23,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import wjd.amb.control.EUpdateResult;
+import wjd.amb.view.Colour;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
 import wjd.math.V2;
 import wjd.teutoburg.collision.Agent;
 import wjd.teutoburg.collision.Collider;
+import wjd.teutoburg.simulation.HornBlast;
 import wjd.teutoburg.simulation.Tile;
 import wjd.teutoburg.simulation.TileGrid;
 import wjd.util.Timer;
@@ -42,12 +44,10 @@ public abstract class RegimentAgent extends Agent
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   private static final double ATTACK_FUMBLE_CHANCE = 0.0;
-  private static final int MAX_NUMBER_OF_KILLS_PER_SOLDIER = 3;
-  private static final int MAX_ATTACKS_PER_TURN = 1;
+  private static final int MAX_KILLS_PER_SOLDIER = 3;
   protected static final int REACH = 1;
-  protected static final float MAX_TIME_BETWEEN_ATTACKS = 1000.0f;
+  protected static final float ATTACK_INTERVAL = 1000.0f;
   protected static final float SPEED_FACTOR = 0.5f;
-  protected static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
   
   /* ATTRIBUTES */
   // model
@@ -79,11 +79,13 @@ public abstract class RegimentAgent extends Agent
   // corpses
   private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
   //communication
-  private final Rect sound_box = new Rect(MAX_SOUND_RADIUS*2, MAX_SOUND_RADIUS*2);
+  protected HornBlast outbox;
+  
+  
+
   protected boolean hornHeard;
   protected V2 hornDirection;
   protected Faction hornFaction;
-  public boolean hasSoundedTheHorn;
 
 
   /* METHODS */
@@ -112,7 +114,7 @@ public abstract class RegimentAgent extends Agent
     
     // combat
     attackReady = false;
-    attackRecharge.setMax((int)(MAX_TIME_BETWEEN_ATTACKS/strength));
+    attackRecharge.setMax((int)(ATTACK_INTERVAL/strength));
 
     // initialise status
     state = State.WAITING;
@@ -120,7 +122,6 @@ public abstract class RegimentAgent extends Agent
     //communication
     hornHeard = false;
     hornDirection = new V2();
-    hasSoundedTheHorn = false;
   }
 
   // accessors -- package
@@ -208,7 +209,7 @@ public abstract class RegimentAgent extends Agent
     
     // remove the dead
     strength -= n_killed;
-    attackRecharge.setMax((int)(MAX_TIME_BETWEEN_ATTACKS/strength));
+    attackRecharge.setMax((int)(ATTACK_INTERVAL/strength));
     
     // destroy the regiment if too many are dead
     if (strength == 0)
@@ -400,20 +401,12 @@ public abstract class RegimentAgent extends Agent
       // render the formation depending on the level of detail
       formation.render(canvas);
       
+      // render the state
+      canvas.setColour(Colour.BLACK);
       canvas.text(""+state, c.centre);
-      //canvas.setColour(Colour.BLACK);
-      //canvas.box(perception_box, false);
     }
     else
       nearby = false;
-    
-    /*canvas.setColour(Colour.WHITE);
-    if(!attackReady)
-    {
-      canvas.setLineWidth(3.0f);
-      canvas.circle(c.centre, c.radius, false);
-    }*/
-    //canvas.text(state+" ; "+attackReady+" ; "+attackRecharge.balance() , c.centre);
   }
   
   @Override
@@ -572,7 +565,7 @@ public abstract class RegimentAgent extends Agent
     // compute attack value
     double total_attack = 0.0;
     total_attack += Math.random()
-    				* MAX_NUMBER_OF_KILLS_PER_SOLDIER
+    				* MAX_KILLS_PER_SOLDIER
                     * this.chanceToHit(other) 
                     * (1 - other.chanceToBlock(this))
                     * (1 - ATTACK_FUMBLE_CHANCE);
@@ -598,25 +591,31 @@ public abstract class RegimentAgent extends Agent
 	  }
 	  return EUpdateResult.CONTINUE;
   }
+  
+  /* COMMUNICATION */
 
   protected void soundTheHorn()
   {
-	  hasSoundedTheHorn = true;
-	  sound_box.centrePos(c.centre);
-	  TileGrid tilesWhereSounding = tile.grid.createSubGrid(sound_box);
-    
-	  // check all tiles in sound radius 
-	  for(Tile t : tilesWhereSounding)
-	  {
-		  if(t.agent != null)
-		  {
-			  t.agent.hornHeard = true;
-			  t.agent.hornFaction = getFaction();
-			  if(t.agent == this)
-				  hornDirection.xy(0, 0);
-			  else
-				  t.agent.hornDirection.reset(t.agent.c.centre).sub(c.centre);
-		  }
-	  }
+    if(outbox == null)
+      outbox = new HornBlast(c.centre.clone(), this);
   }
+  
+  public HornBlast bringOutYourHornBlast()
+  {
+    HornBlast out = outbox;
+      outbox = null;
+    return out;
+  }
+  
+  public void hearTheHorn(HornBlast blast)
+  {
+    hornHeard = true;
+    hornFaction = blast.source.faction;
+    if(blast.source == this)
+      hornDirection.xy(0, 0);
+    else
+      hornDirection.reset(c.centre).sub(blast.position);
+  }
+  
+  
 }

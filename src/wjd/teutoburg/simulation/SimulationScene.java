@@ -51,8 +51,8 @@ public class SimulationScene extends AScene
 	// barbarians
 	private static final float BARB_DEPLOY_FRAC = 0.45f;
 	private static final int BARBARIAN_N_REGIMENTS = 20;
-	// drawing
-	private static final int NB_SOUND_WAVES = 3;
+  // shared
+  private static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
 
 	/* ATTRIBUTES */
   
@@ -61,7 +61,7 @@ public class SimulationScene extends AScene
 	private Rect roman_deploy;
 	private Rect barb_deploy_E, barb_deploy_W;
   
-  
+  // view
 	private StrategyCamera camera;
   
 	// objects
@@ -69,8 +69,12 @@ public class SimulationScene extends AScene
 	private List<RegimentAgent> agents;
 	private List<Copse> copses;
 	private List<Cadaver> cadavers;
-  private List<HornBlast> hornsSounded;
+
 	private ICollisionManager collisionManager;
+  
+  // communication
+  private List<HornBlast> hornsSounded;
+  private final Rect sound_box = new Rect(MAX_SOUND_RADIUS*2, MAX_SOUND_RADIUS*2);
 
 
 	/* METHODS */
@@ -224,11 +228,7 @@ public class SimulationScene extends AScene
       ra.bringOutYourDead(cadavers);
       
       // create a horn-blast ?
-      if(ra.hasSoundedTheHorn)
-      {
-    	  hornsSounded.add(new HornBlast(ra.getCircle().centre.clone(), ra.getFaction()));
-    	  ra.hasSoundedTheHorn = false;
-      }
+      propagateSound(ra.bringOutYourHornBlast());
       
       // destroy the regiment ?
 			if(ra.update(t_delta) == EUpdateResult.DELETE_ME)
@@ -321,4 +321,26 @@ public class SimulationScene extends AScene
 		// all clear
 		return EUpdateResult.CONTINUE;
 	}
+  
+  
+  /* SUBROUTINES */
+  
+  private void propagateSound(HornBlast new_blast)
+  {
+    // ignore null
+    if(new_blast == null)
+      return;
+    
+    // build tile subgrid corresponding to sound blast area
+	  sound_box.centrePos(new_blast.position);
+	  TileGrid tilesWhereSounding = grid.createSubGrid(sound_box);
+    
+	  // check all tiles in sound radius 
+	  for(Tile t : tilesWhereSounding)
+		  if(t.agent != null)
+        t.agent.hearTheHorn(new_blast);
+    
+    // add horn blast to list to be draw
+    hornsSounded.add(new_blast);
+  }
 }
