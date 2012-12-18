@@ -48,7 +48,7 @@ public class SimulationScene extends AScene
 	private static final float ROMAN_DEPLOY_FRAC = 0.1f;
 	private static final int ROMAN_N_REGIMENTS = 15;
 	// barbarians
-	private static final float BARB_DEPLOY_FRAC = 0.42f;
+	private static final float BARB_DEPLOY_FRAC = 0.4f;
 	private static final int BARBARIAN_N_REGIMENTS = 20;
   // shared
   private static final float MAX_SOUND_RADIUS = Tile.SIZE.x*10;
@@ -58,7 +58,7 @@ public class SimulationScene extends AScene
   // boundaries
 	private Rect map;
 	private Rect roman_deploy;
-	private Rect barb_deploy_E, barb_deploy_W;
+	private Rect barb_deploy_E, barb_deploy_W, trees_deploy_E, trees_deploy_W;
   
   // view
 	private StrategyCamera camera;
@@ -88,6 +88,10 @@ public class SimulationScene extends AScene
 				size.x * ROMAN_DEPLOY_FRAC, 
 				size.y * ROMAN_DEPLOY_FRAC);
 
+		
+		trees_deploy_W = new Rect(0, 0, roman_deploy.x, size.y);
+		trees_deploy_E = new Rect(roman_deploy.endx(), 0, 
+															size.x-roman_deploy.endx(), size.y);
 
 		barb_deploy_W = new Rect(0, 0, size.x * BARB_DEPLOY_FRAC - 1, size.y);
 		barb_deploy_E = new Rect(size.x * (1.0f - BARB_DEPLOY_FRAC), 
@@ -141,7 +145,7 @@ public class SimulationScene extends AScene
 			V2 p = copse.getCircle().centre;
 			/*do
       {*/
-			((c%2 == 0) ? barb_deploy_W : barb_deploy_E).randomPoint(p);
+			((c%2 == 0) ? trees_deploy_W : trees_deploy_E).randomPoint(p);
 			//} while(copse.getCircle().collides(corridor));
 
 			// add the finished copse to the list

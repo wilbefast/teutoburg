@@ -48,7 +48,7 @@ public class RomanRegiment extends RegimentAgent
   private static final int REGIMENT_SIZE = 7*7;
   
   // combat
-  private static final double BLOCK_CHANCE_TURTLE = 0.9;
+  private static final double BLOCK_CHANCE_TURTLE = 0.95;
   private static final double BLOCK_CHANCE_RABBLE = 0.5;
   private static final double ATTACK_CHANCE = 0.6;
   private static final int FLANK_MIN_ANGLE = 135;

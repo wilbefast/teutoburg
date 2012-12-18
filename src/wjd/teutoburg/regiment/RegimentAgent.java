@@ -309,6 +309,7 @@ public abstract class RegimentAgent extends Agent
   {
 	  if(strength < initial_strength/4)
 	  {
+	  	setFormedUp(false);
 		  state = State.FLEEING;
 	  }
 	  else if(!combat.isEmpty())
