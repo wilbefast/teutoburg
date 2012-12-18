@@ -50,6 +50,9 @@ public class BarbarianRegiment extends RegimentAgent
   
   private static final V2 temp = new V2();
   
+  /* ATTRIBUTES */
+  private boolean in_hiding = true;
+  
   /* METHODS */
 
   // constructors
@@ -69,22 +72,25 @@ public class BarbarianRegiment extends RegimentAgent
   {
     // spring the trap when enough enemies are inside it
     
-    if((perceived_threat >= AMBUSH_MIN_THREAT 
+    if((in_hiding 
+        && perceived_threat >= AMBUSH_MIN_THREAT 
         && perceived_threat <= AMBUSH_MAX_THREAT
         && n_visible_allies >= AMBUSH_MIN_ALLIES)
-    || heardHorn != null)
+    || heardHorn != null
+    || (!in_hiding
+       && nearestEnemy != null))
     {
       if(nearestEnemy != null && nearestActivAlly == null)
         soundTheHorn();
       state = State.CHARGING;
     }
-    /*else if(nearestActivAlly != null)
+    else if(nearestActivAlly != null)
     {
       faceTowards(nearestActivAlly.getCircle().centre);
       float min = Math.min(SPEED_FACTOR * t_delta, 
                           ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
       advance(min);
-    }*/
+    }
     
     return EUpdateResult.CONTINUE;
   }

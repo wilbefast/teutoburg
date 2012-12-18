@@ -71,7 +71,8 @@ public abstract class RegimentAgent extends Agent
   private boolean nearby = true;
   private V2 left = new V2();
   // ai
-  private final Rect perception_box = new Rect(Tile.SIZE.clone().scale(10));
+  private final int PERCEPTION_RADIUS = (int)Tile.SIZE.x * 10;
+  private final Rect perception_box = new Rect(PERCEPTION_RADIUS, PERCEPTION_RADIUS);
   protected RegimentAgent nearestAlly, nearestEnemy;
   protected float nearestAllyDist2, nearestEnemyDist2;
   protected RegimentAgent nearestActivAlly;
