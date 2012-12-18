@@ -84,9 +84,6 @@ public class BarbarianRegiment extends RegimentAgent
 	  {
 		  if(nearestEnemy != null)// TODO : wait for the *opportune* moment... ^_^
 		  {
-        if(!hornHeard)
-          soundTheHorn();
-        
 			  state = State.CHARGING;
 		  }
 		  else if(nearestActivAlly != null)

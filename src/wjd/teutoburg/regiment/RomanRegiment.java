@@ -74,20 +74,19 @@ public class RomanRegiment extends RegimentAgent
   public RomanRegiment(V2 position, Tile t, Faction faction)
   {
     super(position, REGIMENT_SIZE, t, faction);
- // initialise status
+    
+    // initialise status
     state = RomanState.ESCAPING;
   }
-
-  // accessors
-
-  // mutators
   
   /* IMPLEMENTS -- REGIMENTAGENT */
   
   @Override
   protected boolean canSee(RegimentAgent a)
   {
-	  return (hornHeard || a.tile.forest_amount.isEmpty());
+    // FIXME - not sure this is exactly what we want: rather it is a state
+    // we enter after we have first sighted an enemy
+	  return (heardHorn != null || a.tile.forest_amount.isEmpty());
   }
 
   
@@ -115,11 +114,11 @@ public class RomanRegiment extends RegimentAgent
   {
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
 	  
-	  if(nearestEnemy != null && !hornHeard)
+	  if(nearestEnemy != null && heardHorn == null)
 	  {
 		  soundTheHorn();
 	  }
-	  else if(hornHeard)
+	  else if(heardHorn != null)
 	  {
 		  state = RomanState.RALLYING;
 	  }
@@ -181,19 +180,15 @@ public class RomanRegiment extends RegimentAgent
 		  }
 		  else
 		  {
-			  if(hornFaction == getFaction())
+			  if(heardHorn != null && isAlly(heardHorn.source))
 			  {
 				  // I'm going to rally the horn-bearer
-				  V2 prev_centre = c.centre.clone();
-				  faceTowards(hornDirection);
-				  advance(SPEED_FACTOR*t_delta);
-				  V2 way = c.centre.clone();
-				  way.sub(prev_centre);
-				  hornDirection.add(way);  
+				  faceTowards(temp1.reset(heardHorn.position).sub(c.centre));
+				  advance(SPEED_FACTOR * t_delta); 
 			  }
-			  else // the horn was sounded by an ennemi
+			  else // the horn was sounded by an enemy
 			  {
-				  // I'm alone and ennemies are attacking
+				  // I'm alone and enemies are attacking
 				  state = RomanState.ESCAPING;
 			  }
 		  }
@@ -231,7 +226,6 @@ public class RomanRegiment extends RegimentAgent
 			  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
 			  {
 				  state = RomanState.ESCAPING;
-				  hornHeard = false;
 				  rallyingWithNobody.fill();
 			  }
 		  }

@@ -79,15 +79,7 @@ public abstract class RegimentAgent extends Agent
   // corpses
   private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
   //communication
-  protected HornBlast outbox;
-  
-  
-
-  protected boolean hornHeard;
-  protected V2 hornDirection;
-  protected Faction hornFaction;
-
-
+  protected HornBlast soundedHorn, heardHorn;
   /* METHODS */
   // constructors
   public RegimentAgent(V2 start_position, int start_strength, Tile tile_, 
@@ -118,10 +110,6 @@ public abstract class RegimentAgent extends Agent
 
     // initialise status
     state = State.WAITING;
-
-    //communication
-    hornHeard = false;
-    hornDirection = new V2();
   }
 
   // accessors -- package
@@ -384,6 +372,10 @@ public abstract class RegimentAgent extends Agent
 
 	  // set level of detail
 	  formation.setDetail(visible && nearby);
+    
+    // stop hearing a horn that is long dead
+    if(heardHorn != null && !heardHorn.isAudible())
+      heardHorn = null;
 
 	  // all clear!
 	  return EUpdateResult.CONTINUE;
@@ -596,25 +588,21 @@ public abstract class RegimentAgent extends Agent
 
   protected void soundTheHorn()
   {
-    if(outbox == null)
-      outbox = new HornBlast(c.centre.clone(), this);
+    if(soundedHorn == null)
+      soundedHorn = new HornBlast(c.centre.clone(), this);
   }
   
   public HornBlast bringOutYourHornBlast()
   {
-    HornBlast out = outbox;
-      outbox = null;
+    HornBlast out = soundedHorn;
+      soundedHorn = null;
     return out;
   }
   
   public void hearTheHorn(HornBlast blast)
   {
-    hornHeard = true;
-    hornFaction = blast.source.faction;
-    if(blast.source == this)
-      hornDirection.xy(0, 0);
-    else
-      hornDirection.reset(c.centre).sub(blast.position);
+    if(blast.source != this)
+      heardHorn = blast;
   }
   
   

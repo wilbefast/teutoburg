@@ -39,7 +39,7 @@ public class HornBlast implements IVisible, IDynamic
   /* ATTRIBUTES */
   
   public V2 position;
-  private Timer life;
+  private Timer life; // starts at 0, ends at LIFE_TIME, reset to 0 when dead
   public RegimentAgent source;
   
   /* METHDOS */
@@ -51,6 +51,12 @@ public class HornBlast implements IVisible, IDynamic
     this.life = new Timer(LIFE_TIME);
       life.balance(0);
     this.source = source_;
+  }
+  
+  // accessors
+  public boolean isAudible()
+  {
+    return !life.isEmpty(); // false at the moment of birth and after death
   }
 
   /* IMPLEMENTS -- IVISIBLE */
