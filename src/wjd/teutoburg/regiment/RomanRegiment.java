@@ -116,7 +116,7 @@ public class RomanRegiment extends RegimentAgent
 	  
 	  if(nearestEnemy != null && heardHorn == null && soundedHorn == null)
 	  {
-		  soundTheHorn();
+		  //soundTheHorn();
 	  }
 	  else if(heardHorn != null)
 	  {
@@ -229,7 +229,7 @@ public class RomanRegiment extends RegimentAgent
 			  {
 				  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
 				  {
-					  state = RomanState.ESCAPING;
+					  state = RomanState.MARCHING;
 					  rallyingWithNobody.empty();
 				  }
 			  }
@@ -241,7 +241,7 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  if(in_woods && isFormedUp() && tile.forest_amount.balance() < 0.2)
+	  if(in_woods && isFormedUp() && tile.forest_amount.balance() > 0.4)
 	  {
 		  setFormedUp(false);
 	  }
