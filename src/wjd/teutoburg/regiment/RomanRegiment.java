@@ -350,9 +350,10 @@ public class RomanRegiment extends RegimentAgent
   
   private boolean isProtected()
   {
-	  if(alliesFormedAround.size() >= 3 
-    || (nearestAlly != null && alliesFormedAround.size() > 0
-        && nearestAlly.state == RomanState.DEFENDING))
+	  if(	alliesFormedAround.size() >= 3)
+			//|| (nearestAlly != null 
+			//	&& alliesFormedAround.size() > 0
+			//	&& nearestAlly.state == RomanState.DEFENDING))
 	  {		  
 		  return true;
 	  }

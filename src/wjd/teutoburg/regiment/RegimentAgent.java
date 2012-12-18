@@ -475,7 +475,7 @@ public abstract class RegimentAgent extends Agent
     {
       if(t.agent != null && isEnemy(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
         combat.add(t.agent);
-      if(t.agent != null && isAlly(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
+      if(t.agent != null && t.agent != this && isAlly(t.agent) && t.agent.state != State.DEAD && t.agent.getCircle().collides(c))
           alliesFormedAround.add(t.agent);
     }
     
@@ -631,8 +631,11 @@ public abstract class RegimentAgent extends Agent
 		  for(RegimentAgent r : combat)
 		  {
 			  if(i == attack_i)
+			  {
+				  faceTowards(r.getCircle().centre);
 				  if(melee(r) == EUpdateResult.DELETE_ME)
 					  return EUpdateResult.DELETE_ME;
+			  }
 			  i++;
 		  }
 	  }
