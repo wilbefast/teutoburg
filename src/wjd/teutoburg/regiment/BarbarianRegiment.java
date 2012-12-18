@@ -140,4 +140,10 @@ public class BarbarianRegiment extends RegimentAgent
           ? false
           : (other instanceof BarbarianRegiment);
   }
+  
+  @Override
+  protected float getSpeedFactor()
+  {
+    return SPEED_FACTOR;
+  }
 }

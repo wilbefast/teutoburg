@@ -46,7 +46,6 @@ public abstract class RegimentAgent extends Agent
   private static final int MAX_KILLS_PER_SOLDIER = 3;
   protected static final int REACH = 1;
   protected static final float ATTACK_INTERVAL = 1000.0f;
-  protected static final float SPEED_FACTOR = 0.5f;
   
   /* VARIABLES */
   private final V2 temp = new V2();
@@ -235,6 +234,8 @@ public abstract class RegimentAgent extends Agent
   
   protected abstract boolean isAlly(RegimentAgent other);
   
+  protected abstract float getSpeedFactor();
+  
   /* AI */
   protected EUpdateResult fighting()
   {
@@ -262,7 +263,7 @@ public abstract class RegimentAgent extends Agent
 		  if(faceTowards(nearestEnemy.getCircle().centre))
 		  {
 			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-			  float min = Math.min(SPEED_FACTOR * t_delta, nearestEnemyDist);
+			  float min = Math.min(getSpeedFactor() * t_delta, nearestEnemyDist);
 			  advance(min);
 		  }
 	  }

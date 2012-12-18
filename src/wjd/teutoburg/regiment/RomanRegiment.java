@@ -55,7 +55,7 @@ public class RomanRegiment extends RegimentAgent
   private static final int FLANK_MIN_ANGLE = 135;
   
   // movement
-  private static final float ROMAN_SPEED_FACTOR = 0.3f;
+  private static final float SPEED_FACTOR = 0.3f;
   private static final float MAX_TURN_TURTLE 
                         = 10.0f * (float)Math.PI / 180.0f, 
                           // 20 degrees per millisecond
@@ -147,7 +147,7 @@ public class RomanRegiment extends RegimentAgent
 			  faceTowards(escape_direction);
 		  else
 			  faceTowards(new_direction);
-		  advance(ROMAN_SPEED_FACTOR * t_delta);
+		  advance(SPEED_FACTOR * t_delta);
 	  }
 	  return EUpdateResult.CONTINUE;
   }
@@ -184,7 +184,7 @@ public class RomanRegiment extends RegimentAgent
 			  {
 				  // I'm going to rally the horn-bearer
 				  faceTowards(temp1.reset(heardHorn.position).sub(c.centre));
-				  advance(ROMAN_SPEED_FACTOR * t_delta); 
+				  advance(SPEED_FACTOR * t_delta); 
 			  }
 			  else // the horn was sounded by an enemy
 			  {
@@ -298,7 +298,31 @@ public class RomanRegiment extends RegimentAgent
           : (other instanceof RomanRegiment);
   }
   
-  protected boolean isProtected()
+  @Override
+  protected float getSpeedFactor()
+  {
+    return SPEED_FACTOR;
+  }
+    
+  /* OVERRIDES */
+      
+  @Override
+  public boolean faceTowards(V2 target)
+  {
+	  return turnTowardsGradually(target, getMaxTurn());
+  }
+  
+  
+  
+  
+  /* SUBROUTINES */
+
+  private float getMaxTurn()
+  {
+    return ((isFormedUp()) ? MAX_TURN_TURTLE : MAX_TURN_RABBLE); 
+  }
+  
+  private boolean isProtected()
   {
 	  if(alliesFormedAround.size() >= 3 
     || (nearestAlly != null && alliesFormedAround.size() > 0
@@ -309,7 +333,7 @@ public class RomanRegiment extends RegimentAgent
 	  return false;
   }
   
-  protected void formMetaTurtle(int t_delta, Iterable<Tile> percepts)
+  private void formMetaTurtle(int t_delta, Iterable<Tile> percepts)
   {
 	  // TODO : setFormedUp(false) when relaying ?
 	  V2 new_direction = c.centre.clone();
@@ -332,20 +356,6 @@ public class RomanRegiment extends RegimentAgent
 		  
 	  }
 	  faceTowards(new_direction);
-	  advance(ROMAN_SPEED_FACTOR * t_delta);
-  }
-  
-  
-  /* SUBROUTINES */
-
-  private float getMaxTurn()
-  {
-    return ((isFormedUp()) ? MAX_TURN_TURTLE : MAX_TURN_RABBLE); 
-  }
-  
-  @Override
-  public boolean faceTowards(V2 target)
-  {
-	  return turnTowardsGradually(target, getMaxTurn());
+	  advance(SPEED_FACTOR * t_delta);
   }
 }
