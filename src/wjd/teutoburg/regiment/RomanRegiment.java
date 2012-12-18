@@ -249,10 +249,10 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  /*if(in_woods && isFormedUp() && tile.forest_amount.balance() > 0.4)
+	  if(in_woods && isFormedUp() && tile.forest_amount.balance() > 0.4)
 	  {
 		  setFormedUp(false);
-	  }*/
+	  }
 	  
 	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
 		  return EUpdateResult.DELETE_ME;
@@ -262,7 +262,7 @@ public class RomanRegiment extends RegimentAgent
 		  if(marching(t_delta, percepts) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
 	  }
-	  /*if(state == RomanState.RALLYING)
+	  if(state == RomanState.RALLYING)
 	  {
 		  if(rallying(t_delta, percepts) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
@@ -271,7 +271,7 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  if(defending(t_delta) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
-	  }*/
+	  }
 	  return EUpdateResult.CONTINUE;
   }
   
