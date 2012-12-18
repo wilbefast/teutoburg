@@ -431,18 +431,18 @@ public abstract class RegimentAgent extends Agent
       formation.render(canvas);
       
       canvas.text(""+state, c.centre);
-      canvas.setColour(Colour.BLACK);
+      //canvas.setColour(Colour.BLACK);
       //canvas.box(perception_box, false);
     }
     else
       nearby = false;
     
-    canvas.setColour(Colour.WHITE);
+    /*canvas.setColour(Colour.WHITE);
     if(!attackReady)
     {
       canvas.setLineWidth(3.0f);
       canvas.circle(c.centre, c.radius, false);
-    }
+    }*/
     //canvas.text(state+" ; "+attackReady+" ; "+attackRecharge.balance() , c.centre);
   }
   
@@ -463,7 +463,7 @@ public abstract class RegimentAgent extends Agent
   
   private void setHitableEnemies()
   {
-    // add new enemies to combat
+    // add new enemies to combat ; add new allies to alliesFormedAround
     Iterable<Tile> neighbours = tile.grid.getNeighbours(tile, true);
     for(Tile t : neighbours)
     {
@@ -631,6 +631,7 @@ public abstract class RegimentAgent extends Agent
 
   protected void soundTheHorn()
   {
+	  System.out.println("sound the horn");
 	  hasSoundedTheHorn = true;
 	  sound_box.centrePos(c.centre);
 	  TileGrid tilesWhereSounding = tile.grid.createSubGrid(sound_box);

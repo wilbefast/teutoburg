@@ -45,7 +45,7 @@ public class RomanRegiment extends RegimentAgent
   // combat
   private static final double BLOCK_CHANCE_TURTLE = 0.7;
   private static final double BLOCK_CHANCE_RABBLE = 0.3;
-  private static final double ATTACK_CHANCE = 0.5;
+  private static final double ATTACK_CHANCE = 0.6;
   private static final int FLANK_MIN_ANGLE = 135;
   
   // movement
@@ -58,7 +58,7 @@ public class RomanRegiment extends RegimentAgent
                           // 90 degrees per millisecond
   
   /* ATTRIBUTES */
-  protected Timer defendingAgainstNobody = new Timer(5000);
+  protected Timer defendingAgainstNobody = new Timer(10000);
   protected Timer rallyingWithNobody = new Timer(2000);
   
   /* METHODS */
@@ -90,6 +90,24 @@ public class RomanRegiment extends RegimentAgent
   
   
   // artificial intelligence
+
+  @Override
+  protected EUpdateResult fighting()
+  {
+	  if(!combat.isEmpty())
+	  {
+		 if(randomAttack() == EUpdateResult.DELETE_ME)
+			return EUpdateResult.DELETE_ME;
+	  }
+	  else
+	  {
+		  defendingAgainstNobody.fill();
+		  rallyingWithNobody.fill();
+		  state = State.DEFENDING;
+	  }
+	  return EUpdateResult.CONTINUE;
+  }
+  
   protected EUpdateResult escaping(int t_delta, Iterable<Tile> percepts)
   {
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
@@ -182,14 +200,24 @@ public class RomanRegiment extends RegimentAgent
   }
   
   protected EUpdateResult defending(int t_delta)
-  {
+  {  
 	  if(!isProtected()) // I'm not protected
 	  {
 		  state = State.RALLYING;
 	  }
 	  else // I'm protected
 	  {
-		  if(nearestEnemy != null) // I see an enemy
+		  Tile tileToFace = null;
+		  if(alliesFormedAround.size() == 3)
+			  for(Tile t : tile.grid.getNeighbours(tile, false))
+				  if(t.agent == null)
+					  tileToFace = t;
+		  
+		  if(tileToFace != null)
+		  {
+			  faceTowards(tileToFace.pixel_position.clone().add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f));
+		  }
+		  else if(nearestEnemy != null) // I see an enemy
 		  {
 			  defendingAgainstNobody.fill();
 			  faceTowards(nearestEnemy.getCircle().centre);
@@ -274,8 +302,8 @@ public class RomanRegiment extends RegimentAgent
   
   protected boolean isProtected()
   {
-	  if(alliesFormedAround.size() >= 3)
-	  {
+	  if(alliesFormedAround.size() >= 3 || (alliesFormedAround.size() > 0 && nearestAlly.state == State.DEFENDING))
+	  {		  
 		  return true;
 	  }
 	  return false;
@@ -310,21 +338,6 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  faceTowards(new_direction);
 	  advance(SPEED_FACTOR*t_delta);
-  }
-  
-  @Override
-  protected EUpdateResult fighting()
-  {
-	  if(!combat.isEmpty())
-	  {
-		 if(randomAttack() == EUpdateResult.DELETE_ME)
-			return EUpdateResult.DELETE_ME;
-	  }
-	  else
-	  {
-		  state = State.DEFENDING;
-	  }
-	  return EUpdateResult.CONTINUE;
   }
   
   

@@ -228,7 +228,9 @@ public class SimulationScene extends AScene
       
       if(a.hasSoundedTheHorn)
       {
-    	  hornsSounded.put(System.currentTimeMillis(), a.tile);
+    	  long cur = System.currentTimeMillis();
+    	  System.out.println("add hornsSounded millis "+cur);
+    	  hornsSounded.put(cur, a.tile);
     	  a.hasSoundedTheHorn = false;
       }
       
@@ -276,17 +278,20 @@ public class SimulationScene extends AScene
 			a.render(canvas);
 
 		// draw all the horns sounded
+		//System.out.println("horns drawing");
 		Colour grey = Colour.BLACK.clone();
 		V2 tileCentre = new V2();
+		long currentTime = System.currentTimeMillis();
 		for(Map.Entry<Long, Tile> horn : hornsSounded.entrySet())
 		{
-			long currentTime = System.currentTimeMillis();
-			grey.a = Math.max(	0.0f, 
-									1.0f - ((currentTime-horn.getKey())/(SECONDS_UNTIL_HORN_FADING*100.0f))*0.1f);
+			tileCentre.reset(horn.getValue().pixel_position).add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f);
+			grey.a = Math.max(	0.1f, 
+								1.0f - ((currentTime-horn.getKey())/(SECONDS_UNTIL_HORN_FADING*100.0f))*0.1f);
 			canvas.setColour(grey);
+			//System.out.println("horn grey = "+grey);
 			
 			for(int i = 0 ; i < NB_SOUND_WAVES ; i++)
-				canvas.circle(	tileCentre.reset(horn.getValue().pixel_position).add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f), 
+				canvas.circle(	tileCentre, 
 								MAX_SOUND_RADIUS-(i*MAX_SOUND_RADIUS/NB_SOUND_WAVES), 
 								false);
 		}
