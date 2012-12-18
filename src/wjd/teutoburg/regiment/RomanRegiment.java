@@ -31,10 +31,10 @@ public class RomanRegiment extends RegimentAgent
 	/* NESTING */
 	public static class RomanState extends State
 	{
-		public static final RomanState RALLYING = new RomanState(6, "rallying");
-		public static final RomanState ESCAPING = new RomanState(7, "escaping");
-		public static final RomanState DEFENDING = new RomanState(8, "defending");
-
+		public static final RomanState RALLYING = new RomanState(5, "rallying");
+		public static final RomanState MARCHING = new RomanState(6, "marching");
+		public static final RomanState DEFENDING = new RomanState(7, "defending");
+		
 		protected RomanState(int v, String k) 
 		{
 			super(v, k);
@@ -75,7 +75,7 @@ public class RomanRegiment extends RegimentAgent
     super(position, REGIMENT_SIZE, t, faction);
     
     // initialise status
-    state = RomanState.ESCAPING;
+    state = RomanState.MARCHING;
   }
   
   /* IMPLEMENTS -- REGIMENTAGENT */
@@ -109,15 +109,16 @@ public class RomanRegiment extends RegimentAgent
 	  return EUpdateResult.CONTINUE;
   }
   
+
   @Override
   protected EUpdateResult waiting(int t_delta)
   {
 	  if(state == State.WAITING)
-		  state = State.MARCHING;
+		  state = RomanState.MARCHING;
 	  return EUpdateResult.CONTINUE;
   }
   
-  protected EUpdateResult escaping(int t_delta, Iterable<Tile> percepts)
+  protected EUpdateResult marching(int t_delta, Iterable<Tile> percepts)
   {
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
 	  
@@ -171,7 +172,7 @@ public class RomanRegiment extends RegimentAgent
 		  {
 			  if(rallyingWithNobody.update(t_delta) == EUpdateResult.FINISHED)
 			  {
-				  state = RomanState.ESCAPING;
+				  state = RomanState.MARCHING;
 			  }
 			  else
 			  {
@@ -183,7 +184,7 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  if(rallyingWithNobody.update(t_delta) == EUpdateResult.FINISHED)
 		  {
-			  state = RomanState.ESCAPING;
+			  state = RomanState.MARCHING;
 		  }
 		  else
 		  {
@@ -196,7 +197,7 @@ public class RomanRegiment extends RegimentAgent
 			  else // the horn was sounded by an enemy
 			  {
 				  // I'm alone and enemies are attacking
-				  state = RomanState.ESCAPING;
+				  state = RomanState.MARCHING;
 			  }
 		  }
 	  }
@@ -236,7 +237,7 @@ public class RomanRegiment extends RegimentAgent
 			  {
 				  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
 				  {
-					  state = RomanState.ESCAPING;
+					  state = RomanState.MARCHING;
 					  rallyingWithNobody.empty();
 				  }
 			  }
@@ -256,9 +257,9 @@ public class RomanRegiment extends RegimentAgent
 	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
 		  return EUpdateResult.DELETE_ME;
 	  
-	  if(state == RomanState.ESCAPING)
+	  if(state == RomanState.MARCHING)
 	  {
-		  if(escaping(t_delta, percepts) == EUpdateResult.DELETE_ME)
+		  if(marching(t_delta, percepts) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
 	  }
 	  if(state == RomanState.RALLYING)

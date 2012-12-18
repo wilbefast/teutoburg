@@ -19,12 +19,10 @@ package wjd.teutoburg.simulation;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import wjd.amb.AScene;
 import wjd.amb.control.EUpdateResult;
 import wjd.amb.control.IInput;
 import wjd.amb.rts.StrategyCamera;
-import wjd.amb.view.Colour;
 import wjd.amb.view.ICamera;
 import wjd.amb.view.ICanvas;
 import wjd.math.Rect;
@@ -227,15 +225,15 @@ public class SimulationScene extends AScene
       // creates corpses ?
       ra.bringOutYourDead(cadavers);
       
-      // create a horn-blast ?
-      propagateSound(ra.bringOutYourHornBlast());
-      
       // destroy the regiment ?
 			if(ra.update(t_delta) == EUpdateResult.DELETE_ME)
 			{
 				ra.tile.setRegiment(null);
 				raI.remove();
 			}
+      
+      // create a horn-blast ?
+      propagateSound(ra.bringOutYourHornBlast());
       
       // keep within the map
       ra.getCircle().centre.snapWithin(map);

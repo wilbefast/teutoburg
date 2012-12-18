@@ -78,9 +78,9 @@ public abstract class RegimentAgent extends Agent
   protected RegimentAgent nearestActivAlly;
   protected float nearestActivAllyDist2;
   protected boolean in_woods;
-  protected int n_visible_enemies, n_visible_allies;
+  protected int n_visible_enemies, n_visible_allies, perceived_threat;
   // corpses
-  private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
+  private List<Cadaver> dead_pile;
   //communication
   protected HornBlast queuedHorn, soundedHorn, heardHorn;
   /* METHODS */
@@ -444,7 +444,7 @@ public abstract class RegimentAgent extends Agent
       
       // render the state
       canvas.setColour(Colour.BLACK);
-      canvas.text(state.toString(), c.centre);
+      canvas.text((perceived_threat)+""/*state.toString()*/, c.centre);
     }
     else
       nearby = false;
@@ -547,7 +547,7 @@ public abstract class RegimentAgent extends Agent
     
     // check all tiles in view 
     for(Tile t : percepts)
-	{
+    {
       // skip if dead or non visible or self
       if(t.agent == this || t.agent == null || !canSee(t.agent) 
          || t.agent.state == State.DEAD)
@@ -564,7 +564,7 @@ public abstract class RegimentAgent extends Agent
 				  nearestEnemy = r;
 				  nearestEnemyDist2 = dist2;
 			  }
-        n_visible_enemies++;
+        n_visible_enemies += r.strength;
 		  }
       
       // cache nearest ally
@@ -581,9 +581,10 @@ public abstract class RegimentAgent extends Agent
 				  nearestActivAlly = r;
 				  nearestActivAllyDist2 = dist2;
 			  }
-        n_visible_allies++;
+        n_visible_allies += r.strength;
 		  }
 	  }
+    perceived_threat =  n_visible_enemies - n_visible_allies;
   }
   
   /* COMBAT */
@@ -660,6 +661,4 @@ public abstract class RegimentAgent extends Agent
     if(blast.source != this)
       heardHorn = blast;
   }
-  
-  
 }
