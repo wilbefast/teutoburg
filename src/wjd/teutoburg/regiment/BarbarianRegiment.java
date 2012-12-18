@@ -48,7 +48,7 @@ public class BarbarianRegiment extends RegimentAgent
   
   /* VARIABLES */
   
-  private static final V2 temp = new V2();
+  private static final V2 temp1 = new V2(), temp2 = new V2();
   
   /* ATTRIBUTES */
   private boolean in_hiding = true;
@@ -93,9 +93,12 @@ public class BarbarianRegiment extends RegimentAgent
     // otherwise go where allies are facing
     else if(nearestActivAlly != null)
     {
-      temp.reset(nearestActivAlly.getDirection())
+      // scaled ally direction
+      temp1.reset(nearestActivAlly.getDirection())
           .scale((float)Math.sqrt(nearestActivAllyDist2))
-          .sub(c.centre);
+      // position in front of ally
+          .add(nearestActivAlly.getCircle().centre);
+      turnTowardsGradually(temp1, MAX_TURN_RABBLE);
       advance(SPEED_FACTOR * t_delta);
     }
     
@@ -115,13 +118,12 @@ public class BarbarianRegiment extends RegimentAgent
     
     else if(nearestActivAlly != null) // I can see an active ally
     {
-      // charge towards whatever the ally is facing
-      temp.reset(nearestActivAlly.getDirection())
+      // scaled ally direction
+      temp1.reset(nearestActivAlly.getDirection())
           .scale((float)Math.sqrt(nearestActivAllyDist2))
-          .sub(c.centre).opp();
-      turnTowardsGradually(temp, MAX_TURN_RABBLE);
-      
-      // advance
+      // position in front of ally
+          .add(nearestActivAlly.getCircle().centre);
+      turnTowardsGradually(temp1, MAX_TURN_RABBLE);
       advance(SPEED_FACTOR * t_delta);
     }
     else
