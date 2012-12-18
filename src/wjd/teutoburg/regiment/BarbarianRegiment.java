@@ -63,6 +63,63 @@ public class BarbarianRegiment extends RegimentAgent
 
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
+  {
+	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
+		  return EUpdateResult.DELETE_ME;
+	  
+    //! BARBARIAN AI GOES HERE
+
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  @Override
+  protected EUpdateResult waiting(int t_delta)
+  {
+    if(nearestEnemy != null || heardHorn != null)
+    {
+      // TODO : wait for the *opportune* moment... ^_^
+      
+      soundTheHorn();
+      state = State.CHARGING;
+    }
+    else if(nearestActivAlly != null)
+    {
+      faceTowards(nearestActivAlly.getCircle().centre);
+      float min = Math.min(SPEED_FACTOR * t_delta, 
+                          ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
+      advance(min);
+    }
+    
+    return EUpdateResult.CONTINUE;
+  }
+  
+  @Override
+  protected EUpdateResult charging(int t_delta)
+  {
+    if(nearestEnemy != null) // I can see an enemy
+    {
+      faceTowards(nearestEnemy.getCircle().centre);
+      float distance = (float)Math.sqrt(nearestEnemyDist2);
+      float min = Math.min(SPEED_FACTOR * t_delta, distance);
+      advance(min);
+    }
+    else if(nearestActivAlly != null) // I can see an active ally
+    {
+      faceTowards(nearestActivAlly.getCircle().centre);
+      float distance = (float)Math.sqrt(nearestActivAllyDist2);
+      float min = Math.min(SPEED_FACTOR * t_delta, distance);
+      advance(min);
+    }
+    else
+    {
+      state = State.WAITING;
+    }
+    
+    return EUpdateResult.CONTINUE;
+  }
+  
+  /*
+  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {  
 	  if(state != State.FIGHTING && !combat.isEmpty())
 	  {
@@ -78,19 +135,6 @@ public class BarbarianRegiment extends RegimentAgent
 		  else
 		  {
 			  state = State.WAITING;
-		  }
-	  }
-	  if(state == State.WAITING)
-	  {
-		  if(nearestEnemy != null)// TODO : wait for the *opportune* moment... ^_^
-		  {
-			  state = State.CHARGING;
-		  }
-		  else if(nearestActivAlly != null)
-		  {
-			  faceTowards(nearestActivAlly.getCircle().centre);
-			  float min = Math.min(SPEED_FACTOR*t_delta, ((float)Math.sqrt(nearestActivAllyDist2)-2*c.radius));
-			  advance(min);
 		  }
 	  }
 	  if(state == State.CHARGING)
@@ -111,7 +155,7 @@ public class BarbarianRegiment extends RegimentAgent
 		  }
 	  }
 	  return EUpdateResult.CONTINUE;
-  }
+  }*/
   
   @Override
   protected double chanceToBlock(RegimentAgent attacker)
