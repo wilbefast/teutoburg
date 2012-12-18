@@ -40,35 +40,6 @@ import wjd.util.Timer;
  */
 public abstract class RegimentAgent extends Agent
 {  
-  /* NESTING */
-	public static class State implements Comparable<State>
-	{
-		public static final State WAITING = new State(1,"waiting");
-		public static final State CHARGING = new State(2,"charging");
-		public static final State FIGHTING = new State(3,"fighting");
-		public static final State DEAD = new State(4,"dead");
-		
-		protected State(int v, String k) {VALUE = v; KEY = k;}		  
-		public final int VALUE;
-		public final String KEY;
-		
-		public int compareTo(State s)
-		{
-			if(VALUE < s.VALUE)
-				return -1;
-			else if(VALUE == s.VALUE)
-				return 0;
-			else
-				return 1;
-		}
-		
-		@Override
-		public String toString()
-		{
-			return KEY;
-		}
-	}
-
   /* CONSTANTS */
   private static final float ZOOM_IMPOSTER_THRESHOLD = 0.25f;
   private static final double ATTACK_FUMBLE_CHANCE = 0.0;

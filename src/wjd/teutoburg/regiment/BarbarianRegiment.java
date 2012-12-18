@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2012 William James Dyce
+ Copyright (C) 2012 William James Dyce, Chloé Desdouits
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
-import wjd.math.M;
 import wjd.math.V2;
-import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
 
 /**
@@ -30,11 +28,14 @@ import wjd.teutoburg.simulation.Tile;
 public class BarbarianRegiment extends RegimentAgent
 {
 	/* NESTING */
-	public static class State extends RegimentAgent.State
+	public static class BarbarianState extends State
 	{
 		//public static final State RALLYING = new State(7,"rallying");
 		
-		protected State(int v, String k) {super(v, k);}
+		protected BarbarianState(int v, String k) 
+    {
+      super(v, k);
+    }
 	}
 	
 	/* CONSTANTS */

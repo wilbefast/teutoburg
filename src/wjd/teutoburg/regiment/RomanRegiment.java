@@ -17,9 +17,7 @@
 package wjd.teutoburg.regiment;
 
 import wjd.amb.control.EUpdateResult;
-import wjd.math.M;
 import wjd.math.V2;
-import wjd.teutoburg.regiment.RegimentAgent.State;
 import wjd.teutoburg.simulation.Tile;
 import wjd.util.Timer;
 
@@ -30,13 +28,16 @@ import wjd.util.Timer;
  */
 public class RomanRegiment extends RegimentAgent
 {
-	public static class State extends RegimentAgent.State
+	public static class RomanState extends State
 	{
-		public static final State RALLYING = new State(5,"rallying");
-		public static final State ESCAPING = new State(6,"escaping");
-		public static final State DEFENDING = new State(7,"defending");
+		public static final RomanState RALLYING = new RomanState(5, "rallying");
+		public static final RomanState ESCAPING = new RomanState(6, "escaping");
+		public static final RomanState DEFENDING = new RomanState(7, "defending");
 		
-		protected State(int v, String k) {super(v, k);}
+		protected RomanState(int v, String k) 
+    {
+      super(v, k);
+    }
 	}
 		
   /* CONSTANTS */
@@ -69,7 +70,7 @@ public class RomanRegiment extends RegimentAgent
   {
     super(position, REGIMENT_SIZE, t, faction);
  // initialise status
-    state = State.ESCAPING;
+    state = RomanState.ESCAPING;
   }
 
   // accessors
@@ -81,10 +82,7 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected boolean canSee(RegimentAgent a)
   {
-	  if(!hornHeard && !a.tile.forest_amount.isEmpty())
-		  return false;
-	  else
-		  return true;
+	  return (hornHeard || a.tile.forest_amount.isEmpty());
   }
 
   
@@ -103,7 +101,7 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  defendingAgainstNobody.fill();
 		  rallyingWithNobody.fill();
-		  state = State.DEFENDING;
+		  state = RomanState.DEFENDING;
 	  }
 	  return EUpdateResult.CONTINUE;
   }
@@ -118,7 +116,7 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  else if(hornHeard)
 	  {
-		  state = State.RALLYING;
+		  state = RomanState.RALLYING;
 	  }
 	  else
 	  {
@@ -156,13 +154,13 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  if(isProtected())
 		  {
-			  state = State.DEFENDING;
+			  state = RomanState.DEFENDING;
 		  }
 		  else // I'm not protected : flanckable
 		  {
 			  if(rallyingWithNobody.update(t_delta) == EUpdateResult.FINISHED)
 			  {
-				  state = State.ESCAPING;
+				  state = RomanState.ESCAPING;
 			  }
 			  else
 			  {
@@ -174,7 +172,7 @@ public class RomanRegiment extends RegimentAgent
 	  {
 		  if(rallyingWithNobody.update(t_delta) == EUpdateResult.FINISHED)
 		  {
-			  state = State.ESCAPING;
+			  state = RomanState.ESCAPING;
 		  }
 		  else
 		  {
@@ -191,7 +189,7 @@ public class RomanRegiment extends RegimentAgent
 			  else // the horn was sounded by an ennemi
 			  {
 				  // I'm alone and ennemies are attacking
-				  state = State.ESCAPING;
+				  state = RomanState.ESCAPING;
 			  }
 		  }
 	  }
@@ -203,7 +201,7 @@ public class RomanRegiment extends RegimentAgent
   {  
 	  if(!isProtected()) // I'm not protected
 	  {
-		  state = State.RALLYING;
+		  state = RomanState.RALLYING;
 	  }
 	  else // I'm protected
 	  {
@@ -226,7 +224,7 @@ public class RomanRegiment extends RegimentAgent
 		  {
 			  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
 			  {
-				  state = State.ESCAPING;
+				  state = RomanState.ESCAPING;
 				  hornHeard = false;
 				  rallyingWithNobody.fill();
 			  }
@@ -241,17 +239,17 @@ public class RomanRegiment extends RegimentAgent
 	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
 		  return EUpdateResult.DELETE_ME;
 	  
-	  if(state == State.ESCAPING)
+	  if(state == RomanState.ESCAPING)
 	  {
 		  if(escaping(t_delta, percepts) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
 	  }
-	  if(state == State.RALLYING)
+	  if(state == RomanState.RALLYING)
 	  {
 		  if(rallying(t_delta, percepts) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
 	  }
-	  if(state == State.DEFENDING)
+	  if(state == RomanState.DEFENDING)
 	  {
 		  if(defending(t_delta) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
@@ -287,7 +285,7 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected boolean isEnemy(RegimentAgent other)
   {
-    return (other.state == State.DEAD) 
+    return (other.state == RomanState.DEAD) 
           ? false
           : (other instanceof BarbarianRegiment);
   }
@@ -295,14 +293,16 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected boolean isAlly(RegimentAgent other)
   {
-    return (other.state == State.DEAD) 
+    return (other.state == RomanState.DEAD) 
           ? false
           : (other instanceof RomanRegiment);
   }
   
   protected boolean isProtected()
   {
-	  if(alliesFormedAround.size() >= 3 || (alliesFormedAround.size() > 0 && nearestAlly.state == State.DEFENDING))
+	  if(alliesFormedAround.size() >= 3 
+    || (nearestAlly != null && alliesFormedAround.size() > 0
+        && nearestAlly.state == RomanState.DEFENDING))
 	  {		  
 		  return true;
 	  }
