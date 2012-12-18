@@ -114,7 +114,7 @@ public class RomanRegiment extends RegimentAgent
   {
 	  V2 escape_direction = getCircle().centre.clone().add(0, -10);
 	  
-	  if(nearestEnemy != null && heardHorn == null)
+	  if(nearestEnemy != null && heardHorn == null && soundedHorn == null)
 	  {
 		  soundTheHorn();
 	  }

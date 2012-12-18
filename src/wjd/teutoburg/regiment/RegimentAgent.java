@@ -79,7 +79,7 @@ public abstract class RegimentAgent extends Agent
   // corpses
   private List<Cadaver> dead_pile; // TODO : compute cadavers when the zoom is out
   //communication
-  protected HornBlast soundedHorn, heardHorn;
+  protected HornBlast queuedHorn, soundedHorn, heardHorn;
   /* METHODS */
   // constructors
   public RegimentAgent(V2 start_position, int start_strength, Tile tile_, 
@@ -376,6 +376,8 @@ public abstract class RegimentAgent extends Agent
     // stop hearing a horn that is long dead
     if(heardHorn != null && !heardHorn.isAudible())
       heardHorn = null;
+    if(soundedHorn != null && !soundedHorn.isAudible())
+      soundedHorn = null;
 
 	  // all clear!
 	  return EUpdateResult.CONTINUE;
@@ -588,15 +590,19 @@ public abstract class RegimentAgent extends Agent
 
   protected void soundTheHorn()
   {
-    if(soundedHorn == null)
-      soundedHorn = new HornBlast(c.centre.clone(), this);
+    if(soundedHorn == null && queuedHorn == null)
+      queuedHorn = new HornBlast(c.centre.clone(), this);
   }
   
   public HornBlast bringOutYourHornBlast()
   {
-    HornBlast out = soundedHorn;
-      soundedHorn = null;
-    return out;
+    if(queuedHorn != null)
+    {
+      soundedHorn = queuedHorn;
+      queuedHorn = null;
+      return soundedHorn;
+    }
+    return null;
   }
   
   public void hearTheHorn(HornBlast blast)
