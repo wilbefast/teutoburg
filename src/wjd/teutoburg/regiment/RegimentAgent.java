@@ -445,7 +445,7 @@ public abstract class RegimentAgent extends Agent
       // render the state
       canvas.setColour(Colour.BLACK);
       //canvas.text((perceived_threat)+""/*state.toString()*/, c.centre);
-      canvas.text(state.toString(), c.centre);
+      //canvas.text(state.toString(), c.centre);
     }
     else
       nearby = false;

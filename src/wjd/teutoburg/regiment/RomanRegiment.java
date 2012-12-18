@@ -211,16 +211,23 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  else // I'm protected
 	  {
+		  Tile tileToFace = null;
+		  if(alliesFormedAround.size() == 3)
+			  for(Tile t : tile.grid.getNeighbours(tile, false))
+				  if(t.agent == null)
+					  tileToFace = t;
+
 		  if(tile.forest_amount.balance() < 0.2 && !isFormedUp())
+		  {
 			  setFormedUp(true);
+			  if(tileToFace != null)
+			  {
+				  tileToFace.getCentrePosition(temp1);
+				  faceTowards(temp1);
+			  }
+		  }
 		  else
 		  {
-			  Tile tileToFace = null;
-			  if(alliesFormedAround.size() == 3)
-				  for(Tile t : tile.grid.getNeighbours(tile, false))
-					  if(t.agent == null)
-						  tileToFace = t;
-
 			  if(tileToFace != null)
 			  {
 				  tileToFace.getCentrePosition(temp1);
@@ -356,20 +363,16 @@ public class RomanRegiment extends RegimentAgent
   
   private boolean isProtected()
   {
-	  if(alliesFormedAround.size() >= 3)
+	  if(alliesFormedAround.size() >= 2)
 	  {		  
 		  return true;
 	  }
-	  else if(alliesFormedAround.size() < 2)
-	  {
-		  return false;
-	  }
-	  else
+	  else if(alliesFormedAround.size() == 1)
 	  {
 		  Iterable<Tile> neig = tile.grid.getNeighbours(tile, false);
 		  for(Tile t : neig)
 		  {
-			  if(t.agent != null && isAlly(t.agent) && t.agent.alliesFormedAround.size() >= 3)
+			  if(t.agent != null && isAlly(t.agent) && t.agent.alliesFormedAround.size() >= 2)
 				  return true;
 		  }
 	  }
