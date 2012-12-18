@@ -59,7 +59,7 @@ public class RomanRegiment extends RegimentAgent
   
   /* ATTRIBUTES */
   protected Timer defendingAgainstNobody = new Timer(5000);
-  protected Timer rallyingWithNobody = new Timer(5000);
+  protected Timer rallyingWithNobody = new Timer(2000);
   
   /* METHODS */
 
@@ -136,14 +136,20 @@ public class RomanRegiment extends RegimentAgent
   {
 	  if(nearestAlly != null) // I see an ally
 	  {
-		  rallyingWithNobody.fill();
 		  if(isProtected())
 		  {
 			  state = State.DEFENDING;
 		  }
 		  else // I'm not protected : flanckable
 		  {
-			  formGiganticTurtle(t_delta, percepts);
+			  if(rallyingWithNobody.update(t_delta) == EUpdateResult.FINISHED)
+			  {
+				  state = State.ESCAPING;
+			  }
+			  else
+			  {
+				  formGiganticTurtle(t_delta, percepts);
+			  }
 		  }
 	  }
 	  else // I can't see any ally
@@ -194,6 +200,7 @@ public class RomanRegiment extends RegimentAgent
 			  {
 				  state = State.ESCAPING;
 				  hornHeard = false;
+				  rallyingWithNobody.fill();
 			  }
 		  }
 	  }
@@ -277,20 +284,23 @@ public class RomanRegiment extends RegimentAgent
   protected void formGiganticTurtle(int t_delta, Iterable<Tile> percepts)
   {
 	  // TODO : setFormedUp(false) when relaying ?
-	  V2 new_direction = c.centre.clone(), tmp;
+	  V2 new_direction = c.centre.clone(), tmp = new V2(), tileCentre = new V2();
 	  for(Tile t : percepts)
 	  {
 		  if(t != tile)
 		  {
 			  if(t.agent != null && this.isAlly(t.agent))
 			  {
-				  tmp = new V2(c.centre, t.agent.getCircle().centre);
+				  tmp.reset(t.agent.getCircle().centre);
+				  tmp.sub(c.centre);
 				  tmp.norm(tmp.norm()/Tile.SIZE.norm());
 				  new_direction.add(tmp);
 			  }
 			  if(!(t.forest_amount.isEmpty()))
 			  {
-				  tmp = new V2(t.grid_position, c.centre);
+				  tileCentre.reset(t.pixel_position).add(Tile.SIZE.x/2.0f, Tile.SIZE.y/2.0f);
+				  tmp.reset(c.centre);
+				  tmp.sub(tileCentre);
 				  tmp.normalise();
 				  tmp.scale(t.forest_amount.balance());
 				  new_direction.add(tmp);
