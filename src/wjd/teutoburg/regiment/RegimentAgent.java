@@ -508,8 +508,9 @@ public abstract class RegimentAgent extends Agent
     // check all tiles in view 
     for(Tile t : percepts)
 	{
-      // skip if dead or non visible
-      if(t.agent == null || !canSee(t.agent) || t.agent.state == State.DEAD)
+      // skip if dead or non visible or self
+      if(t.agent == this || t.agent == null || !canSee(t.agent) 
+         || t.agent.state == State.DEAD)
         continue;
       
       RegimentAgent r = t.agent;

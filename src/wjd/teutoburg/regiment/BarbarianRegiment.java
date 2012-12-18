@@ -43,8 +43,10 @@ public class BarbarianRegiment extends RegimentAgent
 	private static final float SPEED_FACTOR = 0.6f;
 	private static final double BLOCK_CHANCE = 0.1;
 	private static final double ATTACK_CHANCE = 0.6;
-
-  /* ATTRIBUTES */
+  
+  /* VARIABLES */
+  
+  private static final V2 temp = new V2();
   
   /* METHODS */
 
@@ -78,8 +80,8 @@ public class BarbarianRegiment extends RegimentAgent
     if(nearestEnemy != null || heardHorn != null)
     {
       // TODO : wait for the *opportune* moment... ^_^
-      
-      soundTheHorn();
+      if(nearestEnemy != null && nearestActivAlly != null)
+        soundTheHorn();
       state = State.CHARGING;
     }
     else if(nearestActivAlly != null)
@@ -103,12 +105,14 @@ public class BarbarianRegiment extends RegimentAgent
       float min = Math.min(SPEED_FACTOR * t_delta, distance);
       advance(min);
     }
+    
     else if(nearestActivAlly != null) // I can see an active ally
     {
-      faceTowards(nearestActivAlly.getCircle().centre);
-      float distance = (float)Math.sqrt(nearestActivAllyDist2);
-      float min = Math.min(SPEED_FACTOR * t_delta, distance);
-      advance(min);
+      // charge towards whatever the ally is facing
+      temp.reset(nearestActivAlly.getDirection())
+          .scale((float)Math.sqrt(nearestActivAllyDist2))
+          .sub(c.centre);
+      advance(SPEED_FACTOR * t_delta);
     }
     else
     {
