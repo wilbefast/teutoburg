@@ -103,8 +103,8 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  else
 	  {
-		  defendingAgainstNobody.fill();
-		  rallyingWithNobody.fill();
+		  defendingAgainstNobody.empty();
+		  rallyingWithNobody.empty();
 		  state = RomanState.DEFENDING;
 	  }
 	  return EUpdateResult.CONTINUE;
@@ -205,28 +205,33 @@ public class RomanRegiment extends RegimentAgent
 	  }
 	  else // I'm protected
 	  {
-		  Tile tileToFace = null;
-		  if(alliesFormedAround.size() == 3)
-			  for(Tile t : tile.grid.getNeighbours(tile, false))
-				  if(t.agent == null)
-					  tileToFace = t;
-		  
-		  if(tileToFace != null)
+		  if(tile.forest_amount.balance() < 0.2 && !isFormedUp())
+			  setFormedUp(true);
+		  else
 		  {
-        tileToFace.getCentrePosition(temp1);
-			  faceTowards(temp1);
-		  }
-		  else if(nearestEnemy != null) // I see an enemy
-		  {
-			  defendingAgainstNobody.fill();
-			  faceTowards(nearestEnemy.getCircle().centre);
-		  }
-		  else // I can't see an enemy
-		  {
-			  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
+			  Tile tileToFace = null;
+			  if(alliesFormedAround.size() == 3)
+				  for(Tile t : tile.grid.getNeighbours(tile, false))
+					  if(t.agent == null)
+						  tileToFace = t;
+
+			  if(tileToFace != null)
 			  {
-				  state = RomanState.ESCAPING;
-				  rallyingWithNobody.fill();
+				  tileToFace.getCentrePosition(temp1);
+				  faceTowards(temp1);
+			  }
+			  else if(nearestEnemy != null) // I see an enemy
+			  {
+				  defendingAgainstNobody.empty();
+				  faceTowards(nearestEnemy.getCircle().centre);
+			  }
+			  else // I can't see an enemy
+			  {
+				  if(defendingAgainstNobody.update(t_delta) == EUpdateResult.FINISHED)
+				  {
+					  state = RomanState.ESCAPING;
+					  rallyingWithNobody.empty();
+				  }
 			  }
 		  }
 	  }
@@ -236,6 +241,11 @@ public class RomanRegiment extends RegimentAgent
   @Override
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
+	  if(in_woods && isFormedUp() && tile.forest_amount.balance() < 0.2)
+	  {
+		  setFormedUp(false);
+	  }
+	  
 	  if(super.ai(t_delta, percepts) == EUpdateResult.DELETE_ME)
 		  return EUpdateResult.DELETE_ME;
 	  
