@@ -70,7 +70,43 @@ public class BarbarianRegiment extends RegimentAgent
   @Override
   protected EUpdateResult waiting(int t_delta)
   {
-    // spring the trap when enough enemies are inside it
+	  if(in_hiding)
+	  {
+		  if(heardHorn != null)
+			  in_hiding = false;
+		  else if(nearestEnemy != null)
+		  {
+			  faceTowards(nearestEnemy.getCircle().centre);
+			  
+			  if(n_visible_enemies > 100)
+			  {
+				  soundTheHorn();
+				  in_hiding = false;
+			  }
+		  }
+		  else if(nearestActivAlly != null)
+		  {
+			  faceTowards(nearestActivAlly.getCircle().centre);
+			  advance(getSpeedFactor()* t_delta);
+		  }
+	  }
+	  else
+	  {
+		  if(nearestEnemy != null)
+			  state = State.CHARGING;
+		  else if(nearestActivAlly != null)
+		  {
+			  faceTowards(nearestActivAlly.getCircle().centre);
+			  advance(getSpeedFactor()* t_delta);
+		  }
+		  else if(heardHorn != null)
+		  {
+			  faceTowards(heardHorn.position);
+			  advance(getSpeedFactor()* t_delta);
+		  }
+	  }
+	  
+    /*// spring the trap when enough enemies are inside it
     if((in_hiding 
         && perceived_threat >= AMBUSH_MIN_THREAT 
         && perceived_threat <= AMBUSH_MAX_THREAT
@@ -100,39 +136,12 @@ public class BarbarianRegiment extends RegimentAgent
           .add(nearestActivAlly.getCircle().centre);
       turnTowardsGradually(temp1, MAX_TURN_RABBLE);
       advance(SPEED_FACTOR * t_delta);
-    }
+    }*/
     
     return EUpdateResult.CONTINUE;
   }
   
-  @Override
-  protected EUpdateResult charging(int t_delta)
-  {
-    if(nearestEnemy != null) // I can see an enemy
-    {
-      faceTowards(nearestEnemy.getCircle().centre);
-      float distance = (float)Math.sqrt(nearestEnemyDist2);
-      float min = Math.min(SPEED_FACTOR * t_delta, distance);
-      advance(min);
-    }
-    
-    else if(nearestActivAlly != null) // I can see an active ally
-    {
-      // scaled ally direction
-      temp1.reset(nearestActivAlly.getDirection())
-          .scale((float)Math.sqrt(nearestActivAllyDist2))
-      // position in front of ally
-          .add(nearestActivAlly.getCircle().centre);
-      turnTowardsGradually(temp1, MAX_TURN_RABBLE);
-      advance(SPEED_FACTOR * t_delta);
-    }
-    else
-    {
-      state = State.WAITING;
-    }
-    
-    return EUpdateResult.CONTINUE;
-  }
+
 
   
   /* IMPLEMENTS -- REGIMENTAGENT */
@@ -145,44 +154,6 @@ public class BarbarianRegiment extends RegimentAgent
 
 	  return EUpdateResult.CONTINUE;
   }
-  /*
-  protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
-  {  
-	  if(state != State.FIGHTING && !combat.isEmpty())
-	  {
-		  state = State.FIGHTING;
-	  }
-	  if(state == State.FIGHTING)
-	  {
-		  if(!combat.isEmpty())
-		  {
-			  if(randomAttack() == EUpdateResult.DELETE_ME)
-					return EUpdateResult.DELETE_ME;
-		  }
-		  else
-		  {
-			  state = State.WAITING;
-		  }
-	  }
-	  if(state == State.CHARGING)
-	  {
-		  if(nearestEnemy != null)
-		  {
-			  V2 goal = nearestEnemy.getCircle().centre.clone();
-			  //goal.add((float)Math.random()*10-5, (float)Math.random()*10-5);
-			  // charge : turn in front of roman, then advance
-			  faceTowards(goal);
-			  float nearestEnemyDist = (float)Math.sqrt(nearestEnemyDist2);
-			  float min = Math.min(SPEED_FACTOR*t_delta, nearestEnemyDist);
-			  advance(min);
-		  }
-		  else
-		  {
-			  state = State.WAITING;
-		  }
-	  }
-	  return EUpdateResult.CONTINUE;
-  }*/
   
   @Override
   protected double chanceToBlock(RegimentAgent attacker)

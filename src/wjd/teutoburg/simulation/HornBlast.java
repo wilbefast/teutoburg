@@ -33,7 +33,7 @@ public class HornBlast implements IVisible, IDynamic
 {
   /* CONSTANTS */
   static final int LIFE_TIME = 1000; // milliseconds
-	private static final float MAX_RADIUS = Tile.SIZE.x*10;
+	private static final float MAX_RADIUS = Tile.SIZE.x*20;
   private static final float MAX_THICKNESS = 10; // pixels
   
   /* ATTRIBUTES */

@@ -27,9 +27,11 @@ public class State implements Comparable<State>
   static final State
     WAITING = new State(1, "waiting"),
     CHARGING = new State(2, "charging"),
-    FIGHTING = new State(3, "fighting"),
-    FLEEING = new State(4, "fleeing"),
-    DEAD = new State(5, "dead");
+    FIGHTING = new State(3, "fighting");
+
+public static final State FLEEING = new State(4, "fleeing");
+
+static final State DEAD = new State(5, "dead");
   
   /* ATTRIBUTES */
   final int value;

@@ -61,7 +61,7 @@ public abstract class RegimentAgent extends Agent
   private int strength;
   private int initial_strength;
   private Faction faction;
-  protected State state;
+  public State state;
   // combat
   protected Timer attackRecharge = new Timer(10);
   protected boolean attackReady;
@@ -287,23 +287,19 @@ public abstract class RegimentAgent extends Agent
 
   protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
   {
-	  V2 new_direction = direction, temp1 = new V2(), temp2 = new V2();
 	  for(Tile t : percepts)
 	  {
 		  if(t != tile)
 		  {
 			  if(t.agent != null && this.isEnemy(t.agent) && t.agent.state != State.DEAD)
 			  {
-				  temp1 = t.agent.getCircle().centre;
-				  temp2.reset(c.centre);
-				  temp2.sub(temp1);
-				  temp2.norm(1.0f/temp2.norm());
-				  new_direction.add(temp2);
+				  V2 temp1 = c.centre.clone().scale(2.0f).sub(t.agent.getCircle().centre);
+				  faceTowards(temp1);
 			  }
 		  }
 
 	  }
-	  faceTowards(new_direction);
+	  
 	  advance(getSpeedFactor() * t_delta);
 
 	  return EUpdateResult.CONTINUE;
@@ -321,11 +317,7 @@ public abstract class RegimentAgent extends Agent
 	  }
 	  if(state == State.FLEEING)
 	  {
-		  if(nearestEnemy == null)
-		  {
-			  state = State.WAITING;
-		  }
-		  else if(fleeing(t_delta, percepts) == EUpdateResult.DELETE_ME)
+		  if(fleeing(t_delta, percepts) == EUpdateResult.DELETE_ME)
 			  return EUpdateResult.DELETE_ME;
 		  
 	  }
@@ -560,41 +552,41 @@ public abstract class RegimentAgent extends Agent
       // skip if dead or non visible or self
       if(t.agent == this || t.agent == null || !canSee(t.agent) 
          || t.agent.state == State.DEAD)
-        continue;
-      
+    	  continue;
+
       RegimentAgent r = t.agent;
-      
+
       // cache nearest enemy
-		  if(isEnemy(r))
-		  {
-			  float dist2 = r.getCircle().centre.distance2(c.centre);
-			  if(dist2 < nearestEnemyDist2)
-			  {
-				  nearestEnemy = r;
-				  nearestEnemyDist2 = dist2;
-          n_active_enemies += r.strength;
-			  }
-        n_visible_enemies += r.strength;
-		  }
-      
+      if(isEnemy(r))
+      {
+    	  float dist2 = r.getCircle().centre.distance2(c.centre);
+    	  if(dist2 < nearestEnemyDist2)
+    	  {
+    		  nearestEnemy = r;
+    		  nearestEnemyDist2 = dist2;
+    		  n_active_enemies += r.strength;
+    	  }
+    	  n_visible_enemies += r.strength;
+      }
+
       // cache nearest ally
       else if(isAlly(r))
-		  {
-			  float dist2 = r.getCircle().centre.distance2(c.centre);
-			  if(dist2 < nearestAllyDist2)
-			  {
-				  nearestAlly = r;
-				  nearestAllyDist2 = dist2;
-			  }
-			  if(r.state != State.WAITING && dist2 < nearestActivAllyDist2)
-			  {
-				  nearestActivAlly = r;
-				  nearestActivAllyDist2 = dist2;
-          n_active_allies += r.strength;
-			  }
-        n_visible_allies += r.strength;
-		  }
-	  }
+      {
+    	  float dist2 = r.getCircle().centre.distance2(c.centre);
+    	  if(dist2 < nearestAllyDist2)
+    	  {
+    		  nearestAlly = r;
+    		  nearestAllyDist2 = dist2;
+    	  }
+    	  if(r.state != State.WAITING && r.state != State.DEAD && r.state != State.FLEEING && dist2 < nearestActivAllyDist2)
+    	  {
+    		  nearestActivAlly = r;
+    		  nearestActivAllyDist2 = dist2;
+    		  n_active_allies += r.strength;
+    	  }
+    	  n_visible_allies += r.strength;
+      }
+    }
     perceived_threat =  n_visible_enemies - n_visible_allies;
   }
   

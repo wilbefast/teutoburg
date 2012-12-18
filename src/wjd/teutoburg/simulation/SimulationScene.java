@@ -35,6 +35,7 @@ import wjd.teutoburg.forest.Copse;
 import wjd.teutoburg.regiment.Cadaver;
 import wjd.teutoburg.regiment.Faction;
 import wjd.teutoburg.regiment.RegimentAgent;
+import wjd.teutoburg.regiment.State;
 
 /**
  * @author wdyce
@@ -226,7 +227,9 @@ public class SimulationScene extends AScene
       ra.bringOutYourDead(cadavers);
       
       // destroy the regiment ?
-			if(ra.update(t_delta) == EUpdateResult.DELETE_ME)
+			if(ra.update(t_delta) == EUpdateResult.DELETE_ME
+					|| ra.getCircle().centre.y < ra.getCircle().radius
+					|| ra.state == State.FLEEING && !ra.getCircle().inside(map))
 			{
 				ra.tile.setRegiment(null);
 				raI.remove();

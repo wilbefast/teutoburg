@@ -45,11 +45,11 @@ public class RomanRegiment extends RegimentAgent
   private static final V2 temp1 = new V2(), temp2 = new V2();
 		
   /* CONSTANTS */
-  private static final int REGIMENT_SIZE = 6*6;
+  private static final int REGIMENT_SIZE = 7*7;
   
   // combat
-  private static final double BLOCK_CHANCE_TURTLE = 0.7;
-  private static final double BLOCK_CHANCE_RABBLE = 0.3;
+  private static final double BLOCK_CHANCE_TURTLE = 0.9;
+  private static final double BLOCK_CHANCE_RABBLE = 0.5;
   private static final double ATTACK_CHANCE = 0.6;
   private static final int FLANK_MIN_ANGLE = 135;
   
@@ -331,6 +331,19 @@ public class RomanRegiment extends RegimentAgent
 	  return turnTowardsGradually(target, getMaxTurn());
   }
   
+  @Override
+  protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
+  {
+
+	  
+	  if(nearestEnemy == null)
+		  state = RomanState.MARCHING;
+	  
+	  super.fleeing(t_delta, percepts); // TODO treat return value
+	  
+	  return EUpdateResult.CONTINUE;
+  }
+  
   
   
   
@@ -343,12 +356,22 @@ public class RomanRegiment extends RegimentAgent
   
   private boolean isProtected()
   {
-	  if(	alliesFormedAround.size() >= 3)
-			//|| (nearestAlly != null 
-			//	&& alliesFormedAround.size() > 0
-			//	&& nearestAlly.state == RomanState.DEFENDING))
+	  if(alliesFormedAround.size() >= 3)
 	  {		  
 		  return true;
+	  }
+	  else if(alliesFormedAround.size() < 2)
+	  {
+		  return false;
+	  }
+	  else
+	  {
+		  Iterable<Tile> neig = tile.grid.getNeighbours(tile, false);
+		  for(Tile t : neig)
+		  {
+			  if(t.agent != null && isAlly(t.agent) && t.agent.alliesFormedAround.size() >= 3)
+				  return true;
+		  }
 	  }
 	  return false;
   }
