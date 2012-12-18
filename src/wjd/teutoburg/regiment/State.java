@@ -28,7 +28,8 @@ public class State implements Comparable<State>
     WAITING = new State(1, "waiting"),
     CHARGING = new State(2, "charging"),
     FIGHTING = new State(3, "fighting"),
-    DEAD = new State(4, "dead");
+    FLEEING = new State(4, "fleeing"),
+    DEAD = new State(5, "dead");
   
   /* ATTRIBUTES */
   final int value;

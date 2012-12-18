@@ -28,18 +28,17 @@ import wjd.util.Timer;
  */
 public class RomanRegiment extends RegimentAgent
 {
-  
-  /* NESTING */
+	/* NESTING */
 	public static class RomanState extends State
 	{
-		public static final RomanState RALLYING = new RomanState(5, "rallying");
-		public static final RomanState ESCAPING = new RomanState(6, "escaping");
-		public static final RomanState DEFENDING = new RomanState(7, "defending");
-		
+		public static final RomanState RALLYING = new RomanState(6, "rallying");
+		public static final RomanState ESCAPING = new RomanState(7, "escaping");
+		public static final RomanState DEFENDING = new RomanState(8, "defending");
+
 		protected RomanState(int v, String k) 
-    {
-      super(v, k);
-    }
+		{
+			super(v, k);
+		}
 	}
   
   /* CLASS VARIABLES */
@@ -107,6 +106,14 @@ public class RomanRegiment extends RegimentAgent
 		  rallyingWithNobody.empty();
 		  state = RomanState.DEFENDING;
 	  }
+	  return EUpdateResult.CONTINUE;
+  }
+  
+  @Override
+  protected EUpdateResult waiting(int t_delta)
+  {
+	  if(state == State.WAITING)
+		  state = State.MARCHING;
 	  return EUpdateResult.CONTINUE;
   }
   
@@ -358,12 +365,12 @@ public class RomanRegiment extends RegimentAgent
 			  }
 			  if(!(t.forest_amount.isEmpty()))
 			  {
-          t.getCentrePosition(temp1);
-          temp2.reset(c.centre);
-          new_direction.add(temp2.sub(temp1).normalise().scale(t.forest_amount.balance()));
+				  t.getCentrePosition(temp1);
+				  temp2.reset(c.centre);
+				  new_direction.add(temp2.sub(temp1).normalise().scale(t.forest_amount.balance()));
 			  }
 		  }
-		  
+
 	  }
 	  faceTowards(new_direction);
 	  advance(SPEED_FACTOR * t_delta);

@@ -53,6 +53,7 @@ public abstract class RegimentAgent extends Agent
   /* ATTRIBUTES */
   // model
   private int strength;
+  private int initial_strength;
   private Faction faction;
   protected State state;
   // combat
@@ -93,6 +94,7 @@ public abstract class RegimentAgent extends Agent
     
     // save parameters
     this.strength = start_strength;
+    this.initial_strength = start_strength;
     this.faction = faction;
     this.tile = tile_;
     tile.agent = this;
@@ -274,12 +276,50 @@ public abstract class RegimentAgent extends Agent
 	  }
 	  return EUpdateResult.CONTINUE;
   }
+
+  protected EUpdateResult fleeing(int t_delta, Iterable<Tile> percepts)
+  {
+	  V2 new_direction = c.centre.clone(), temp1 = new V2(), temp2 = new V2();
+	  for(Tile t : percepts)
+	  {
+		  if(t != tile)
+		  {
+			  if(t.agent != null && this.isEnemy(t.agent) && t.agent.state != State.DEAD)
+			  {
+				  temp1 = t.agent.getCircle().centre;
+				  temp2.reset(c.centre);
+				  temp2.sub(temp1);
+				  temp2.norm(1.0f/temp2.norm());
+				  new_direction.add(temp2);
+			  }
+		  }
+
+	  }
+	  faceTowards(new_direction);
+	  advance(getSpeedFactor() * t_delta);
+
+	  return EUpdateResult.CONTINUE;
+  }
   
   protected EUpdateResult ai(int t_delta, Iterable<Tile> percepts)
   {
-	  if(!combat.isEmpty())
+	  if(strength < initial_strength/4)
+	  {
+		  state = State.FLEEING;
+	  }
+	  else if(!combat.isEmpty())
 	  {
 		  state = State.FIGHTING;
+	  }
+	  if(state == State.FLEEING)
+	  {
+		  if(nearestEnemy == null)
+		  {
+			  state = State.WAITING;
+		  }
+		  else if(fleeing(t_delta, percepts) == EUpdateResult.DELETE_ME)
+			  return EUpdateResult.DELETE_ME;
+		  
 	  }
 	  if(state == State.FIGHTING)
 	  {
