@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!-- build.xml -->
+
+
+<!-- TODO MANIFEST, tests, etc... -->
+
+<project name="teutoburg"
+         basedir="."
+         default="jar">
+
+
+	<!-- properties -->
+
+	<property name="name"			value="teutoburg"/>
+	<property name="lib"			value="../ambition-engine/target/release/ambition.jar"/>
+	<property name="lib-test"		value=""/>
+
+	<property name="src"            value="src"/>
+	<property name="src-test"       value="src/tests"/>
+
+	<property name="target"         value="target"/>
+	<property name="target-build"   value="${target}/build"/>
+	<property name="target-test"    value="${target}/tests"/>
+	<property name="target-release" value="${target}/release"/>
+	<!-- end properties -->
+
+
+	<!-- prebuild step -->
+	<target name="pre">
+		<mkdir dir="${target-build}"/>
+		<mkdir dir="${target-release}"/>
+	</target>
+
+	<!-- compile sources (.java) into classes (.class)  -->
+	<target name="compile"
+	        depends="pre">
+		<javac destdir="${target-build}"
+		       srcdir="${src}"
+			   classpath="${lib}"
+			   includeantruntime="false"/>
+	</target>
+
+	<!-- compile test source files -->
+	<target name="compile-test"
+	        depends="compile">
+		<javac destdir="${target-test}"
+		       srcdir="${src-test}"
+			   classpath="${lib-test}:${target-build}"
+			   includeantruntime="false"/>
+	</target>
+
+	<!-- execute tests -->
+	<target name="execute-test"
+	        depends="compile-test">
+	</target>
+
+	<target name="test"
+	        depends="compile-test,execute-test">
+	</target>
+
+	<!-- compress classes into a jar file -->
+	<target name="jar"
+	        depends="compile">
+		<jar destfile="${target-release}/${name}.jar"
+		     basedir="${target-build}" >
+		     <zipgroupfileset dir="../ambition-engine/target/release/" includes="*.jar" />
+		     <manifest>
+             	<attribute name="Main-Class" value="wjd.teutoburg.Main" />
+             </manifest>
+		</jar>
+	</target>
+
+
+	<!-- clean outputs -->
+	<target name="clean">
+		<delete dir="${target-build}"/>
+		<delete dir="${target-release}"/>
+	</target>
+
+</project>
+
