@@ -46,7 +46,8 @@
 		<javac destdir="${target-test}"
 		       srcdir="${src-test}"
 			   classpath="${lib-test}:${target-build}"
-			   includeantruntime="false"/>
+			   includeantruntime="false"
+			   target="1.6"/>
 	</target>
 
 	<!-- execute tests -->
